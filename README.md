@@ -16,30 +16,26 @@ Features include
  * Various forms of simulated implementations useful for historical back-testing or paper
    trading strategies as well as unit testing application code.
 
-Subprojects
-===========
+Component projects
+-----------
 
-tradeframework-core
--------------------
+### tradeframework-core
 The API interfaces, common classes and simulated implementations.
 
-tradeframework-ib
------------------
+### tradeframework-ib
 Interactive Brokers TWS API implementation.
 
-tradeframework-yahoo
---------------------
+### tradeframework-yahoo
 HistoricalDataSource implementation which fetches historical data at a daily
 or greater level from csv web service available at Yahoo Finance.
 
-event-trader
-------------
+### event-trader
 An application framework built on tradeframework for quickly building systems that
 monitor any type of source for a message of some kind and perform an action based
 on the message.
 
 License
-=======
+-------
 Copyright (c) 2012 Jeremy Goetsch (jeremygoetsch@gmail.com)
  
 Licensed under the Apache License, Version 2.0 (the "License");
