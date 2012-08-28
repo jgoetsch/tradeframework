@@ -120,4 +120,23 @@ public class ProfidingMsgParserTest extends TestCase {
 		});
 	}
 
+	@SuppressWarnings("rawtypes")
+	public void testIntPrice() throws Exception {
+		msgParser.parseData("alert", (Map)JSONValue.parse(
+			"{\"entry\":{\"exitPrice\":null,\"dateAdded\":1346162335587,\"newsletterIds\":[3,2,24,26],\"type\":\"Short Stock\",\"dateClosed\":null,\"amount\":null,\"username\":\"timothysykes\",\"compareDate\":1346162335587,\"ticker\":\"NTE\",\"action\":\"Shorted\",\"entryPrice\":9,\"shortSell\":true,\"shortUrl\":\"1Mn43l\",\"optionType\":\"CALL\",\"callOption\":true,\"entryComments\":\"Shorted some into this mammoth spike, this is not a volatile stock, Seeking Alpha hyped it up based on rumors, goal is to make 50 cents/share in 1-2 days\",\"percentage\":null,\"optionExpiration\":null,\"entryDate\":1346162335587,\"futuresMonth\":0,\"futuresYear\":0,\"shares\":2000,\"entryType\":\"STOCK\",\"exitDate\":null,\"optionStrike\":null,\"comments\":null,\"openTrade\":true},\"msgId\":30040,\"image\":\"http://a1.twimg.com/profile_images/1166026278/TimCover1_normal.jpg\"}"
+			), new MsgHandler() {
+			public boolean newMsg(Msg msg) {
+				Assert.assertEquals(TradeSignal.class, msg.getClass());
+				TradeSignal trade = (TradeSignal) msg;
+				Assert.assertEquals("timothysykes", trade.getSourceName());
+				Assert.assertEquals(1346162335587L, trade.getDate().toDate().getTime());
+				Assert.assertEquals(TradeSignal.TYPE_SHORT, trade.getType());
+				Assert.assertEquals(Contract.stock("NTE"), trade.getContract());
+				Assert.assertEquals(2000, trade.getNumShares());
+				Assert.assertEquals(9.0, trade.getPrice());
+				return false;
+			}
+		});
+	}
+
 }

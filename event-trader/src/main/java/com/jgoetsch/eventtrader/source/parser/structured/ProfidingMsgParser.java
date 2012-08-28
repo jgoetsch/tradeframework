@@ -61,7 +61,7 @@ public class ProfidingMsgParser implements StructuredMsgParser {
 			TradeSignal trade = new TradeSignal();
 			trade.setSourceName((String)entry.get("username"));
 			trade.setContract(Contract.stock((String)entry.get("ticker")));
-			trade.setNumShares(((Long)(partial != null ? partial : entry).get("shares")).intValue());
+			trade.setNumShares(((Number)(partial != null ? partial : entry).get("shares")).intValue());
 			trade.setImageUrl((String)data.get("image"));
 			trade.setPartial(partial != null);
 
@@ -79,19 +79,19 @@ public class ProfidingMsgParser implements StructuredMsgParser {
 
 			if (trade.isPartial()) {
 				trade.setDate(new DateTime(partial.get("tradeDate")));
-				trade.setPrice((Double)partial.get("price"));
+				trade.setPrice(((Number)partial.get("price")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + ((Boolean)entry.get("shortSell") ? "Short " : "Long ")
 						+ entry.get("shares") + " total at "
 						+ DecimalFormat.getCurrencyInstance().format(entry.get("entryPrice")) + " average");
 			}
 			else if (trade.isExit()) {
 				trade.setDate(new DateTime(entry.get("dateClosed")));
-				trade.setPrice((Double)entry.get("exitPrice"));
+				trade.setPrice(((Number)entry.get("exitPrice")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + (String)entry.get("comments"));
 			}
 			else {
 				trade.setDate(new DateTime(entry.get("entryDate")));
-				trade.setPrice((Double)entry.get("entryPrice"));
+				trade.setPrice(((Number)entry.get("entryPrice")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + (String)entry.get("entryComments"));
 			}
 			msg = trade;
