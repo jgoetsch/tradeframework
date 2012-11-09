@@ -42,13 +42,16 @@ import com.jgoetsch.tradeframework.order.processing.TrailingStopOrderProcessor;
 
 public class SimulatedTradingService implements TradingService, MarketDataListener {
 
-	private final MarketDataSource marketDataSource;
+	private MarketDataSource marketDataSource;
 	private final Set<ExecutionListener> executionListeners = new HashSet<ExecutionListener>();
 
 	//private final List<Execution> executions = new LinkedList<Execution>();
 	private final Map<Contract, Collection<OrderProcessor>> openOrders = new HashMap<Contract, Collection<OrderProcessor>>();
 
-	private final CommissionStructure commissions;
+	private CommissionStructure commissions;
+
+	public SimulatedTradingService() {
+	}
 
 	public SimulatedTradingService(MarketDataSource marketDataSource) {
 		this.marketDataSource = marketDataSource;
@@ -161,6 +164,22 @@ public class SimulatedTradingService implements TradingService, MarketDataListen
 	@Override
 	public String toString() {
 		return "SimulatedTradingService:" + openOrders;
+	}
+
+	public MarketDataSource getMarketDataSource() {
+		return marketDataSource;
+	}
+
+	public void setMarketDataSource(MarketDataSource marketDataSource) {
+		this.marketDataSource = marketDataSource;
+	}
+
+	public CommissionStructure getCommissions() {
+		return commissions;
+	}
+
+	public void setCommissions(CommissionStructure commissions) {
+		this.commissions = commissions;
 	}
 
 }
