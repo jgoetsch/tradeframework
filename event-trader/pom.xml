@@ -4,13 +4,13 @@
   <parent>
   	<groupId>com.jgoetsch.tradeframework</groupId>
   	<artifactId>tradeframework</artifactId>
-  	<version>0.9.0-SNAPSHOT</version>
+  	<version>0.9.0</version>
   </parent>
   <dependencies>
   	<dependency>
   		<groupId>com.jgoetsch.tradeframework</groupId>
   		<artifactId>tradeframework-core</artifactId>
-  		<version>0.9.0-SNAPSHOT</version>
+  		<version>0.9.0</version>
   	</dependency>
   	<dependency>
   		<groupId>org.apache.httpcomponents</groupId>
