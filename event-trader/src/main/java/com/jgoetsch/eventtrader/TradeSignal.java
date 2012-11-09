@@ -127,10 +127,15 @@ public class TradeSignal extends Msg {
 
 		return true;
 	}
+	
+	public String toString() {
+		return getTradeString() + ": " + super.toString();
+	}
 
 	public String getTradeString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getType());
+		if (getType() != null)
+			sb.append(getType());
 		if (getNumShares() != 0)
 			sb.append(" ").append(getNumShares());
 		if (getContract() != null)

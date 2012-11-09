@@ -27,7 +27,7 @@ import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.Contract;
 
 /**
- * Regex based parser to extract a TradeSignal from a texual trade alert service, i.e. TimAlerts.
+ * Regex based parser to extract a TradeSignal from a textual trade alert service, i.e. TimAlerts.
  * The regex supplied accommodates various common irregularities.
  * 
  * 	alertPattern is the regex and should yield the following groups

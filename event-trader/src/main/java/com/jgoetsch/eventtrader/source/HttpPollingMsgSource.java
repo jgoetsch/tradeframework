@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.source;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,8 +34,9 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 
 	private Logger log = LoggerFactory.getLogger(HttpPollingMsgSource.class);
 	private long pollingInterval = 60000;
+	private long freshnessThreshold = 30000;
 	private MsgParser msgParser;
-	private boolean useIfModifiedSince = true;
+	private boolean useIfModifiedSince = false;
 	private boolean alertInitial = false;
 
 	private String lastModifiedDate;
@@ -42,9 +44,15 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 	private class NewMsgHandler implements MsgHandler {
 		private Set<Msg> lastMsgs;
 		private Set<Msg> msgs = new HashSet<Msg>();
+		private Date lastCheckAt;
 
 		public boolean newMsg(Msg msg) {
 			msgs.add(msg);
+			if (lastCheckAt != null && new Date().getTime() - lastCheckAt.getTime() > pollingInterval + freshnessThreshold) {
+				if (lastMsgs != null)
+					lastMsgs.clear();
+				lastMsgs = null;
+			}
 			if (lastMsgs == null) {
 				log.debug("Previous message: {}", msg);
 			}
@@ -56,8 +64,11 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 		}
 
 		public void nextPass() {
+			if (lastMsgs != null)
+				lastMsgs.clear();
 			lastMsgs = msgs;
 			msgs = new HashSet<Msg>(lastMsgs.size() + 4);
+			lastCheckAt = new Date();
 		}
 	};
 
@@ -185,6 +196,14 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 
 	public boolean isAlertInitial() {
 		return alertInitial;
+	}
+
+	public long getFreshnessThreshold() {
+		return freshnessThreshold;
+	}
+
+	public void setFreshnessThreshold(long freshnessThreshold) {
+		this.freshnessThreshold = freshnessThreshold;
 	}
 
 }

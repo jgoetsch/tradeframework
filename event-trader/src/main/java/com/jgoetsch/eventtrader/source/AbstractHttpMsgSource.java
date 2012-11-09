@@ -63,7 +63,7 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 	private String username;
 	private String password;
 	private boolean preemtiveAuth = false;
-	private HttpParams httpParams = new BasicHttpParams();
+	private HttpClient httpClient;
 	private String method = "GET";
 	private HttpActionFilter loginAction;
 
@@ -124,12 +124,12 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 
 	@Override
 	protected final void receiveMsgs() {
-		SchemeRegistry supportedSchemes = new SchemeRegistry();
+		/*SchemeRegistry supportedSchemes = new SchemeRegistry();
 		SocketFactory sf = PlainSocketFactory.getSocketFactory();
 		supportedSchemes.register(new Scheme("http", sf, 80));
 
 		ClientConnectionManager ccm = new SingleClientConnManager(httpParams, supportedSchemes);
-		DefaultHttpClient client = new DefaultHttpClient(ccm, httpParams);
+		DefaultHttpClient client = new DefaultHttpClient(httpParams);
 
 		if (getUsername() != null) {
 			client.getCredentialsProvider().setCredentials(
@@ -142,9 +142,18 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 
 			if (loginAction != null)
 				loginAction.doAction(client, this);
+		}*/
+
+		if (httpClient == null)
+			httpClient = new DefaultHttpClient();
+
+		if (getUsername() != null) {
+			((DefaultHttpClient)httpClient).getCredentialsProvider().setCredentials(
+				AuthScope.ANY,
+				new UsernamePasswordCredentials(getUsername(), getPassword()));
 		}
 
-		receiveMsgs(client);
+		receiveMsgs(httpClient);
 	}
 
 	protected abstract void receiveMsgs(HttpClient client);
@@ -173,22 +182,6 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 		this.preemtiveAuth = preemtiveAuth;
 	}
 
-	public HttpParams getHttpParams() {
-		return httpParams;
-	}
-
-	public void setHttpParams(HttpParams httpParams) {
-		this.httpParams = httpParams;
-	}
-
-	public HttpConnectionParamBean getHttpConnectionParams() {
-		return new HttpConnectionParamBean(httpParams);
-	}
-
-	public HttpProtocolParamBean getHttpProtocolParams() {
-		return new HttpProtocolParamBean(httpParams);
-	}
-
 	public void setMethod(String method) {
 		this.method = method;
 	}
@@ -203,6 +196,14 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 
 	public HttpActionFilter getLoginAction() {
 		return loginAction;
+	}
+
+	public HttpClient getHttpClient() {
+		return httpClient;
+	}
+
+	public void setHttpClient(HttpClient httpClient) {
+		this.httpClient = httpClient;
 	}
 
 }

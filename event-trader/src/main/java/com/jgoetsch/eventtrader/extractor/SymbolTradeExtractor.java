@@ -16,6 +16,8 @@
 package com.jgoetsch.eventtrader.extractor;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jgoetsch.eventtrader.Msg;
@@ -23,12 +25,15 @@ import com.jgoetsch.eventtrader.TradeSignal;
 
 public class SymbolTradeExtractor extends TradeExtractor {
 
-	private Pattern symbolPattern;
+	private Pattern symbolPattern = Pattern.compile("\\b(?:NASDAQ|Nasdaq|NYSE|OTC|OTCBB)\\:\\s*([A-Z]{2,5})\\b");
 
 	@Override
 	public Collection<TradeSignal> parseTrades(Msg msg) {
-		// TODO Auto-generated method stub
-		return null;
+		Matcher m = symbolPattern.matcher(msg.getMessage());
+		if (m.find())
+			return Collections.singleton(new TradeSignal(null, m.group(1), msg));
+		else
+			return null;
 	}
 
 	public void setSymbolPattern(Pattern symbolPattern) {

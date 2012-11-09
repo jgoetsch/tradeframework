@@ -32,6 +32,7 @@ public class HttpStreamingMsgSource extends AbstractHttpMsgSource {
 	private MsgParser msgParser;
 
 	public void receiveMsgs(HttpClient client) {
+		log.info("receiveMsgss");
 		while (executeRequest(client, createRequest(), getMsgParser()) && afterDisconnect()) {}
 	}
 

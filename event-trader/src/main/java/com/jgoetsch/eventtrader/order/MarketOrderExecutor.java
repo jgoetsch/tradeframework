@@ -50,8 +50,16 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 		order.setAccount(account);
 		try {
 			MarketData marketData = ContextCacheUtil.getMarketData(marketDataSource, trade.getContract(), context);
+			if (marketData == null || marketData.getBid() <= 0 || marketData.getAsk() <= 0) {
+				log.warn("Market data not available for contract " + trade.getContract());
+				return;
+			}
+			log.debug("Market data for " + trade.getContract() + ": " + marketData);
+			
 			int numShares = (orderSize.getValue(trade, getIntendedPrice(trade, marketData), context) / roundOrderQty) * roundOrderQty;
-			order.setQuantity(trade.isBuy() ? numShares : -numShares);
+			if (trade.getType() == null)
+				trade.setType(numShares > 0 ? TradeSignal.TYPE_BUY : TradeSignal.TYPE_SELL);
+			order.setQuantity(trade.isSell() ? -Math.abs(numShares) : Math.abs(numShares));
 			prepareOrder(order, trade, marketData);
 		} catch (DataUnavailableException e) {
 			log.warn("Could not processs order because: " + e.getMessage());

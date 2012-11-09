@@ -15,7 +15,6 @@
  */
 package com.jgoetsch.eventtrader.source.parser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -23,34 +22,46 @@ import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class HtmlTextParser implements MsgParser {
+public class HtmlSelectorMsgParser implements MsgParser {
 
-	private MsgParser innerParser = new BufferedMsgParser();
+	private String selector;
 	private Pattern charsetPattern = Pattern.compile("charset=([^;]+)");
 
-	public HtmlTextParser() {
+	public HtmlSelectorMsgParser() {
 	}
 
-	public HtmlTextParser(MsgParser innerParser) {
-		this.innerParser = innerParser;
+	public HtmlSelectorMsgParser(String selector) {
+		this.selector = selector;
 	}
 
-	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
+	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException {
 		Matcher charset = charsetPattern.matcher(contentType);
 		Document doc = Jsoup.parse(input, charset.find() ? charset.group(1) : null, "");
-		String text = doc.text();
-		return innerParser.parseContent(new ByteArrayInputStream(text.getBytes()), text.length(), "text/plain", handler);
+		Elements nodes = doc.select(selector);
+		for (Element node : nodes) {
+			Msg msg = createMsg(node);
+			if (msg != null && !handler.newMsg(msg))
+				return false;
+		}
+		return true;
 	}
 
-	public void setInnerParser(MsgParser innerParser) {
-		this.innerParser = innerParser;
+	protected Msg createMsg(Element node) {
+		return new Msg(null, node.text());
 	}
 
-	public MsgParser getInnerParser() {
-		return innerParser;
+	public String getSelector() {
+		return selector;
+	}
+
+	public void setSelector(String selector) {
+		this.selector = selector;
 	}
 
 }

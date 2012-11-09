@@ -52,8 +52,10 @@ public abstract class MarketDataAwareProcessor implements Processor<TradeSignal>
 	public final void process(TradeSignal trade, Map<Object, Object> context) throws Exception {
 		try {
 			MarketData contractData = ContextCacheUtil.getMarketData(marketDataSource, trade.getContract(), context);
-			if (contractData != null)
+			if (contractData != null && contractData.getBid() > 0 && contractData.getAsk() > 0) {
+				log.debug("Market data for " + trade.getContract() + ": " + contractData);
 				process(trade, contractData, context);
+			}
 			else
 				log.warn("Market data not available for contract " + trade.getContract());
 		} catch (InvalidContractException e) {
