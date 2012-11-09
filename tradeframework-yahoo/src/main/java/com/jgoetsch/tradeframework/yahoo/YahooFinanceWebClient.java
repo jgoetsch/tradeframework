@@ -139,7 +139,7 @@ public class YahooFinanceWebClient implements ContractDataSource<FundamentalData
 			if (fields.length >= 7) {
 				try {
 					SimpleOHLC ohlc = new SimpleOHLC();
-					ohlc.setStart(df.parse(fields[0]));
+					ohlc.setDate(df.parse(fields[0]));
 					ohlc.setOpen(Double.parseDouble(fields[1]));
 					ohlc.setHigh(Double.parseDouble(fields[2]));
 					ohlc.setLow(Double.parseDouble(fields[3]));

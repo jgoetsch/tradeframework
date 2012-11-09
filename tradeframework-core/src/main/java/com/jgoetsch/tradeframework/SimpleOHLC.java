@@ -32,13 +32,24 @@ public class SimpleOHLC implements OHLC, Serializable {
 
 	private static final long serialVersionUID = 2L;
 
-	private Date start;
-	private Date end;
+	private Date date;
 	private double open;
 	private double high;
 	private double low;
 	private double close;
 	private long volume;
+
+	public SimpleOHLC() {
+	}
+
+	public SimpleOHLC(OHLC ohlc) {
+		this.date = ohlc.getDate();
+		this.open = ohlc.getOpen();
+		this.high = ohlc.getHigh();
+		this.low = ohlc.getLow();
+		this.close = ohlc.getClose();
+		this.volume = ohlc.getVolume();
+	}
 
 	public void setOpen(double open) {
 		this.open = open;
@@ -80,27 +91,23 @@ public class SimpleOHLC implements OHLC, Serializable {
 		return volume;
 	}
 
-	public void setStart(Date start) {
-		this.start = start;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
-	public Date getStart() {
-		return start;
-	}
-
-	public void setEnd(Date end) {
-		this.end = end;
+	public Date getDate() {
+		return date;
 	}
 
 	public Date getEnd() {
-		return end;
+		return null;
 	}
 	
 	private static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MM/dd/yy HH:mm:ss z").withZone(DateTimeZone.forID("America/New_York"));
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (getStart() != null) {
-			sb.append(dateFormat.print(getStart().getTime())).append(' ');
+		if (getDate() != null) {
+			sb.append(dateFormat.print(getDate().getTime())).append(' ');
 		}
 		sb.append("O=").append(getOpen());
 		sb.append(" H=").append(getHigh());

@@ -81,25 +81,25 @@ public class OHLCStatistic implements OHLC {
 		return close.getValue();
 	}
 
-	public Date getEnd() {
-		return null;
-	}
-
-	public Date getStart() {
+	public Date getDate() {
 		return start;
 	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (getStart() != null) {
+		if (getDate() != null) {
 			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG);
 			df.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-			sb.append(df.format(getStart())).append(' ');
+			sb.append(df.format(getDate())).append(' ');
 		}
 		sb.append("O=").append(getOpen());
 		sb.append(" H=").append(getHigh());
 		sb.append(" L=").append(getLow());
 		sb.append(" C=").append(getClose());
 		return sb.toString();
+	}
+
+	public long getVolume() {
+		return 0;
 	}
 }

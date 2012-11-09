@@ -27,7 +27,8 @@ public interface OHLC {
 
 	public double getClose();
 
-	public Date getStart();
-	
-	public Date getEnd();
+	public Date getDate();
+
+	public long getVolume();
+
 }

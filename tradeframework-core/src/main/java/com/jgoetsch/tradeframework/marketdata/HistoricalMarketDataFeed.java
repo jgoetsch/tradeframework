@@ -75,12 +75,12 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 			if (data == null)
 				return null;
 			if (log.isTraceEnabled())
-				log.trace("Received historical data for " + contract + " from " + TFUtils.getDateFormat().print(data[0].getStart().getTime())
-						+ " to " + TFUtils.getDateFormat().print(data[data.length-1].getStart().getTime())
+				log.trace("Received historical data for " + contract + " from " + TFUtils.getDateFormat().print(data[0].getDate().getTime())
+						+ " to " + TFUtils.getDateFormat().print(data[data.length-1].getDate().getTime())
 						+ ", starting at " + TFUtils.getDateFormat().print(curTimestamp));
 
 			dataIndex = 0;
-			while (dataIndex < data.length && data[dataIndex].getStart().getTime() <= curTimestamp)
+			while (dataIndex < data.length && data[dataIndex].getDate().getTime() <= curTimestamp)
 				dataIndex++;
 			if (newTime && dataIndex > 0) dataIndex--;
 		}
@@ -108,8 +108,8 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 		mkd.setAsk(mkd.getLast() + 0.00);
 		mkd.setBidSize(10000);
 		mkd.setAskSize(10000);
-		mkd.setTimestamp(ohlc.getStart().getTime());
-		mkd.setLastTimestamp(ohlc.getStart().getTime());
+		mkd.setTimestamp(ohlc.getDate().getTime());
+		mkd.setLastTimestamp(ohlc.getDate().getTime());
 		return mkd;
 	}
 

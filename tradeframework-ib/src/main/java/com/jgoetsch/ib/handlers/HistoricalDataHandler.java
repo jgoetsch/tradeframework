@@ -63,14 +63,15 @@ public class HistoricalDataHandler extends BaseIdHandler {
 			ohlc.setHigh(high);
 			ohlc.setLow(low);
 			ohlc.setClose(close);
+			ohlc.setVolume(volume * 100);
 			try {
 				if (date.length() == 8) {
 					DateFormat df = new SimpleDateFormat("yyyyMMdd");
 					df.setTimeZone(HistoricalDataSource.timeZone);
-					ohlc.setStart(df.parse(date));
+					ohlc.setDate(df.parse(date));
 				}
 				else
-					ohlc.setStart(new Date(Long.parseLong(date) * 1000));
+					ohlc.setDate(new Date(Long.parseLong(date) * 1000));
 			}
 			catch (ParseException e) {
 				e.printStackTrace();
