@@ -39,7 +39,16 @@ public class TWSUtils {
 	 */
 	public static com.ib.client.Contract toTWSContract(Contract contract) {
 		com.ib.client.Contract twsContract = new com.ib.client.Contract();
-		twsContract.m_secType = contract.getType();
+
+		if ("Stock".equalsIgnoreCase(contract.getType()))
+			twsContract.m_secType = Contract.STOCK;
+		else if ("Futures".equalsIgnoreCase(contract.getType()))
+			twsContract.m_secType = Contract.FUTURES;
+		else if ("Option".equalsIgnoreCase(contract.getType()))
+			twsContract.m_secType = Contract.OPTIONS;
+		else
+			twsContract.m_secType = contract.getType();
+
 		twsContract.m_symbol = contract.getSymbol();
 		twsContract.m_exchange = contract.getExchange();
 		twsContract.m_currency = contract.getCurrency();
