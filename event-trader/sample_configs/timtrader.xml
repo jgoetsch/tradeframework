@@ -86,7 +86,6 @@
 								<bean class="com.jgoetsch.eventtrader.order.LimitOrderExecutor">
 									<property name="tradingService" ref="twsService"/>
 									<property name="marketDataSource" ref="twsService"/>
-									<property name="account" value="U466176"/>
 	
 									<!-- Limit order at the lesser of 3 cents past the ask or 20 cents past the alert price (for buys, reversed for shorts) -->
 									<property name="limitPrice" value="Ask + 0.03, TradeSignalPrice + 0.20"/>

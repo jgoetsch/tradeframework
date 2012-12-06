@@ -293,10 +293,10 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	public OHLC[] getHistoricalData(Contract contract, Date endDate, int numPeriods, int periodUnit) throws InvalidContractException, DataUnavailableException
 	{
 		String duration = (numPeriods * histDurationMultiplier[periodUnit]) + " " + histDurationUnit[periodUnit];
-		return getHistoricalData(contract, endDate, duration, periodUnit);
+		return getHistoricalData(contract, endDate, duration, periodUnit, true);
 	}
 
-	public OHLC[] getHistoricalData(Contract contract, Date endDate, String duration, int periodUnit) throws InvalidContractException, DataUnavailableException
+	public OHLC[] getHistoricalData(Contract contract, Date endDate, String duration, int periodUnit, boolean onlyRTH) throws InvalidContractException, DataUnavailableException
 	{
 		if (!isConnected())
 			throw new DataUnavailableException("TWS service is not connected");
@@ -310,7 +310,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 			int tickerId = getNextId();
 			hdh = new HistoricalDataHandler(tickerId);
 			handlerManager.addHandler(hdh);
-			eClientSocket.reqHistoricalData(tickerId, TWSUtils.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", 1, 2);
+			eClientSocket.reqHistoricalData(tickerId, TWSUtils.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", onlyRTH ? 1 : 0, 2);
 			synchronized (hdh) {
 				success = hdh.block();
 			}
