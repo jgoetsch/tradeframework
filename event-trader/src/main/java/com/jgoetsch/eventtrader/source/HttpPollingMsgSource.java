@@ -121,9 +121,9 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 						return;
 				}
 			}
-			/*catch (IOException e) {
-				log.warn(e);
-			}*/
+			catch (IOException e) {
+				log.warn(e.getClass() + ": " + e.getMessage());
+			}
 			catch (Exception e) {
 				log.warn(e.getClass() + ": " + e.getMessage(), e);
 			}
