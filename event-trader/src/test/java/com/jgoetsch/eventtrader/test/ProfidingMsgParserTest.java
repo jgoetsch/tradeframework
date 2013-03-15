@@ -139,4 +139,24 @@ public class ProfidingMsgParserTest extends TestCase {
 		});
 	}
 
+	@SuppressWarnings("rawtypes")
+	public void testOption() throws Exception {
+		msgParser.parseData("alert", (Map)JSONValue.parse(
+			"{\"entry\": {\"exitPrice\": null,\"dateAdded\": 1355246510000,\"newsletterIds\": [58,59],\"type\": \"Long Option\",\"dateClosed\": null,\"amount\": null,\"username\": \"super_trades\",\"compareDate\": 1355246510000,\"ticker\": \"SGYP\",\"action\": \"Bought\",\"entryPrice\": 0.7,\"shortSell\": false,\"shortUrl\": \"1MnC9Y\",\"optionType\": \"CALL\",\"callOption\": true,\"entryComments\": \"All or nothing option position like SRPT was.  If drug data is good, I see targets out there from 15-40.  If data is not good,  then these options WILL BE WORTH ZERO.  Data due first week of January.  \",\"percentage\": null,\"optionExpiration\": 1358571600000,\"entryDate\": 1355246510000,\"futuresMonth\": 0,\"futuresYear\": 0,\"shares\": 50,\"entryType\": \"OPTION\",\"exitDate\": null,\"optionStrike\": 7.5,\"comments\": null,\"openTrade\": true},\"msgId\":30040,\"image\":\"http://a1.twimg.com/profile_images/1166026278/TimCover1_normal.jpg\"}"
+			), new MsgHandler() {
+			public boolean newMsg(Msg msg) {
+				Assert.assertEquals(TradeSignal.class, msg.getClass());
+				TradeSignal trade = (TradeSignal) msg;
+				Assert.assertEquals("super_trades", trade.getSourceName());
+				Assert.assertEquals(1355246510000L, trade.getDate().toDate().getTime());
+				Assert.assertEquals(TradeSignal.TYPE_BUY, trade.getType());
+				Assert.assertEquals("SGYP", trade.getContract().getSymbol());
+				Assert.assertEquals(Contract.OPTIONS, trade.getContract().getType());
+				Assert.assertEquals(50, trade.getNumShares());
+				Assert.assertEquals(0.7, trade.getPrice());
+				return false;
+			}
+		});
+	}
+
 }

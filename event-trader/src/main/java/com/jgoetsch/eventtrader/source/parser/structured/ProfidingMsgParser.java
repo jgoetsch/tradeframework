@@ -58,9 +58,18 @@ public class ProfidingMsgParser implements StructuredMsgParser {
 		if ("alert".equals(type)) {
 			Map partial = (Map)data.get("partial");
 			Map entry = (Map)data.get(partial != null ? "partial_entry" : "entry");
+
+			Contract contract = new Contract();
+			contract.setSymbol((String)entry.get("ticker"));
+			if ("OPTION".equals(entry.get("entryType"))) {
+				contract.setType(Contract.OPTIONS);
+			}
+			else if ("FUTURES".equals(entry.get("entryType")))
+				contract.setType(Contract.FUTURES);
+
 			TradeSignal trade = new TradeSignal();
 			trade.setSourceName((String)entry.get("username"));
-			trade.setContract(Contract.stock((String)entry.get("ticker")));
+			trade.setContract(contract);
 			trade.setNumShares(((Number)(partial != null ? partial : entry).get("shares")).intValue());
 			trade.setImageUrl((String)data.get("image"));
 			trade.setPartial(partial != null);
