@@ -54,6 +54,7 @@ public class GrowlNotification implements Processor<Msg> {
 		private String appIcon;
 		private Set<String> notificationTypes = new LinkedHashSet<String>();
 		private long timeout = 3000;
+		private String host = "localhost";
 		private int port = Gntp.WINDOWS_TCP_PORT;
 
 		private Map<String, GntpNotificationInfo> notificationInfos;
@@ -68,7 +69,7 @@ public class GrowlNotification implements Processor<Msg> {
 				notificationInfos.put(notificationType, Gntp.notificationInfo(info, notificationType).build());
 				log.debug("Registering notification type: " + notificationType);
 			}
-			client = Gntp.client(info).onPort(port).build();
+			client = Gntp.client(info).forHost(host).onPort(port).build();
 			client.register();
 		}
 	
