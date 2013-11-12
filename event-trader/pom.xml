@@ -100,5 +100,10 @@
   		<artifactId>jsoup</artifactId>
   		<version>1.7.1</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.atmosphere</groupId>
+  		<artifactId>wasync</artifactId>
+  		<version>1.0.0.RC5</version>
+  	</dependency>
   </dependencies>
 </project>
