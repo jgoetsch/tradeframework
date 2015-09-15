@@ -133,7 +133,8 @@ public class ProfidingPusherMsgParser implements StructuredMsgParser {
 				trade.setPrice(((Number)partial.get("price")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + ((Boolean)entry.get("shortSell") ? "Short " : "Long ")
 						+ entry.get("shares") + " total at "
-						+ DecimalFormat.getCurrencyInstance().format(entry.get("entryPrice")) + " average");
+						+ DecimalFormat.getCurrencyInstance().format(entry.get("entryPrice")) + " average"
+						+ "\n" + (String)partial.get("comments"));
 			}
 			else if (trade.isExit()) {
 				trade.setDate(new DateTime(entry.get("dateClosed")));
