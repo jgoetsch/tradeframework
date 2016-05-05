@@ -50,6 +50,7 @@ import com.jgoetsch.tradeframework.Contract;
  *         ,"partial":{"shares":4240,"short":false,"tradeDate":1344266235912,
  *         "transactionType":"Bought","price":7.06,"adding":true}}]}
  */
+@Deprecated
 public class ProfidingMsgParser implements StructuredMsgParser {
 
 	@SuppressWarnings("rawtypes")

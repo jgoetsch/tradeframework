@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jgoetsch.eventtrader.source.parser.structured;
+package com.jgoetsch.eventtrader.processor;
 
 import java.util.Map;
 
-import com.jgoetsch.eventtrader.source.MsgHandler;
-import com.jgoetsch.eventtrader.source.parser.MsgParseException;
+import com.jgoetsch.eventtrader.Msg;
 
-/**
- * Interface to decode a structured alert message (such as the newer Profiding alerts)
- * into a Msg object.
- * 
- * @author jgoetsch
- *
- */
-public interface StructuredMsgParser {
-	public boolean parseData(Map data, MsgHandler handler) throws MsgParseException;
+public class NoopProcessor implements Processor<Msg> {
+
+	public void process(Msg msg, Map<Object, Object> context) throws Exception {
+		// Do nothing
+	}
+
 }

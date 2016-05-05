@@ -75,7 +75,9 @@ public class ProfidingPusherMsgParser implements StructuredMsgParser {
 	private Logger log = LoggerFactory.getLogger(getClass());
 
 	@SuppressWarnings("rawtypes")
-	public boolean parseData(String type, Map data, MsgHandler handler) throws MsgParseException {
+	public boolean parseData(Map data, MsgHandler handler) throws MsgParseException {
+		String type = (String)data.get("command");
+		data = (Map)data.get("message");
         Object ts = data.get("date");
         if (ts != null && Number.class.isAssignableFrom(ts.getClass()))
         	log.info("{} alert latency was {} ms", type, System.currentTimeMillis() - ((Number)ts).longValue());
