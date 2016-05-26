@@ -28,7 +28,7 @@ import com.jgoetsch.eventtrader.source.MsgHandler;
 
 public class HtmlTextParser implements MsgParser {
 
-	private MsgParser innerParser = new BufferedMsgParser();
+	private MsgParser innerParser = new FullBufferedMsgParser();
 	private Pattern charsetPattern = Pattern.compile("charset=([^;]+)");
 
 	public HtmlTextParser() {

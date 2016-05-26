@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class PatternMsgParser extends BufferedMsgParser {
+public class PatternMsgParser extends FullBufferedMsgParser {
 
 	private Pattern pattern;
 	private String sourceFormat;
@@ -43,7 +43,7 @@ public class PatternMsgParser extends BufferedMsgParser {
 	}
 
 	@Override
-	protected boolean parseContent(String content, String contentType, MsgHandler handler) {
+	public boolean parseContent(String content, String contentType, MsgHandler handler) {
 		Matcher m = pattern.matcher(content);
 		while (m.find()) {
 			Msg msg = new Msg(sourceFormat != null ? formatFromGroups(m, sourceFormat) : null, formatFromGroups(m, messageFormat));

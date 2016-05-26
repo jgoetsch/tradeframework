@@ -32,9 +32,7 @@ public class PusherForwardingProcessor implements Processor<Msg> {
 		if (pusher == null)
 			initialize();
 
-		Map data = new HashMap();
-		data.put("command", value)
-		pusher.trigger(channels, "message", msg);
+		pusher.trigger(channels, msg.getClass().getSimpleName(), msg);
 	}
 
 	public String getAppId() {

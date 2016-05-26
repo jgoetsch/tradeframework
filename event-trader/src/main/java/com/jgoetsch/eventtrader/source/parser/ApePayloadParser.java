@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.structured.StructuredMsgParser;
 
+@Deprecated
 public class ApePayloadParser implements MsgParser {
 	private Logger log = LoggerFactory.getLogger(ApePayloadParser.class);
 	private StructuredMsgParser payload;

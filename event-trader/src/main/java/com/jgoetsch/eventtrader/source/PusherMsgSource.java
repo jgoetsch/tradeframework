@@ -2,13 +2,11 @@ package com.jgoetsch.eventtrader.source;
 
 import java.util.Set;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
-import com.jgoetsch.eventtrader.source.parser.structured.StructuredMsgParser;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
@@ -23,7 +21,7 @@ public class PusherMsgSource extends MsgSource {
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private String appKey;
 	private PusherOptions pusherOptions;
-	private StructuredMsgParser msgParser;
+	private BufferedMsgParser msgParser;
 	private Set<String> channels;
 
 	@Override
@@ -44,9 +42,10 @@ public class PusherMsgSource extends MsgSource {
 		    public void onEvent(String channel, String event, String data) {
 		        log.debug(data);
 
-				JSONObject json = (JSONObject)JSONValue.parse(data);
+				//JSONObject json = (JSONObject)JSONValue.parse(data);
 				try {
-					msgParser.parseData((String)json.get("command"), (JSONObject)json.get("message"), PusherMsgSource.this);
+					//msgParser.parseData((String)json.get("command"), (JSONObject)json.get("message"), PusherMsgSource.this);
+					msgParser.parseContent(data, event, PusherMsgSource.this);
 				} catch (MsgParseException e) {
 					log.error("Message parse error, content was:\n" + data, e);
 				}
@@ -90,11 +89,11 @@ public class PusherMsgSource extends MsgSource {
 		this.pusherOptions = pusherOptions;
 	}
 
-	public StructuredMsgParser getMsgParser() {
+	public BufferedMsgParser getMsgParser() {
 		return msgParser;
 	}
 
-	public void setMsgParser(StructuredMsgParser msgParser) {
+	public void setMsgParser(BufferedMsgParser msgParser) {
 		this.msgParser = msgParser;
 	}
 

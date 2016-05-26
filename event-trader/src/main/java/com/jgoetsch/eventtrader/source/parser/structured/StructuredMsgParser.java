@@ -28,5 +28,5 @@ import com.jgoetsch.eventtrader.source.parser.MsgParseException;
  *
  */
 public interface StructuredMsgParser {
-	public boolean parseData(Map data, MsgHandler handler) throws MsgParseException;
+	public boolean parseData(String type, Map data, MsgHandler handler) throws MsgParseException;
 }

@@ -21,7 +21,7 @@ import com.jgoetsch.eventtrader.source.MsgHandler;
 public class PlainTextMsgParser extends LineBufferedMsgParser {
 
 	@Override
-	protected boolean parseContent(String content, String contentType, MsgHandler handler) {
+	public boolean parseContent(String content, String contentType, MsgHandler handler) {
 		return handler.newMsg(new Msg(null, content));
 	}
 

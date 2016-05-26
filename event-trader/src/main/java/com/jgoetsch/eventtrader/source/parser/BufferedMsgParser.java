@@ -15,52 +15,10 @@
  */
 package com.jgoetsch.eventtrader.source.parser;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class BufferedMsgParser implements MsgParser {
-	private int maxLength = -1;
+public interface BufferedMsgParser {
 
-	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
-        if (length > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("entity too large to be buffered in memory");
-        }
-        int i = (int)length;
-        if (i < 0)
-        	i = 4096;
-        Reader reader = new InputStreamReader(input);
-        //CharArrayBuffer buffer = new CharArrayBuffer((int)length);
-        StringBuilder buffer = new StringBuilder(length > 0 ? (int)length : 4096);
-        try {
-            char[] tmp = new char[1024];
-            int l;
-            while((l = reader.read(tmp)) != -1) {
-                buffer.append(tmp, 0, l);
-            }
-        } finally {
-            reader.close();
-        }
-        if (maxLength > -1)
-        	buffer.setLength(maxLength);
-        return parseContent(buffer.toString(), contentType, handler);
-	}
-
-	protected boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException
-	{
-		return handler.newMsg(new Msg(null, content));
-	}
-
-	public void setMaxLength(int maxLength) {
-		this.maxLength = maxLength;
-	}
-
-	public int getMaxLength() {
-		return maxLength;
-	}
+	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException;
 
 }

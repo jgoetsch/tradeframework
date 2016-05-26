@@ -1,32 +1,19 @@
-/*
- * Copyright (c) 2012 Jeremy Goetsch
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.jgoetsch.eventtrader.source.parser.structured;
+package com.jgoetsch.eventtrader.source.parser;
 
 import java.text.DecimalFormat;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.source.MsgHandler;
-import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.jgoetsch.tradeframework.Contract;
+
 
 /**
  * Decodes structured Profiding alert into a Msg object.
@@ -71,12 +58,16 @@ import com.jgoetsch.tradeframework.Contract;
     }
 }
  */
-@Deprecated
-public class ProfidingPusherMsgParser implements StructuredMsgParser {
+public class ProfidingMsgParser extends FullBufferedMsgParser {
 	private Logger log = LoggerFactory.getLogger(getClass());
 
+	@Override
 	@SuppressWarnings("rawtypes")
-	public boolean parseData(String type, Map data, MsgHandler handler) throws MsgParseException {
+	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException {
+		JSONObject json = (JSONObject)JSONValue.parse(content);
+		String type = (String)json.get("command");
+		Map data = (JSONObject)json.get("message");
+
         Object ts = data.get("date");
         if (ts != null && Number.class.isAssignableFrom(ts.getClass()))
         	log.info("{} alert latency was {} ms", type, System.currentTimeMillis() - ((Number)ts).longValue());
@@ -159,6 +150,6 @@ public class ProfidingPusherMsgParser implements StructuredMsgParser {
 			return handler.newMsg(msg);
 		}
 		else
-			return true;
+			throw new MsgParseException("Unknown command type \"" + type + "\" encountered");
 	}
 }

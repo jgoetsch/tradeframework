@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class ReverseMsgParser extends BufferedMsgParser {
+public class ReverseMsgParser extends FullBufferedMsgParser {
 
 	Logger log = LoggerFactory.getLogger(ReverseMsgParser.class);
 	private MsgParser msgParser;
@@ -35,7 +35,7 @@ public class ReverseMsgParser extends BufferedMsgParser {
 	}
 
 	@Override
-	protected boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException {
+	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException {
 		StringBuilder buffer = new StringBuilder(content.length());
 		int prev = content.length();
 		for (int i = prev; i > 0; prev = i, i = content.lastIndexOf('\n', prev - 1)) {

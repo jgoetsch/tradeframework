@@ -27,7 +27,7 @@ public class TwitterJSONMsgParser extends LineBufferedMsgParser {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	protected boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException {
+	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException {
 		if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json"))
 			throw new MsgParseException("Attempt to parse non-JSON content type " + contentType + " with JSONMsgParser");
 

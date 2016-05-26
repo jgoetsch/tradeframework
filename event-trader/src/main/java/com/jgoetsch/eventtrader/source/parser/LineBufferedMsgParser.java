@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public abstract class LineBufferedMsgParser implements MsgParser {
+public abstract class LineBufferedMsgParser implements MsgParser, BufferedMsgParser {
 
 	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -34,6 +34,6 @@ public abstract class LineBufferedMsgParser implements MsgParser {
 		return true;
 	}
 
-	protected abstract boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException;
+	public abstract boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException;
 
 }
