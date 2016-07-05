@@ -104,6 +104,7 @@ public class TWSUtils {
 		twsOrder.m_totalQuantity = Math.abs(order.getQuantity());
 		twsOrder.m_orderType = order.getType();
 		twsOrder.m_tif = order.getTimeInForce();
+		twsOrder.m_outsideRth = order.getAllowOutsideRth();
 		twsOrder.m_lmtPrice = order.getLimitPrice();
 		twsOrder.m_auxPrice = order.getAuxPrice();
 		twsOrder.m_trailStopPrice = order.getTrailStopPrice();

@@ -23,6 +23,7 @@ public class Order {
 	private String type;
 	private int quantity;
 	private String timeInForce;
+	private boolean allowOutsideRth;
 	private double limitPrice;
 	private double auxPrice;
 	private double trailStopPrice;
@@ -52,6 +53,7 @@ public class Order {
 		this.type = other.type;
 		this.quantity = other.quantity;
 		this.timeInForce = other.timeInForce;
+		this.allowOutsideRth = other.allowOutsideRth;
 		this.limitPrice = other.limitPrice;
 		this.auxPrice = other.auxPrice;
 		this.trailStopPrice = other.trailStopPrice;
@@ -149,6 +151,14 @@ public class Order {
 
 	public String getTimeInForce() {
 		return timeInForce;
+	}
+
+	public void setAllowOutsideRth(boolean allowOutsideRth) {
+		this.allowOutsideRth = allowOutsideRth;
+	}
+
+	public boolean getAllowOutsideRth() {
+		return allowOutsideRth;
 	}
 
 	public void setTransmit(boolean bTransmit) {

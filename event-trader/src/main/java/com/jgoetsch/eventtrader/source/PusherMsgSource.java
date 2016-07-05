@@ -5,6 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.pusher.client.Pusher;
@@ -26,11 +27,14 @@ public class PusherMsgSource extends MsgSource {
 
 	@Override
 	protected void receiveMsgs() {
-		Pusher pusher = new Pusher(appKey, pusherOptions);
+		Pusher pusher = pusherOptions != null ? new Pusher(appKey, pusherOptions) : new Pusher(appKey);
 
 		pusher.connect(new ConnectionEventListener() {
 		    public void onConnectionStateChange(ConnectionStateChange change) {
 		    	log.info("State changed to " + change.getCurrentState() + " from " + change.getPreviousState());
+		    	if (change.getCurrentState().equals(ConnectionState.DISCONNECTED) && change.getPreviousState().equals(ConnectionState.CONNECTED)) {
+		    		newMsg(new Msg("system", "PusherMsgSource is " + change.getCurrentState()));
+		    	}
 		    }
 
 		    public void onError(String message, String code, Exception e) {
@@ -61,8 +65,14 @@ public class PusherMsgSource extends MsgSource {
 		};
 
 		for (String channelName : channels) {
-			Channel channel = pusher.subscribePrivate(channelName);
+			Channel channel;
+			if(channelName.startsWith("private-"))
+				channel = pusher.subscribePrivate(channelName);
+			else
+				channel = pusher.subscribe(channelName);
 			channel.bind("message", messageListener);
+			channel.bind("Msg", messageListener);
+			channel.bind("TradeSignal", messageListener);
 		}
 
 		for (;;) {

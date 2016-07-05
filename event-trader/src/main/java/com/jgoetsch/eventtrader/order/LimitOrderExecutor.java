@@ -33,12 +33,14 @@ import com.jgoetsch.tradeframework.order.OrderException;
 public class LimitOrderExecutor extends MarketOrderExecutor {
 
 	private OrderPrice limitPrice;
+	private boolean allowOutsideRth;
 
 	@Override
 	protected void prepareOrder(Order order, TradeSignal trade, MarketData marketData) throws OrderException, DataUnavailableException
 	{
 		order.setType(Order.TYPE_LIMIT);
 		order.setLimitPrice(limitPrice.getValue(trade, marketData));
+		order.setAllowOutsideRth(allowOutsideRth);
 	}
 
 	public void initialize() {
@@ -57,6 +59,14 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 
 	public OrderPrice getLimitPrice() {
 		return limitPrice;
+	}
+
+	public boolean isAllowOutsideRth() {
+		return allowOutsideRth;
+	}
+
+	public void setAllowOutsideRth(boolean allowOutsideRth) {
+		this.allowOutsideRth = allowOutsideRth;
 	}
 
 }
