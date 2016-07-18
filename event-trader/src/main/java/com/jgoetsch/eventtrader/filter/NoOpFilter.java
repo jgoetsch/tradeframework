@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jgoetsch.eventtrader.processor;
+package com.jgoetsch.eventtrader.filter;
 
 import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
-public class NoopProcessor<M extends Msg> implements Processor<M> {
+/**
+ * Skips processing of TradeSignals marked as being a partial entry or exit.
+ * (call <code>setInverse(true)</code> to process only partial trades).
+ * 
+ * @author jgoetsch
+ *
+ */
+public class NoOpFilter<M extends Msg> extends FilterProcessor<M> {
 
-	public void process(M msg, Map<Object, Object> context) throws Exception {
-		// Do nothing
+	@Override
+	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
+		return true;
 	}
 
 }
