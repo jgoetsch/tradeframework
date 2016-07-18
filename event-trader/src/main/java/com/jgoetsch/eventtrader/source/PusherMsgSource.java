@@ -1,5 +1,6 @@
 package com.jgoetsch.eventtrader.source;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,8 +12,9 @@ import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
-import com.pusher.client.channel.PrivateChannelEventListener;
+import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
+import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
@@ -23,7 +25,7 @@ public class PusherMsgSource extends MsgSource {
 	private String appKey;
 	private PusherOptions pusherOptions;
 	private BufferedMsgParser msgParser;
-	private Set<String> channels;
+	private Collection<String> channels;
 
 	@Override
 	protected void receiveMsgs() {
@@ -42,7 +44,7 @@ public class PusherMsgSource extends MsgSource {
 		    }
 		}, ConnectionState.ALL);
 
-		SubscriptionEventListener messageListener = new PrivateChannelEventListener() {
+		SubscriptionEventListener messageListener = new PresenceChannelEventListener() {
 		    public void onEvent(String channel, String event, String data) {
 		        log.debug(data);
 
@@ -62,12 +64,23 @@ public class PusherMsgSource extends MsgSource {
 			public void onAuthenticationFailure(String message, Exception e) {
 				log.error("Failed to subscribe: " + message, e);
 			}
+
+			public void onUsersInformationReceived(String channelName, Set<User> users) {
+			}
+
+			public void userSubscribed(String channelName, User user) {
+			}
+
+			public void userUnsubscribed(String channelName, User user) {
+			}
 		};
 
 		for (String channelName : channels) {
 			Channel channel;
 			if(channelName.startsWith("private-"))
 				channel = pusher.subscribePrivate(channelName);
+			else if (channelName.startsWith("presence-"))
+				channel = pusher.subscribePresence(channelName);
 			else
 				channel = pusher.subscribe(channelName);
 			channel.bind("message", messageListener);
@@ -107,11 +120,11 @@ public class PusherMsgSource extends MsgSource {
 		this.msgParser = msgParser;
 	}
 
-	public Set<String> getChannels() {
+	public Collection<String> getChannels() {
 		return channels;
 	}
 
-	public void setChannels(Set<String> channels) {
+	public void setChannels(Collection<String> channels) {
 		this.channels = channels;
 	}
 

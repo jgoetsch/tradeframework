@@ -17,7 +17,6 @@ package com.jgoetsch.eventtrader.processor;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
@@ -37,13 +36,6 @@ import com.jgoetsch.eventtrader.Msg;
 public abstract class PropagatingProcessor<M extends Msg, P extends Msg> implements Processor<M> {
 
 	private Collection<Processor<P>> processors;
-
-	public void process(M msg, Map<Object,Object> context) throws Exception {
-		if (processors != null) {
-			for (Processor<P> p : processors)
-				p.process((P)msg, context);
-		}
-	}
 
 	public final void setProcessors(Collection<Processor<P>> processors) {
 		this.processors = processors;

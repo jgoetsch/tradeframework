@@ -29,11 +29,11 @@ import com.jgoetsch.eventtrader.Msg;
  * @author jgoetsch
  *
  */
-public class SoundNotification implements Processor<Msg> {
+public class SoundNotification<M extends Msg> implements Processor<M> {
 
 	private URL url;
 
-	public void process(Msg msg, Map<Object,Object> context) {
+	public void process(M msg, Map<Object,Object> context) {
 		AudioClip clip = Applet.newAudioClip(url);
 		clip.play();
 	}

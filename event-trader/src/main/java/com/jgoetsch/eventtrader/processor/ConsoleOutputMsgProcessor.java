@@ -20,7 +20,7 @@ import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
-public class ConsoleOutputMsgProcessor implements Processor<Msg> {
+public class ConsoleOutputMsgProcessor<M extends Msg> implements Processor<M> {
 
 	private final PrintStream out;
 	private final String format = null;
@@ -29,7 +29,7 @@ public class ConsoleOutputMsgProcessor implements Processor<Msg> {
 		this.out = out;
 	}
 
-	public void process(Msg msg, Map<Object,Object> context) throws Exception {
+	public void process(M msg, Map<Object,Object> context) throws Exception {
 		if (format == null)
 			out.println(msg);
 	}

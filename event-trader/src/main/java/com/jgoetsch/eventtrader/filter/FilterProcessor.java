@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.PropagatingProcessor;
 
 /**
@@ -40,14 +41,21 @@ public abstract class FilterProcessor<M extends Msg> extends PropagatingProcesso
 
 	public final void process(M msg, Map<Object,Object> context) throws Exception {
 		if (disabled || handleProcessing(msg, context) != inverse) {
-			super.process(msg, context);
+			doProcess(msg, context);
 		}
 		else if (log.isDebugEnabled()) {
 			log.debug("Execution blocked of trade " + msg);
 		}
 	}
-	
+
 	protected abstract boolean handleProcessing(M msg, Map<Object,Object> context) throws Exception;
+
+	protected void doProcess(M msg, Map<Object,Object> context) throws Exception {
+		if (getProcessors() != null) {
+			for (Processor<M> p : getProcessors())
+				p.process(msg, context);
+		}
+	}
 
 	/**
 	 * Disabled or enables the filter. If disabled, the filter will pass all

@@ -1,20 +1,15 @@
 package com.jgoetsch.eventtrader.processor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.SerializationUtil;
 import com.pusher.rest.Pusher;
 
 public class PusherForwardingProcessor implements Processor<Msg> {
-	private Logger log = LoggerFactory.getLogger(PusherForwardingProcessor.class);
 
 	private String appId;
 	private String apiKey;

@@ -47,7 +47,7 @@ import com.jgoetsch.eventtrader.Msg;
  * @author jgoetsch
  * 
  */
-public class GrowlNotification implements Processor<Msg> {
+public class GrowlNotification<M extends Msg> implements Processor<M> {
 
 	public static class GntpClientBean {
 		private String appName;
@@ -191,7 +191,7 @@ public class GrowlNotification implements Processor<Msg> {
 		}
 	}
 
-	public void process(Msg msg, Map<Object,Object> context) {
+	public void process(M msg, Map<Object,Object> context) {
 		if (client != null) {
 			try {
 				BufferedImage image = null;

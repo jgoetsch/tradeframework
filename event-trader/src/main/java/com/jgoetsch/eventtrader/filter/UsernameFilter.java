@@ -28,12 +28,12 @@ import com.jgoetsch.eventtrader.Msg;
  * @author jgoetsch
  *
  */
-public class UsernameFilter extends FilterProcessor<Msg> {
+public class UsernameFilter<M extends Msg> extends FilterProcessor<M> {
 
 	private Set<String> usernames;
 
 	@Override
-	protected boolean handleProcessing(Msg trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(M trade, Map<Object,Object> context) {
 		return usernames.contains(trade.getSourceName().toUpperCase());
 	}
 

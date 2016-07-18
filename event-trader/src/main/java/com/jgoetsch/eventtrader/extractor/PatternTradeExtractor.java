@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.PropagatingProcessor;
 import com.jgoetsch.tradeframework.Contract;
 
@@ -43,7 +44,10 @@ public class PatternTradeExtractor extends PropagatingProcessor<Msg, TradeSignal
 			if (symbolFormat != null)
 				tradeSignal.setContract(Contract.stock(formatFromGroups(m, symbolFormat)));
 			log.debug("{}", tradeSignal);
-			super.process(tradeSignal, context);
+			if (getProcessors() != null) {
+				for (Processor<TradeSignal> p : getProcessors())
+					p.process(tradeSignal, context);
+			}
 		}
 	}
 

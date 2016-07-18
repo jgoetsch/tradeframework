@@ -37,7 +37,10 @@ public class TradeExtractor extends PropagatingProcessor<Msg, TradeSignal> {
 		if (trades != null && !trades.isEmpty()) {
 			log.debug("{}", msg);
 			for (TradeSignal trade : trades) {
-				super.process(trade, context);
+				if (getProcessors() != null) {
+					for (Processor<TradeSignal> p : getProcessors())
+						p.process(trade, context);
+				}
 			}
 		}
 		else if (nonTradeProcessors != null) {

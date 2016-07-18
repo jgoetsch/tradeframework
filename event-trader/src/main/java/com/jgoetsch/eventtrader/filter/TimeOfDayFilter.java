@@ -30,7 +30,7 @@ import com.jgoetsch.eventtrader.Msg;
  * @author jgoetsch
  *
  */
-public class TimeOfDayFilter extends FilterProcessor<Msg> {
+public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 
 	private final LocalTime startTime;
 	private final LocalTime endTime;
@@ -45,12 +45,12 @@ public class TimeOfDayFilter extends FilterProcessor<Msg> {
 	}
 
 	@Override
-	protected boolean handleProcessing(Msg msg, Map<Object,Object> context) {
+	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
 		LocalTime msgTime = new LocalTime(msg.getDate(), timeZone);
 		return msgTime.compareTo(startTime) > 0 && msgTime.compareTo(endTime) < 0;
 	}
 
-	public static TimeOfDayFilter getUSStockRTHFilter() {
-		return new TimeOfDayFilter(new LocalTime(9, 30), new LocalTime(16, 0), DateTimeZone.forID("America/New_York"));
+	public static TimeOfDayFilter<? extends Msg> getUSStockRTHFilter() {
+		return new TimeOfDayFilter<Msg>(new LocalTime(9, 30), new LocalTime(16, 0), DateTimeZone.forID("America/New_York"));
 	}
 }

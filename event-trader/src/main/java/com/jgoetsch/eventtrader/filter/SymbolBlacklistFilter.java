@@ -15,8 +15,8 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 
@@ -30,18 +30,18 @@ import com.jgoetsch.eventtrader.TradeSignal;
  */
 public class SymbolBlacklistFilter extends FilterProcessor<TradeSignal> {
 
-	private Set<String> symbols;
+	private Collection<String> symbols;
 
 	@Override
 	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
 		return !symbols.contains(trade.getContract().getSymbol());
 	}
 
-	public void setSymbols(Set<String> symbols) {
+	public void setSymbols(Collection<String> symbols) {
 		this.symbols = symbols;
 	}
 
-	public Set<String> getSymbols() {
+	public Collection<String> getSymbols() {
 		return symbols;
 	}
 

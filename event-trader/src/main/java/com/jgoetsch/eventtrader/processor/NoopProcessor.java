@@ -19,9 +19,9 @@ import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
-public class NoopProcessor implements Processor<Msg> {
+public class NoopProcessor<M extends Msg> implements Processor<M> {
 
-	public void process(Msg msg, Map<Object, Object> context) throws Exception {
+	public void process(M msg, Map<Object, Object> context) throws Exception {
 		// Do nothing
 	}
 
