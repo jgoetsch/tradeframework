@@ -41,7 +41,7 @@ public class ExistingPositionFilter extends FilterProcessor<TradeSignal> {
 
 	@Override
 	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
-		if (TradeSignal.TYPE_COVER.equals(trade.getType()) || TradeSignal.TYPE_SELL.equals(trade.getType()))
+		if (trade.getType().isExit())
 			return true;
 		else {
 			AccountData account = ContextCacheUtil.getAccountData(accountDataSource, context);

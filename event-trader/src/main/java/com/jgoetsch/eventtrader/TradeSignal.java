@@ -32,12 +32,7 @@ public class TradeSignal extends Msg {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TYPE_BUY = "BUY";
-	public static final String TYPE_SELL = "SELL";
-	public static final String TYPE_SHORT = "SHORT";
-	public static final String TYPE_COVER = "COVER";
-	
-	private String type;
+	private TradeType type;
 	private int numShares;
 	private double price;
 	private Contract contract;
@@ -65,23 +60,23 @@ public class TradeSignal extends Msg {
 	 * @param symbol Ticker symbol.
 	 * @param msg The ChatMsg that this TradeSignal was derived from for reference.
 	 */
-	public TradeSignal(String side, Contract contract, Msg msg) {
+	public TradeSignal(TradeType side, Contract contract, Msg msg) {
 		super(msg);
 		this.type = side;
 		this.contract = contract;
 	}
 
-	public TradeSignal(String side, String symbol, Msg msg) {
+	public TradeSignal(TradeType side, String symbol, Msg msg) {
 		super(msg);
 		this.type = side;
 		this.contract = Contract.stock(symbol);
 	}
 
-	public TradeSignal(String type, Contract contract, int numShares, double price) {
+	public TradeSignal(TradeType type, Contract contract, int numShares, double price) {
 		this(type, contract, numShares, price, null);
 	}
 
-	public TradeSignal(String type, Contract contract, int numShares, double price, Msg msg) {
+	public TradeSignal(TradeType type, Contract contract, int numShares, double price, Msg msg) {
 		super(msg);
 		this.type = type;
 		this.contract = contract;
@@ -98,7 +93,7 @@ public class TradeSignal extends Msg {
 	 * @param msg The ChatMsg that this TradeSignal was derived from for reference.
 	 * @return List of TradeSignal objects.
 	 */
-	public static List<TradeSignal> fromList(String side, String symbols, Msg msg) {
+	public static List<TradeSignal> fromList(TradeType side, String symbols, Msg msg) {
 		List<TradeSignal> list = new ArrayList<TradeSignal>();
 		for (String symbol : symbols.split("\\s+")) {
 			list.add(new TradeSignal(side, Contract.stock(symbol), msg));
@@ -135,7 +130,7 @@ public class TradeSignal extends Msg {
 	public String getTradeString() {
 		StringBuilder sb = new StringBuilder();
 		if (getType() != null)
-			sb.append(getType());
+			sb.append(getType().toString());
 		if (getNumShares() != 0)
 			sb.append(" ").append(getNumShares());
 		if (getContract() != null)
@@ -145,26 +140,11 @@ public class TradeSignal extends Msg {
 		return sb.toString();
 	}
 
-	public boolean isBuy() {
-		return TYPE_BUY.equalsIgnoreCase(type) || TYPE_COVER.equalsIgnoreCase(type);
-	}
-
-	public boolean isSell() {
-		return TYPE_SELL.equalsIgnoreCase(type) || TYPE_SHORT.equalsIgnoreCase(type);
-	}
-
-	public boolean isExit() {
-		return TYPE_SELL.equalsIgnoreCase(type) || TYPE_COVER.equalsIgnoreCase(type);
-	}
-	public boolean isEntry() {
-		return !isExit();
-	}
-
-	public String getType() {
+	public TradeType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(TradeType type) {
 		this.type = type;
 	}
 

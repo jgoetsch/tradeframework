@@ -62,7 +62,7 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * @return offset to add to base price
 	 */
 	protected double getOffset(TradeSignal trade, MarketData marketData, double basePrice) {
-		return Math.rint(((trade.isSell() ? -getOffset() : getOffset()) * (isPercentage() ? basePrice : 1)) / tickSize) * tickSize;
+		return Math.rint(((trade.getType().isSell() ? -getOffset() : getOffset()) * (isPercentage() ? basePrice : 1)) / tickSize) * tickSize;
 	}
 
 	@Override

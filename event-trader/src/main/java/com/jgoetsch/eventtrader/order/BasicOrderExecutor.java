@@ -58,7 +58,7 @@ public class BasicOrderExecutor implements Processor<TradeSignal> {
 	}
 
 	protected Order createOrder(TradeSignal trade) {
-		return Order.marketOrder(trade.isBuy() ? trade.getNumShares() : -trade.getNumShares());
+		return Order.marketOrder(trade.getType().isBuy() ? trade.getNumShares() : -trade.getNumShares());
 	}
 
 	public TradingService getTradingService() {

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.order.size.OrderSize;
 import com.jgoetsch.eventtrader.processor.ContextCacheUtil;
 import com.jgoetsch.eventtrader.processor.Processor;
@@ -58,8 +59,8 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 			
 			int numShares = (orderSize.getValue(trade, getIntendedPrice(trade, marketData), context) / roundOrderQty) * roundOrderQty;
 			if (trade.getType() == null)
-				trade.setType(numShares > 0 ? TradeSignal.TYPE_BUY : TradeSignal.TYPE_SELL);
-			order.setQuantity(trade.isSell() ? -Math.abs(numShares) : Math.abs(numShares));
+				trade.setType(numShares > 0 ? TradeType.BUY : TradeType.SELL);
+			order.setQuantity(trade.getType().isSell() ? -Math.abs(numShares) : Math.abs(numShares));
 			prepareOrder(order, trade, marketData);
 		} catch (DataUnavailableException e) {
 			log.warn("Could not processs order because: " + e.getMessage());

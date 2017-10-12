@@ -21,6 +21,7 @@ import org.json.simple.JSONValue;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.ProfidingMsgParser;
 import com.jgoetsch.tradeframework.Contract;
@@ -71,7 +72,7 @@ public class ProfidingMsgParserTest extends TestCase {
 				Assert.assertEquals("timothysykes", trade.getSourceName());
 				Assert.assertEquals("http://a1.twimg.com/profile_images/1166026278/TimCover1_normal.jpg", trade.getImageUrl());
 				Assert.assertEquals(1344347916726L, trade.getDate().toDate().getTime());
-				Assert.assertEquals(TradeSignal.TYPE_COVER, trade.getType());
+				Assert.assertEquals(TradeType.COVER, trade.getType());
 				Assert.assertEquals(Contract.stock("CRMB"), trade.getContract());
 				Assert.assertEquals(300, trade.getNumShares());
 				Assert.assertEquals(3.2, trade.getPrice());

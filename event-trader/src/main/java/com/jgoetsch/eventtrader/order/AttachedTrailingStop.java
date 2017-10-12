@@ -64,7 +64,7 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 
 		double trailAmt = price * trailPercent + .01;
 		return Order.trailingStopOrder(-baseOrder.getQuantity(),
-				trade.isBuy() ? price - trailAmt : price + trailAmt, trailAmt);
+				trade.getType().isBuy() ? price - trailAmt : price + trailAmt, trailAmt);
 	}
 
 	protected final Order createOrder(TradeSignal trade, MarketData marketData) {

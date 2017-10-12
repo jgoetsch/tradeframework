@@ -34,13 +34,13 @@ public class PusherMsgSource extends MsgSource {
 		pusher.connect(new ConnectionEventListener() {
 		    public void onConnectionStateChange(ConnectionStateChange change) {
 		    	log.info("State changed to " + change.getCurrentState() + " from " + change.getPreviousState());
-		    	if (change.getCurrentState().equals(ConnectionState.DISCONNECTED) && change.getPreviousState().equals(ConnectionState.CONNECTED)) {
+		    	if (change.getCurrentState().equals(ConnectionState.DISCONNECTED) && (change.getPreviousState().equals(ConnectionState.CONNECTED) || change.getPreviousState().equals(ConnectionState.CONNECTING))) {
 		    		newMsg(new Msg("system", "PusherMsgSource is " + change.getCurrentState()));
 		    	}
 		    }
 
 		    public void onError(String message, String code, Exception e) {
-		        log.info("There was a problem connecting!");
+		        log.info("There was a problem connecting!", e);
 		    }
 		}, ConnectionState.ALL);
 

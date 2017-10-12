@@ -3,15 +3,11 @@ package com.jgoetsch.eventtrader.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Assert;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.filter.ContractTypeFilter;
 import com.jgoetsch.eventtrader.filter.FilterChainProcessor;
 import com.jgoetsch.eventtrader.filter.FilterProcessor;
@@ -39,12 +35,12 @@ public class FilterProcessorTest extends TestCase {
 		FilterChainProcessor<TradeSignal> filterChain = new FilterChainProcessor<TradeSignal>();
 		filterChain.setFilters(filters);
 
-		AssertFilter.shouldProcess(filterChain, new TradeSignal("BUY", "MSFT", null));
-		AssertFilter.shouldNotProcess(filterChain, new TradeSignal("BUY", "ISNS", null));
-		AssertFilter.shouldNotProcess(filterChain, new TradeSignal("BUY", Contract.futures("HE", "102016", "GLOBEX"), null));
-		AssertFilter.shouldProcess(filterChain, new TradeSignal("SELL", Contract.stock("TASR"), 5000, 1.23, null));
+		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.BUY, "MSFT", null));
+		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "ISNS", null));
+		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, Contract.futures("HE", "102016", "GLOBEX"), null));
+		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.SELL, Contract.stock("TASR"), 5000, 1.23, null));
 
-		TradeSignal partialTrade = new TradeSignal("BUY", Contract.stock("WATT"), 1000, 8.86, null);
+		TradeSignal partialTrade = new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 1000, 8.86, null);
 		AssertFilter.shouldProcess(filterChain, partialTrade);
 		partialTrade.setPartial(true);
 		AssertFilter.shouldNotProcess(filterChain, partialTrade);
@@ -52,9 +48,9 @@ public class FilterProcessorTest extends TestCase {
 		UsernameFilter<TradeSignal> usernameFilter = new UsernameFilter<TradeSignal>();
 		usernameFilter.setUsernames(Collections.singleton("timothysykes"));
 		filters.add(usernameFilter);
-		AssertFilter.shouldProcess(filterChain, new TradeSignal("BUY", "GLUU", new Msg("timothysykes", "Bought some GLUU")));
-		AssertFilter.shouldNotProcess(filterChain, new TradeSignal("BUY", "GLUU", new Msg("someotherguy", "Bought some GLUU")));
-		AssertFilter.shouldNotProcess(filterChain, new TradeSignal("BUY", "DGLY", new Msg("timothysykes", "Buying banned stock")));
+		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.BUY, "GLUU", new Msg("timothysykes", "Bought some GLUU")));
+		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "GLUU", new Msg("someotherguy", "Bought some GLUU")));
+		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "DGLY", new Msg("timothysykes", "Buying banned stock")));
 	}
 
 }

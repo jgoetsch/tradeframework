@@ -29,7 +29,7 @@ public class BidPrice extends OffsetOrderPrice {
 
 	@Override
 	protected Double getBaseValue(TradeSignal trade, MarketData marketData) {
-		return trade.isBuy() ? marketData.getBid() : marketData.getAsk();
+		return trade.getType().isBuy() ? marketData.getBid() : marketData.getAsk();
 	}
 
 }

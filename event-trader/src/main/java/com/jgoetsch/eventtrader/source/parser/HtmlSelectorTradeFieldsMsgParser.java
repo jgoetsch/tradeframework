@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 
 public class HtmlSelectorTradeFieldsMsgParser extends HtmlSelectorMsgParser {
 
@@ -25,7 +26,7 @@ public class HtmlSelectorTradeFieldsMsgParser extends HtmlSelectorMsgParser {
 		if (message != null) {
 			Msg msg = super.createMsg(message);
 			if (sym != null) {
-				return new TradeSignal(typeSelector != null ? node.select(typeSelector).text() : null, sym.text(), msg);
+				return new TradeSignal(typeSelector != null ? TradeType.valueOf(node.select(typeSelector).text()) : null, sym.text(), msg);
 			}
 			else {
 				return msg;

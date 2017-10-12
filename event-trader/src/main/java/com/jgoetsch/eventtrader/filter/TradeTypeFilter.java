@@ -16,11 +16,10 @@
 package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 
 /**
  * Filters TradeSignal messages to the given types (any of BUY, SELL, SHORT, or COVER).
@@ -30,11 +29,11 @@ import com.jgoetsch.eventtrader.TradeSignal;
  */
 public class TradeTypeFilter extends FilterProcessor<TradeSignal> {
 
-	private Set<String> tradeTypes;
+	private Collection<TradeType> tradeTypes;
 
 	@Override
 	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
-		return tradeTypes.contains(trade.getType().toUpperCase());
+		return tradeTypes.contains(trade.getType());
 	}
 
 	/**
@@ -45,10 +44,8 @@ public class TradeTypeFilter extends FilterProcessor<TradeSignal> {
 	 *            Collection of strings representing trade types to allow.
 	 *            Contents can be any of "BUY", "SELL", "SHORT", and "COVER".
 	 */
-	public void setTradeTypes(Collection<String> tradeTypes) {
-		this.tradeTypes = new HashSet<String>(tradeTypes.size());
-		for (String type : tradeTypes)
-			this.getTradeTypes().add(type.trim().toUpperCase());
+	public void setTradeTypes(Collection<TradeType> tradeTypes) {
+		this.tradeTypes = tradeTypes;
 	}
 
 	/**
@@ -58,7 +55,7 @@ public class TradeTypeFilter extends FilterProcessor<TradeSignal> {
 	 * @return Collection of strings representing trade types to allow. Contents
 	 *         can be any of "BUY", "SELL", "SHORT", and "COVER".
 	 */
-	public Collection<String> getTradeTypes() {
+	public Collection<TradeType> getTradeTypes() {
 		return tradeTypes;
 	}
 

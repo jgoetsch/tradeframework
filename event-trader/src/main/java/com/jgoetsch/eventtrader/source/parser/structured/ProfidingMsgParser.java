@@ -22,6 +22,7 @@ import org.joda.time.DateTime;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.jgoetsch.tradeframework.Contract;
@@ -76,15 +77,8 @@ public class ProfidingMsgParser implements StructuredMsgParser {
 			trade.setPartial(partial != null);
 
 			String action = (String)(partial != null ? partial.get("transactionType") : entry.get("action"));
-			if ("Bought".equalsIgnoreCase(action))
-				trade.setType(TradeSignal.TYPE_BUY);
-			else if ("Sold".equalsIgnoreCase(action))
-				trade.setType(TradeSignal.TYPE_SELL);
-			else if ("Shorted".equalsIgnoreCase(action))
-				trade.setType(TradeSignal.TYPE_SHORT);
-			else if ("Covered".equalsIgnoreCase(action))
-				trade.setType(TradeSignal.TYPE_COVER);
-			else
+			trade.setType(TradeType.findByIdentifier(action));
+			if (trade.getType() == null)
 				throw new MsgParseException("Unknown alert action " + action);
 
 			if (trade.isPartial()) {
@@ -94,7 +88,7 @@ public class ProfidingMsgParser implements StructuredMsgParser {
 						+ entry.get("shares") + " total at "
 						+ DecimalFormat.getCurrencyInstance().format(entry.get("entryPrice")) + " average");
 			}
-			else if (trade.isExit()) {
+			else if (trade.getType().isExit()) {
 				trade.setDate(new DateTime(entry.get("dateClosed")));
 				trade.setPrice(((Number)entry.get("exitPrice")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + (String)entry.get("comments"));

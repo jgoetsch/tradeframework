@@ -41,7 +41,7 @@ public class ConstrainedPrice implements OrderPrice {
 			if (price == -1)
 				price = pr;
 			else
-				price = trade.isBuy() != aggressive ? Math.min(price, pr) : Math.max(price, pr);
+				price = trade.getType().isBuy() != aggressive ? Math.min(price, pr) : Math.max(price, pr);
 		}
 		return price;
 	}

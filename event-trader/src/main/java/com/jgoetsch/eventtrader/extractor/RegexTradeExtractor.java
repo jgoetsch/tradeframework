@@ -21,10 +21,11 @@ import java.util.regex.Pattern;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 
 public class RegexTradeExtractor extends TradeExtractor {
 
-	private String side;
+	private TradeType side;
 	private Pattern matchPattern;
 	private Pattern excludePattern;
 	private int symbolsGroupIndex;
@@ -33,7 +34,7 @@ public class RegexTradeExtractor extends TradeExtractor {
 	 * @param matchPattern
 	 * @param noMatchPattern
 	 */
-	public RegexTradeExtractor(String side, String matchRegex, int symbolsGroupIndex) {
+	public RegexTradeExtractor(TradeType side, String matchRegex, int symbolsGroupIndex) {
 		this.side = side;
 		this.matchPattern = Pattern.compile(matchRegex);
 		this.symbolsGroupIndex = symbolsGroupIndex;
@@ -43,7 +44,7 @@ public class RegexTradeExtractor extends TradeExtractor {
 	 * @param matchPattern
 	 * @param noMatchPattern
 	 */
-	public RegexTradeExtractor(String side, String matchRegex, String excludeRegex, int symbolsGroupIndex) {
+	public RegexTradeExtractor(TradeType side, String matchRegex, String excludeRegex, int symbolsGroupIndex) {
 		this.side = side;
 		this.matchPattern = Pattern.compile(matchRegex);
 		this.excludePattern = excludeRegex == null ? null : Pattern.compile(excludeRegex);

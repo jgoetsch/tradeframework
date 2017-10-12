@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.tradeframework.Contract;
 
@@ -94,29 +95,22 @@ public class ProfidingMsgParser extends FullBufferedMsgParser {
 
 			if (partial != null) {
 				String action = (String)(partial.get("transactionType"));
-				if ("Bought".equalsIgnoreCase(action))
-					trade.setType(TradeSignal.TYPE_BUY);
-				else if ("Sold".equalsIgnoreCase(action))
-					trade.setType(TradeSignal.TYPE_SELL);
-				else if ("Shorted".equalsIgnoreCase(action))
-					trade.setType(TradeSignal.TYPE_SHORT);
-				else if ("Covered".equalsIgnoreCase(action))
-					trade.setType(TradeSignal.TYPE_COVER);
-				else
+				trade.setType(TradeType.findByIdentifier(action));
+				if (trade.getType() == null)
 					throw new MsgParseException("Unknown alert action " + action);
 			} else {
 				Boolean isShort = (Boolean)entry.get("shortSell");
 				if (isShort) {
 					if (entry.get("dateClosed") == null)
-						trade.setType(TradeSignal.TYPE_SHORT);
+						trade.setType(TradeType.SHORT);
 					else
-						trade.setType(TradeSignal.TYPE_COVER);
+						trade.setType(TradeType.COVER);
 				}
 				else {
 					if (entry.get("dateClosed") == null)
-						trade.setType(TradeSignal.TYPE_BUY);
+						trade.setType(TradeType.BUY);
 					else
-						trade.setType(TradeSignal.TYPE_SELL);
+						trade.setType(TradeType.SELL);
 				}
 			}
 
@@ -128,7 +122,7 @@ public class ProfidingMsgParser extends FullBufferedMsgParser {
 						+ DecimalFormat.getCurrencyInstance().format(entry.get("entryPrice")) + " average"
 						+ "\n" + (String)partial.get("comments"));
 			}
-			else if (trade.isExit()) {
+			else if (trade.getType().isExit()) {
 				trade.setDate(new DateTime(entry.get("dateClosed")));
 				trade.setPrice(((Number)entry.get("exitPrice")).doubleValue());
 				trade.setMessage(trade.getTradeString() + "\n" + (String)entry.get("comments"));

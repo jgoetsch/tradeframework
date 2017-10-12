@@ -37,7 +37,7 @@ public class AvailableMarginSize extends MultipliedOrderSize {
 		AccountData accountData = ContextCacheUtil.getAccountData(accountDataSource, context);
 		double available = accountData.getValue("AvailableFunds");
 
-		if (trade.isBuy()) {
+		if (trade.getType().isBuy()) {
 			return (int)(available / (marginFactor * price));
 		}
 		else if (price > 5.0) {

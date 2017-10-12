@@ -6,17 +6,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
 
 import com.jgoetsch.eventtrader.Msg;
-import com.jgoetsch.eventtrader.TradeSignal;
-import com.jgoetsch.eventtrader.filter.FilterProcessor;
 import com.jgoetsch.eventtrader.filter.PusherPresenceFilter;
-import com.jgoetsch.eventtrader.processor.PusherForwardingProcessor;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.PusherForwardingProcessor;
 import com.jgoetsch.eventtrader.source.PusherMsgSource;
 import com.jgoetsch.eventtrader.source.PusherSecretAuthorizer;
 import com.jgoetsch.eventtrader.source.parser.JsonSerializedMsgParser;

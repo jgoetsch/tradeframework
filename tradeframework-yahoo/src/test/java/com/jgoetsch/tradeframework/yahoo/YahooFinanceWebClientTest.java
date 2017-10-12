@@ -18,6 +18,8 @@ package com.jgoetsch.tradeframework.yahoo;
 import java.io.IOException;
 import java.util.Date;
 
+import org.junit.Ignore;
+
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.OHLC;
 import com.jgoetsch.tradeframework.data.FundamentalData;
@@ -27,7 +29,7 @@ import com.jgoetsch.tradeframework.yahoo.YahooFinanceWebClient;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-
+@Ignore
 public class YahooFinanceWebClientTest extends TestCase {
 
 	YahooFinanceWebClient client;

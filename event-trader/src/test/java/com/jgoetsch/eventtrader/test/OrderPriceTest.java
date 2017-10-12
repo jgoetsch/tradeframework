@@ -21,6 +21,7 @@ import org.junit.Assert;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.order.price.AskPrice;
 import com.jgoetsch.eventtrader.order.price.BidPrice;
 import com.jgoetsch.eventtrader.order.price.ClosePrice;
@@ -67,17 +68,17 @@ public class OrderPriceTest extends TestCase {
 		MidpointPrice p2 = new MidpointPrice();
 		p2.setOffset(0.20);
 		ConstrainedPrice orderPrice = new ConstrainedPrice(Arrays.asList(p1, p2));
-		Assert.assertEquals(40.7, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_BUY, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 41, 40.8)), .0001);
-		Assert.assertEquals(40.3, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_SELL, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 41, 40.8)), .0001);
-		Assert.assertEquals(40.2, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_BUY, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 40.1, 40.8)), .0001);
-		Assert.assertEquals(39.9, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_SELL, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 40.1, 40.8)), .0001);
+		Assert.assertEquals(40.7, orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 41, 40.8)), .0001);
+		Assert.assertEquals(40.3, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 41, 40.8)), .0001);
+		Assert.assertEquals(40.2, orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 40.1, 40.8)), .0001);
+		Assert.assertEquals(39.9, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 40.1, 40.8)), .0001);
 	}
 
 	private void testOffsetPrice(OffsetOrderPrice orderPrice, MarketData marketData, double expectedBuy, double expectedSell, double tickSize) throws Exception {
 		for (int i = -5; i < 5; i++) {
 			orderPrice.setOffset(i * tickSize);
-			Assert.assertEquals(expectedBuy + i * tickSize, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_BUY, Contract.stock("TEST"), new Msg()), marketData), .0001);
-			Assert.assertEquals(expectedSell - i * tickSize, orderPrice.getValue(new TradeSignal(TradeSignal.TYPE_SELL, Contract.stock("TEST"), new Msg()), marketData), .0001);
+			Assert.assertEquals(expectedBuy + i * tickSize, orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), marketData), .0001);
+			Assert.assertEquals(expectedSell - i * tickSize, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), marketData), .0001);
 		}
 	}
 }
