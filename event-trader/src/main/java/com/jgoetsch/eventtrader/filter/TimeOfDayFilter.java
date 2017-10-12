@@ -32,25 +32,52 @@ import com.jgoetsch.eventtrader.Msg;
  */
 public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 
-	private final LocalTime startTime;
-	private final LocalTime endTime;
-	private final DateTimeZone timeZone;
+	private LocalTime after;
+	private LocalTime before;
+	private DateTimeZone timeZone = DateTimeZone.forID("America/New_York");
 
-	public TimeOfDayFilter(LocalTime startTime, LocalTime endTime, DateTimeZone timeZone) {
+	public TimeOfDayFilter() {
+	}
+
+	public TimeOfDayFilter(LocalTime startTime, LocalTime endTime) {
 		if (startTime.compareTo(endTime) > 1)
 			throw new IllegalArgumentException("startTime cannot be after endTime");
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.timeZone = timeZone;
+		this.after = startTime;
+		this.before = endTime;
 	}
 
 	@Override
 	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
 		LocalTime msgTime = new LocalTime(msg.getDate(), timeZone);
-		return msgTime.compareTo(startTime) > 0 && msgTime.compareTo(endTime) < 0;
+		return (after == null || msgTime.compareTo(after) >= 0)
+				&& (before == null || msgTime.compareTo(before) < 0);
 	}
 
 	public static TimeOfDayFilter<? extends Msg> getUSStockRTHFilter() {
-		return new TimeOfDayFilter<Msg>(new LocalTime(9, 30), new LocalTime(16, 0), DateTimeZone.forID("America/New_York"));
+		return new TimeOfDayFilter<Msg>(new LocalTime(9, 30), new LocalTime(16, 0));
+	}
+
+	public String getAfter() {
+		return after.toString();
+	}
+
+	public void setAfter(String after) {
+		this.after = new LocalTime(after, timeZone);
+	}
+
+	public String getBefore() {
+		return before.toString();
+	}
+
+	public void setBefore(String before) {
+		this.before = new LocalTime(before, timeZone);
+	}
+
+	public DateTimeZone getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(DateTimeZone timeZone) {
+		this.timeZone = timeZone;
 	}
 }
