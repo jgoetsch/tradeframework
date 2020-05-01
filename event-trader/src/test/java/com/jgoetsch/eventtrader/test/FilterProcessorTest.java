@@ -15,6 +15,7 @@ import com.jgoetsch.eventtrader.filter.ContractTypeFilter;
 import com.jgoetsch.eventtrader.filter.FilterChainProcessor;
 import com.jgoetsch.eventtrader.filter.FilterProcessor;
 import com.jgoetsch.eventtrader.filter.PartialTradeFilter;
+import com.jgoetsch.eventtrader.filter.PriceFilter;
 import com.jgoetsch.eventtrader.filter.SymbolBlacklistFilter;
 import com.jgoetsch.eventtrader.filter.TimeOfDayFilter;
 import com.jgoetsch.eventtrader.filter.UsernameFilter;
@@ -88,4 +89,12 @@ public class FilterProcessorTest extends TestCase {
 		AssertFilter.shouldNotProcess(middayFilter, afternoonAlert);
 	}
 
+	public void testPriceFilter() throws Exception {
+		PriceFilter priceFilter = new PriceFilter();
+		priceFilter.setMin(2.0);
+		AssertFilter.shouldProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, 180.00));
+		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("LQMT"), 10000, 0.26));
+		priceFilter.setMax(20.0);
+		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, 180.00));
+	}
 }

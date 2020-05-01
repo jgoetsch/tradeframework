@@ -76,15 +76,22 @@ public class AlertTradeExtractorTest extends TestCase {
 		//assertTrade(extractor.parseTrades(new Msg(src, "Sold RYUN for small gains at $2.42ish, gotta focus")),
 		//		new TradeSignal(TradeType.SELL, Contract.stock("RYUN"), 0, 2.42));
 		
-		//assertTrade(extractor.parseTrades(new Msg(src, "Reshorted 17k SAPX in the 3.30s on the slight bounce off day low of 3.07")),
-		//		new TradeSignal(TradeType.SHORT, Contract.stock("SAPX"), 17000, 3.30));
+		assertTrade(extractor.parseTrades(new Msg(src, "Reshorted 17k SAPX in the 3.30s on the slight bounce off day low of 3.07")),
+				new TradeSignal(TradeType.SHORT, Contract.stock("SAPX"), 17000, 0));
 		
-		assertTrade(extractor.parseTrades(new Msg(src, "i bought 10,000 XCO at 2.30. it's up 40% today")),
-				new TradeSignal(TradeType.BUY, Contract.stock("XCO"), 10000, 2.30));
-		assertTrade(extractor.parseTrades(new Msg(src, "I bought 100,000 DCTH .163")),
-				new TradeSignal(TradeType.BUY, Contract.stock("DCTH"), 100000, 0.163));
+		assertNull(extractor.parseTrades(new Msg(src, "i bought 10,000 XCO at 2.30. it's up 40% today")));
+		//		new TradeSignal(TradeType.BUY, Contract.stock("XCO"), 10000, 2.30));
+		assertNull(extractor.parseTrades(new Msg(src, "i just bought 100,000 DCTH .163")));
+		//		new TradeSignal(TradeType.BUY, Contract.stock("DCTH"), 100000, 0.163));
 
 		assertNull(extractor.parseTrades(new Msg(src, "added 5000 MOSY at 2.08")));
+
+		assertTrade(extractor.parseTrades(new Msg(src, "swing trade: bought 5k WATT at ¤15.57")),
+				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, 15.57));
+
+		assertTrade(extractor.parseTrades(new Msg(src, "momentum alert - bought 5k WATT at ¤15.57")),
+				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, 15.57));
+
 	}
 
 	private void assertTrade(Collection<TradeSignal> trades, TradeSignal trade) {

@@ -44,7 +44,7 @@ import com.jgoetsch.tradeframework.Contract;
 public class AlertTradeExtractor extends TradeExtractor {
 
 	private static Pattern alertPattern = Pattern.compile(
-		"(?:i\\s+)?(?:just\\s+)?([a-z]+)\\s*(\\d+(?:\\,\\d{3})*(?:\\.\\d+)?k?)\\s*((?-i:[A-Z]+))\\s+(?:at\\s+)?\\$?(\\d*\\.?\\d*)\\s*(cents)?",
+		"(?:[a-z]*\\s*(?:trade|alert)\\s*[\\:-])?\\s*([a-z]+)\\s*(\\d+(?:\\,\\d{3})*(?:\\.\\d+)?k?)\\s*((?-i:[A-Z]+))\\s+(?:at\\s+)?[\\$¤]?(\\d*\\.?\\d*)\\s*(cents)?",
 		Pattern.CASE_INSENSITIVE);
 	
 	public Collection<TradeSignal> parseTrades(Msg msg) {

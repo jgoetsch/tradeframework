@@ -13,6 +13,7 @@ import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -33,10 +34,12 @@ public class PusherMsgSource extends MsgSource {
 
 		pusher.connect(new ConnectionEventListener() {
 		    public void onConnectionStateChange(ConnectionStateChange change) {
-		    	log.info("State changed to " + change.getCurrentState() + " from " + change.getPreviousState());
-		    	if (change.getCurrentState().equals(ConnectionState.DISCONNECTED) && (change.getPreviousState().equals(ConnectionState.CONNECTED) || change.getPreviousState().equals(ConnectionState.CONNECTING))) {
-		    		newMsg(new Msg("system", "PusherMsgSource is " + change.getCurrentState()));
-		    	}
+			    	log.info("State changed to " + change.getCurrentState() + " from " + change.getPreviousState());
+			    	if (change.getCurrentState().equals(ConnectionState.DISCONNECTED)
+			    			/*&& (change.getPreviousState().equals(ConnectionState.CONNECTED) || change.getPreviousState().equals(ConnectionState.CONNECTING))*/)
+			    	{
+			    		newMsg(new Msg("system", "PusherMsgSource is " + change.getCurrentState()));
+			    	}
 		    }
 
 		    public void onError(String message, String code, Exception e) {
@@ -45,15 +48,15 @@ public class PusherMsgSource extends MsgSource {
 		}, ConnectionState.ALL);
 
 		SubscriptionEventListener messageListener = new PresenceChannelEventListener() {
-		    public void onEvent(String channel, String event, String data) {
-		        log.debug(data);
+		    public void onEvent(PusherEvent event) {
+		        log.debug(event.getData());
 
 				//JSONObject json = (JSONObject)JSONValue.parse(data);
 				try {
 					//msgParser.parseData((String)json.get("command"), (JSONObject)json.get("message"), PusherMsgSource.this);
-					msgParser.parseContent(data, event, PusherMsgSource.this);
+					msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this);
 				} catch (MsgParseException e) {
-					log.error("Message parse error, content was:\n" + data, e);
+					log.error("Message parse error, content was:\n" + event.getData(), e);
 				}
 		    }
 
