@@ -1,0 +1,6 @@
+
+dependencies {
+    api 'joda-time:joda-time:1.6.2'
+    api 'net.sourceforge.collections:collections-generic:4.01'
+    implementation 'org.slf4j:slf4j-api:1.7.5'
+}
