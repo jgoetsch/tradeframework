@@ -1,0 +1,51 @@
+{
+	"command": "Trade",
+	"message": {
+		"type": "EntryDingMessage",
+		"msgId": 232281,
+		"newsletter": 555,
+		"date": 1588603047183,
+		"username": "test_user1",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg",
+		"entry": {
+			"id": 1223480,
+			"amount": 0.0,
+			"shares": 2000,
+			"ticker": "WXYZ",
+			"compareDate": 1588603047149,
+			"dateAdded": 1588603047149,
+			"entryDate": 1588603047149,
+			"entryComments": "Buying a very volatile stock here on a dip, it is a good risk/reward example of a usual pattern that occurs frequently. More comments and some other analysis are forthcoming.",
+			"entryPrice": 0.1301,
+			"exitPrice": 0.0,
+			"openTrade": true,
+			"entryType": "STOCK",
+			"callOption": true,
+			"optionStrike": 0.0,
+			"type": "Long Stock",
+			"username": "test_user1",
+			"shortSell": false,
+			"shortUrl": "1Mxrbk",
+			"percentage": 0.0,
+			"hasPercentage": false,
+			"futuresMonth": 0,
+			"futuresYear": 0,
+			"partialEntries": [
+				{
+					"id": 18772,
+					"transactionType": "Bought",
+					"adding": true,
+					"tradeDate": 1588603047149,
+					"shares": 2000,
+					"price": 0.1301,
+					"sharesRemaining": 2000,
+					"short": false
+				}
+			],
+			"hidden": false,
+			"accountPrivate": false,
+			"pageViews": 0,
+			"userComments": []
+		}
+	}
+}

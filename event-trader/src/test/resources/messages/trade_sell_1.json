@@ -1,0 +1,76 @@
+{
+	"command": "PartialTrade",
+	"message": {
+		"type": "PartialEntryDingMessage",
+		"msgId": 232217,
+		"newsletter": 3,
+		"date": 1588599616398,
+		"username": "test_user1",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg",
+		"entry": {
+			"id": 2827539,
+			"amount": 870.0,
+			"shares": 15000,
+			"ticker": "WXYZ",
+			"comments": "Sold position for a large profit on this trade, but also had some other losses. It is all even in the end.",
+			"compareDate": 1588599616345,
+			"dateAdded": 1588599138000,
+			"dateClosed": 1588599616345,
+			"entryDate": 1588599138000,
+			"exitDate": 1588599616345,
+			"entryComments": "Buying a very volatile stock here on a dip, it is a good risk/reward example of a usual pattern that occurs frequently. More comments and some other analysis are forthcoming.",
+			"entryPrice": 0.137,
+			"exitPrice": 0.195,
+			"openTrade": false,
+			"entryType": "STOCK",
+			"callOption": true,
+			"optionStrike": 0.0,
+			"type": "Long Stock",
+			"username": "test_user1",
+			"shortSell": false,
+			"shortUrl": "1MxrZT",
+			"percentage": 42.34,
+			"hasPercentage": true,
+			"futuresMonth": 0,
+			"futuresYear": 0,
+			"partialEntries": [
+				{
+					"id": 18771,
+					"transactionType": "Sold",
+					"adding": false,
+					"tradeDate": 1588599616345,
+					"shares": 15000,
+					"price": 0.195,
+					"comments": "Sold position for a large profit on this trade, but also had some other losses. It is all even in the end.",
+					"sharesRemaining": 0,
+					"short": false
+				},
+				{
+					"id": 18770,
+					"transactionType": "Bought",
+					"adding": true,
+					"tradeDate": 1588599138000,
+					"shares": 15000,
+					"price": 0.137,
+					"sharesRemaining": 15000,
+					"short": false
+				}
+			],
+			"hidden": false,
+			"accountPrivate": false,
+			"pageViews": 53,
+			"userComments": []
+		},
+		"partialEntry": {
+			"id": 18771,
+			"transactionType": "Sold",
+			"adding": false,
+			"tradeDate": 1588599616345,
+			"shares": 15000,
+			"price": 0.195,
+			"comments": "Sold position for a large profit on this trade, but also had some other losses. It is all even in the end.",
+			"sharesRemaining": 0,
+			"short": false
+		}
+	}
+}

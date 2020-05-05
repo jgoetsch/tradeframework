@@ -1,0 +1,76 @@
+{
+	"command": "PartialTrade",
+	"message": {
+		"type": "PartialEntryDingMessage",
+		"msgId": 222666,
+		"newsletter": 555,
+		"date": 1588690380144,
+		"username": "test_user2",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg",
+		"entry": {
+			"id": 2829683,
+			"amount": 600.0,
+			"shares": 300,
+			"ticker": "ABCD",
+			"comments": "Cover of short trade on a lower price for medium profit.",
+			"compareDate": 1588690380113,
+			"dateAdded": 1588689906000,
+			"dateClosed": 1588690380113,
+			"entryDate": 1588689906000,
+			"exitDate": 1588690380113,
+			"entryComments": "Shorted on high of the day spike to new levels above resisitance and support of various indicators",
+			"entryPrice": 2.47,
+			"exitPrice": 2.35,
+			"openTrade": false,
+			"entryType": "STOCK",
+			"callOption": true,
+			"optionStrike": 0.0,
+			"type": "Short Stock",
+			"username": "test_user2",
+			"shortSell": true,
+			"shortUrl": "1xxxxx",
+			"percentage": 5.11,
+			"hasPercentage": true,
+			"futuresMonth": 0,
+			"futuresYear": 0,
+			"partialEntries": [
+				{
+					"id": 18002,
+					"transactionType": "Covered",
+					"adding": false,
+					"tradeDate": 1588690380113,
+					"shares": 5000,
+					"price": 2.35,
+					"comments": "Cover of short trade on a lower price for medium profit.",
+					"sharesRemaining": 0,
+					"short": false
+				},
+				{
+					"id": 18001,
+					"transactionType": "Shorted",
+					"adding": true,
+					"tradeDate": 1588689906000,
+					"shares": 5000,
+					"price": 2.47,
+					"sharesRemaining": 5000,
+					"short": false
+				}
+			],
+			"hidden": false,
+			"accountPrivate": false,
+			"pageViews": 36,
+			"userComments": []
+		},
+		"partialEntry": {
+			"id": 18002,
+			"transactionType": "Covered",
+			"adding": false,
+			"tradeDate": 1588690380113,
+			"shares": 5000,
+			"price": 2.35,
+			"comments": "Cover of short trade on a lower price for medium profit.",
+			"sharesRemaining": 0,
+			"short": false
+		}
+	}
+}
