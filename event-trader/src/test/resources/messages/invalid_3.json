@@ -1,0 +1,11 @@
+{
+	"command": "Commentary",
+	"message": {
+		"msgId": 222555,
+		"newsletter": 555,
+		"date": 1344264740426,
+		"msg": "The quick brown fox jumped over the lazy dogs, the quick brown fox jumped over the lazy dogs, the quick brown fox jumped over the lazy dogs.",
+		"username": "test_user1",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg"
+	}
+}

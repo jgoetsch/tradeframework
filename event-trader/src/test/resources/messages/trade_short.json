@@ -1,0 +1,51 @@
+{
+	"command": "Trade",
+	"message": {
+		"type": "EntryDingMessage",
+		"msgId": 222777,
+		"newsletter": 555,
+		"date": 1588772127578,
+		"username": "test_user2",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg",
+		"entry": {
+			"id": 2831640,
+			"amount": 0.0,
+			"shares": 15000,
+			"ticker": "ABCD",
+			"compareDate": 1588772127524,
+			"dateAdded": 1588772127524,
+			"entryDate": 1588772127524,
+			"entryComments": "Shorted on high of the day spike to new levels above resisitance and support of various indicators",
+			"entryPrice": 1.32,
+			"exitPrice": 0.0,
+			"openTrade": true,
+			"entryType": "STOCK",
+			"callOption": true,
+			"optionStrike": 0.0,
+			"type": "Short Stock",
+			"username": "test_user2",
+			"shortSell": true,
+			"shortUrl": "1xxxxx",
+			"percentage": 0.0,
+			"hasPercentage": false,
+			"futuresMonth": 0,
+			"futuresYear": 0,
+			"partialEntries": [
+				{
+					"id": 18788,
+					"transactionType": "Shorted",
+					"adding": true,
+					"tradeDate": 1588772127524,
+					"shares": 15000,
+					"price": 1.32,
+					"sharesRemaining": 15000,
+					"short": true
+				}
+			],
+			"hidden": false,
+			"accountPrivate": false,
+			"pageViews": 0,
+			"userComments": []
+		}
+	}
+}

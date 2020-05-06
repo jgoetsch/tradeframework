@@ -51,9 +51,7 @@ public class PusherMsgSource extends MsgSource {
 		    public void onEvent(PusherEvent event) {
 		        log.debug(event.getData());
 
-				//JSONObject json = (JSONObject)JSONValue.parse(data);
 				try {
-					//msgParser.parseData((String)json.get("command"), (JSONObject)json.get("message"), PusherMsgSource.this);
 					msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this);
 				} catch (MsgParseException e) {
 					log.error("Message parse error, content was:\n" + event.getData(), e);

@@ -1,0 +1,11 @@
+{
+	"command": "Commentary",
+	"message": {
+		"type": "DingMessage",
+		"msgId": 222555,
+		"newsletter": 555,
+		"date": 1344264740426,
+		"username": "test_user1",
+		"image": "https://pbs.twimg.com/profile_images/example.jpg"
+	}
+}

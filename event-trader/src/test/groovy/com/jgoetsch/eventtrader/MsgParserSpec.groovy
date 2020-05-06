@@ -3,6 +3,7 @@ package com.jgoetsch.eventtrader
 import org.junit.Assert
 
 import com.jgoetsch.eventtrader.source.MsgHandler
+import com.jgoetsch.eventtrader.source.parser.MsgParseException
 import com.jgoetsch.eventtrader.source.parser.PdJsonMsgParser
 import com.jgoetsch.tradeframework.Contract
 
@@ -14,7 +15,7 @@ class MsgParserSpec extends Specification {
 	def msgParser = new PdJsonMsgParser()
 
 	@Unroll
-	def "Parses Msg #testData"() {
+	def "Parses Msg #dataFile"() {
 		when:
 		def result = parseMsgFromJson(dataFile)
 
@@ -31,13 +32,15 @@ class MsgParserSpec extends Specification {
 		dataFile        | type        | sourceName      | date           | text
 		'commentary_1'  | Msg         | "test_user1"    | 1344264740426L | "The quick brown fox jumped over the lazy dogs,"
 		'commentary_2'  | Msg         | "test_user2"    | 1588605541436L | "Some commentary about some stock \$TICKER"
-		'trade_cover_1' | TradeSignal | "test_user2"    | 1588690380113L | "Cover of short trade on a lower price for medium profit."
-		'trade_buy_1'   | TradeSignal | "test_user1"    | 1588603047149L | "Buying a very volatile stock here on a dip,"
-		'trade_sell_1'  | TradeSignal | "test_user1"    | 1588599616345L | "Sold position for a large profit"
+		'trade_buy'     | TradeSignal | "test_user1"    | 1588603047149L | "Buying a very volatile stock here on a dip,"
+		'trade_sell'    | TradeSignal | "test_user1"    | 1588599616345L | "Sold position for a large profit"
+		'trade_short'   | TradeSignal | "test_user2"    | 1588772127524L | "Shorted on high of the day spike to new levels"
+		'trade_cover'   | TradeSignal | "test_user2"    | 1588772644631L | "Cover of short trade on a lower price for medium profit!"
+		'trade_add_buy' | TradeSignal | "test_user1"    | 1588777300294L | "Adding shares to long position"
 	}
 
 	@Unroll
-	def "Parses TradeSignal #testData"() {
+	def "Parses TradeSignal #dataFile"() {
 		when:
 		def result = parseMsgFromJson(dataFile)
 
@@ -45,16 +48,46 @@ class MsgParserSpec extends Specification {
 		result.getClass() == TradeSignal
 		with (result as TradeSignal) {
 			getType() == tradeType
-			getContract() == contract
+			getContract() == Contract.stock(ticker)
 			getNumShares() == numShares
 			getPrice() == price
+			isPartial() == partial
 		}
 
 		where:
-		dataFile        | tradeType       | contract               | numShares  | price
-		'trade_cover_1' | TradeType.COVER | Contract.stock("ABCD") | 5000       | 2.35
-		'trade_buy_1'   | TradeType.BUY   | Contract.stock("WXYZ") | 2000       | 0.1301
-		'trade_sell_1'  | TradeType.SELL  | Contract.stock("WXYZ") | 15000      | 0.195
+		dataFile        | tradeType       | ticker  | numShares  | price   | partial
+		'trade_buy'     | TradeType.BUY   | "WXYZ"  | 2000       | 0.1301  | false
+		'trade_sell'    | TradeType.SELL  | "WXYZ"  | 15000      | 0.195   | false
+		'trade_short'   | TradeType.SHORT | "ABCD"  | 15000      | 1.32    | false
+		'trade_cover'   | TradeType.COVER | "ABCD"  | 15000      | 1.17    | false
+		'trade_add_buy' | TradeType.BUY   | "WXYZ"  | 5000       | 2.19    | true
+	}
+
+	def "Does not parse unrecognized command"() {
+		when:
+		def result = parseMsgFromJson('unrecognized_command')
+		
+		then:
+		result == null
+		noExceptionThrown()
+	}
+	
+	@Unroll
+	def "Throws exception on #dataFile: #exceptionMessage"() {
+		when:
+		def result = parseMsgFromJson(dataFile)
+		
+		then:
+		result == null
+		MsgParseException e = thrown()
+		e.message.contains(exceptionMessage)
+		
+		where:
+		dataFile    | exceptionMessage
+		'invalid_1' | "message.partialEntry must not be null"
+		'invalid_2' | "message.msg must not be null"
+		'invalid_3' | "Missing type id"
+		
 	}
 
 	Msg parseMsgFromJson(String dataFile) {

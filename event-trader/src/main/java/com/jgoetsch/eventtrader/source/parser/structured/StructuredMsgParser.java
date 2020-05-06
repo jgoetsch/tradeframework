@@ -21,12 +21,10 @@ import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 
 /**
- * Interface to decode a structured alert message (such as the newer Profiding alerts)
- * into a Msg object.
- * 
  * @author jgoetsch
  *
  */
+@Deprecated
 public interface StructuredMsgParser {
 	public boolean parseData(String type, Map data, MsgHandler handler) throws MsgParseException;
 }

@@ -48,25 +48,21 @@ import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFa
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.jboss.netty.util.ThreadNameDeterminer;
 import org.jboss.netty.util.ThreadRenamingRunnable;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jgoetsch.eventtrader.source.parser.structured.StructuredMsgParser;
+import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 
 /**
-
  * Source for streaming messages from a Socket.IO server
  * using WebSockets as the transport.
  * 
- * As of March, 2012 this is the preferred source for Profiding alerts.
  */
 
+@Deprecated
 public class SocketIOWebSocketMsgSource extends UrlBasedMsgSource {
 	private Logger log = LoggerFactory.getLogger(getClass());
-	private StructuredMsgParser msgParser;
+	private BufferedMsgParser msgParser;
 
 	private ClientBootstrap bootstrap;
 	private Channel ch;
@@ -182,16 +178,9 @@ public class SocketIOWebSocketMsgSource extends UrlBasedMsgSource {
 					try {
 						int idx = message.getText().indexOf('{');
 						if (idx >= 0) {
-							JSONObject json = (JSONObject)JSONValue.parse(message.getText().substring(idx));
-
-							Object data = json.get("args");
-							if (data != null && data.getClass().isAssignableFrom(JSONArray.class)) {
-								data = ((JSONArray) json.get("args")).get(0);
-								if (data.getClass().isAssignableFrom(JSONObject.class)) {
-									if (!msgParser.parseData((String)json.get("name"), (JSONObject)data, SocketIOWebSocketMsgSource.this)) {
-										ctx.getChannel().close();
-									}
-								}
+							// { args: [ ... ] }
+							if (!msgParser.parseContent(message.getText().substring(idx), null, SocketIOWebSocketMsgSource.this)) {
+								ctx.getChannel().close();
 							}
 						}
 					} catch (Exception ex) {
@@ -203,11 +192,11 @@ public class SocketIOWebSocketMsgSource extends UrlBasedMsgSource {
 		}
 	}
 
-	public void setMsgParser(StructuredMsgParser msgParser) {
+	public void setMsgParser(BufferedMsgParser msgParser) {
 		this.msgParser = msgParser;
 	}
 
-	public StructuredMsgParser getMsgParser() {
+	public BufferedMsgParser getMsgParser() {
 		return msgParser;
 	}
 }

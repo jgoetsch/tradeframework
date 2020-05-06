@@ -1,0 +1,39 @@
+{
+	"command": "UserTrade",
+	"newsletter": 333,
+	"entry": {
+		"id": 2829958,
+		"amount": 0.0,
+		"shares": 1000,
+		"ticker": "ABCD",
+		"broker": "TDAmeritrade",
+		"newsletters": [
+			3
+		],
+		"compareDate": 1588693120000,
+		"dateAdded": 1588693120000,
+		"entryDate": 1588693120000,
+		"entryComments": "Xyxyczjid ABCD stock buy sell message trade user",
+		"entryPrice": 0.2671,
+		"exitPrice": 0.0,
+		"openTrade": true,
+		"entryType": "STOCK",
+		"callOption": true,
+		"optionStrike": 0.0,
+		"type": "Long Stock",
+		"username": "test_user5",
+		"shortSell": false,
+		"shortUrl": "1Mxxxx",
+		"percentage": 0.0,
+		"hasPercentage": false,
+		"futuresMonth": 0,
+		"futuresYear": 0,
+		"partialEntries": [],
+		"hidden": false,
+		"accountPrivate": false,
+		"pageViews": 0
+	},
+	"username": "test_user5",
+	"date": 1588693120314,
+	"msgId": 76383180064738677
+}
