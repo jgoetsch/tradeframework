@@ -16,11 +16,12 @@
 package com.jgoetsch.eventtrader;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.jgoetsch.eventtrader.source.parser.mapper.MsgMappable;
 
 /**
  * Basic object representing a textual message of some sort. Msg objects are
@@ -32,11 +33,13 @@ import org.joda.time.format.DateTimeFormatter;
  * @author jgoetsch
  * 
  */
-public class Msg implements Serializable {
+
+@JsonTypeInfo(use = Id.CLASS)
+public class Msg implements Serializable, MsgMappable {
 
 	private static final long serialVersionUID = 1L;
 
-	private DateTime date;
+	private Instant date;
 	private String sourceName;
 	private String sourceType;
 	private String message;
@@ -57,23 +60,24 @@ public class Msg implements Serializable {
 	}
 
 	public Msg(String sourceName, String message) {
-		this.date = new DateTime();
+		this.date = Instant.now();
 		this.sourceName = sourceName;
 		this.message = message;
 	}
 
-	public Msg(DateTime date, String sourceName, String message) {
+	public Msg(Instant date, String sourceName, String message) {
 		this.date = date;
 		this.sourceName = sourceName;
 		this.message = message;
 	}
 
-	private static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MM/dd/yy HH:mm:ss z").withZone(DateTimeZone.forID("America/New_York"));
+	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss z");
 	private static final int MAX_MSG_DISPLAY_LENGTH = 1024;
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(dateFormat.print(getDate())).append(" - ");
+		if (getDate() != null)
+			sb.append(getDate().toString()).append(" - ");
 		if (getSourceName() != null)
 			sb.append(getSourceName()).append(": ");
 		if (getMessage() != null && getMessage().length() > MAX_MSG_DISPLAY_LENGTH) {
@@ -120,11 +124,16 @@ public class Msg implements Serializable {
 		return true;
 	}
 
-	public void setDate(DateTime date) {
+	@Override
+	public Msg toMsg() {
+		return this;
+	}
+
+	public void setDate(Instant date) {
 		this.date = date;
 	}
 
-	public DateTime getDate() {
+	public Instant getDate() {
 		return date;
 	}
 

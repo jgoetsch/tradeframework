@@ -15,10 +15,9 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Map;
-
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalTime;
 
 import com.jgoetsch.eventtrader.Msg;
 
@@ -34,7 +33,7 @@ public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 
 	private LocalTime after;
 	private LocalTime before;
-	private DateTimeZone timeZone = DateTimeZone.forID("America/New_York");
+	private ZoneId timeZone = ZoneId.of("America/New_York");
 
 	public TimeOfDayFilter() {
 	}
@@ -48,13 +47,13 @@ public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 
 	@Override
 	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
-		LocalTime msgTime = new LocalTime(msg.getDate(), timeZone);
+		LocalTime msgTime = LocalTime.ofInstant(msg.getDate(), timeZone);
 		return (after == null || msgTime.compareTo(after) >= 0)
 				&& (before == null || msgTime.compareTo(before) < 0);
 	}
 
 	public static TimeOfDayFilter<? extends Msg> getUSStockRTHFilter() {
-		return new TimeOfDayFilter<Msg>(new LocalTime(9, 30), new LocalTime(16, 0));
+		return new TimeOfDayFilter<Msg>(LocalTime.of(9, 30), LocalTime.of(16, 0));
 	}
 
 	public String getAfter() {
@@ -62,7 +61,7 @@ public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 	}
 
 	public void setAfter(String after) {
-		this.after = new LocalTime(after, timeZone);
+		this.after = LocalTime.parse(after);
 	}
 
 	public String getBefore() {
@@ -70,14 +69,14 @@ public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 	}
 
 	public void setBefore(String before) {
-		this.before = new LocalTime(before, timeZone);
+		this.before = LocalTime.parse(before);
 	}
 
-	public DateTimeZone getTimeZone() {
+	public ZoneId getTimeZone() {
 		return timeZone;
 	}
 
-	public void setTimeZone(DateTimeZone timeZone) {
+	public void setTimeZone(ZoneId timeZone) {
 		this.timeZone = timeZone;
 	}
 }

@@ -31,6 +31,10 @@ public enum TradeType {
 		return null;
 	}
 
+	public String getDisplayString() {
+		return toString().substring(0, 1).toUpperCase() + toString().substring(1).toLowerCase();
+	}
+
 	public boolean isBuy() {
 		return isBuy;
 	}

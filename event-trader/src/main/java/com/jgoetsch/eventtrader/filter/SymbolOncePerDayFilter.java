@@ -15,23 +15,25 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.joda.time.LocalDate;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.Contract;
 
 public class SymbolOncePerDayFilter extends FilterProcessor<TradeSignal> {
 
-	Set<Contract> used = new HashSet<Contract>();
-	LocalDate curDate;
+	private ZoneId timeZone = ZoneId.of("America/New_York");
+
+	private Set<Contract> used = new HashSet<Contract>();
+	private LocalDate curDate;
 
 	@Override
 	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
-		LocalDate date = new LocalDate(trade.getDate());
+		LocalDate date = LocalDate.ofInstant(trade.getDate(), timeZone);
 		if (!date.equals(curDate)) {
 			used.clear();
 			curDate = date;
@@ -42,6 +44,14 @@ public class SymbolOncePerDayFilter extends FilterProcessor<TradeSignal> {
 			used.add(trade.getContract());
 			return true;
 		}
+	}
+
+	public ZoneId getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(ZoneId timeZone) {
+		this.timeZone = timeZone;
 	}
 
 }

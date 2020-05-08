@@ -4,7 +4,8 @@ import org.junit.Assert
 
 import com.jgoetsch.eventtrader.source.MsgHandler
 import com.jgoetsch.eventtrader.source.parser.MsgParseException
-import com.jgoetsch.eventtrader.source.parser.PdJsonMsgParser
+import com.jgoetsch.eventtrader.source.parser.JsonMsgParser
+import com.jgoetsch.eventtrader.source.parser.mapper.PdMsgMapper
 import com.jgoetsch.tradeframework.Contract
 
 import spock.lang.Specification
@@ -12,7 +13,7 @@ import spock.lang.Unroll
 
 class MsgParserSpec extends Specification {
 
-	def msgParser = new PdJsonMsgParser()
+	def msgParser = new JsonMsgParser(PdMsgMapper)
 
 	@Unroll
 	def "Parses Msg #dataFile"() {
@@ -24,7 +25,7 @@ class MsgParserSpec extends Specification {
 		with(result) {
 			getSourceName() == sourceName
 			getImageUrl() == "https://pbs.twimg.com/profile_images/example.jpg"
-			getDate().toDate().getTime() == date
+			getDate().toEpochMilli() == date
 			getMessage().startsWith(text)
 		}
 		

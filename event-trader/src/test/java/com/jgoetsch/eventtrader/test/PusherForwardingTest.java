@@ -1,5 +1,7 @@
 package com.jgoetsch.eventtrader.test;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,16 +9,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.DateTime;
 import org.junit.Assert;
 
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.filter.PusherPresenceFilter;
 import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.PusherForwardingProcessor;
 import com.jgoetsch.eventtrader.source.PusherMsgSource;
 import com.jgoetsch.eventtrader.source.PusherSecretAuthorizer;
-import com.jgoetsch.eventtrader.source.parser.JsonSerializedMsgParser;
+import com.jgoetsch.eventtrader.source.parser.JsonMsgParser;
 import com.pusher.client.PusherOptions;
 
 import junit.framework.TestCase;
@@ -29,10 +32,7 @@ public class PusherForwardingTest extends TestCase {
 	private String channel = "presence-forwarding";
 
 	public void testPusherForwarding() throws Exception {
-		PusherSecretAuthorizer authorizer = new PusherSecretAuthorizer();
-		authorizer.setAppId(appId);
-		authorizer.setApiKey(apiKey);
-		authorizer.setApiSecret(apiSecret);
+		PusherSecretAuthorizer authorizer = new PusherSecretAuthorizer(appId, apiKey, apiSecret);
 
 		PusherOptions options = new PusherOptions();
 		options.setAuthorizer(authorizer);
@@ -41,12 +41,9 @@ public class PusherForwardingTest extends TestCase {
 		listener.setAppKey(apiKey);
 		listener.setChannels(Collections.singletonList(channel));
 		listener.setPusherOptions(options);
-		listener.setMsgParser(new JsonSerializedMsgParser());
+		listener.setMsgParser(new JsonMsgParser(Msg.class));
 
-		PusherPresenceFilter<Msg> presenceFilter = new PusherPresenceFilter<Msg>();
-		presenceFilter.setAppId(appId);
-		presenceFilter.setApiKey(apiKey);
-		presenceFilter.setApiSecret(apiSecret);
+		PusherPresenceFilter<Msg> presenceFilter = new PusherPresenceFilter<Msg>(appId, apiKey, apiSecret);
 		presenceFilter.setChannel(channel);
 		AssertFilter.shouldNotProcess(presenceFilter, new Msg("system", "test"));
 
@@ -61,16 +58,14 @@ public class PusherForwardingTest extends TestCase {
 
 		AssertFilter.shouldProcess(presenceFilter, new Msg("system", "test"));
 
-		PusherForwardingProcessor processor = new PusherForwardingProcessor();
-		processor.setAppId(appId);
-		processor.setApiKey(apiKey);
-		processor.setApiSecret(apiSecret);
+		PusherForwardingProcessor processor = new PusherForwardingProcessor(appId, apiKey, apiSecret);
 		processor.setChannels(Collections.singletonList(channel));
 
 		List<Msg> messages = Arrays.asList(
 				new Msg("system", "Test message #1"),
 				new Msg("jgoetsch", "Test message #2"),
-				new Msg(new DateTime(2016, 6, 10, 9, 30, 0, 0), "timothysykes", "Test message #3")
+				new Msg(ZonedDateTime.of(2016, 6, 10, 9, 30, 0, 0, ZoneId.of("America/New_York")).toInstant(), "test_user1", "Test message #3"),
+				new TradeSignal(TradeType.BUY, "ZXYW", new Msg("test_user2", "Testing \"14^#%52234"))
 		);
 		for (Msg msg : messages) {
 			processor.process(msg, new HashMap<Object,Object>());

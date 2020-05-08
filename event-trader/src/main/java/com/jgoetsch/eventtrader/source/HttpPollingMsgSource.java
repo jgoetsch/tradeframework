@@ -16,14 +16,15 @@
 package com.jgoetsch.eventtrader.source;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,23 +73,23 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 		}
 	};
 
-	public void receiveMsgs(HttpClient client)
+	public void receiveMsgs(CloseableHttpClient client)
 	{
 		NewMsgHandler msgHandler = new NewMsgHandler();
 		HttpUriRequest req = createRequest();
 		for(;;) {
-			HttpEntity entity = null;
+			CloseableHttpResponse rsp = null;
 			try {
 				if (isUseIfModifiedSince() && lastModifiedDate != null)
 					req.setHeader("If-Modified-Since", lastModifiedDate);
 
 				long startTime = System.currentTimeMillis();
-				HttpResponse rsp = client.execute(req);
+				rsp = client.execute(req);
 				if (rsp.containsHeader("Last-Modified")) {
 					lastModifiedDate = rsp.getFirstHeader("Last-Modified").getValue();
 					//log.debug("Resource last modified: " + lastModifiedDate);
 				}
-				entity = rsp.getEntity();
+				HttpEntity entity = rsp.getEntity();
 				if (rsp.getStatusLine().getStatusCode() >= 400) {
 					log.warn("HTTP request to " + req.getURI().getHost() + " failed ["
 							+ rsp.getStatusLine().getStatusCode() + " " + rsp.getStatusLine().getReasonPhrase() + ", "
@@ -108,7 +109,12 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 				else {
 					boolean bContinue = true;
 					if (entity != null && rsp.getStatusLine().getStatusCode() != 304) {	// 304 = not modified
-						bContinue = getMsgParser().parseContent(entity.getContent(), entity.getContentLength(), entity.getContentType() == null ? null : entity.getContentType().getValue(), msgHandler);
+						InputStream inputStream = entity.getContent();
+						try {
+							bContinue = getMsgParser().parseContent(inputStream, entity.getContentLength(), entity.getContentType() == null ? null : entity.getContentType().getValue(), msgHandler);
+						} finally {
+							inputStream.close();
+						}
 						msgHandler.nextPass();
 					}
 					if (log.isDebugEnabled()) {
@@ -128,10 +134,10 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 				log.warn(e.getClass() + ": " + e.getMessage(), e);
 			}
 			finally {
-				if (entity != null) {
+				if (rsp != null) {
 					 // release connection gracefully
 					try {
-						entity.consumeContent();
+						rsp.close();
 					} catch (IOException e) { }
 				}
 			}
@@ -146,7 +152,7 @@ public class HttpPollingMsgSource extends AbstractHttpMsgSource {
 		} catch (InterruptedException e) { }
 	}
 
-	protected void doLoginAction(HttpClient client) {
+	protected void doLoginAction(CloseableHttpClient client) {
 	}
 
 	/*

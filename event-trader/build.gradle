@@ -3,8 +3,8 @@ apply plugin: "groovy"
 dependencies {
     api project(':tradeframework-core')
     implementation 'org.apache.httpcomponents:httpclient:4.5.12'
-    implementation 'com.googlecode.json-simple:json-simple:1.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.0'
 	implementation 'javax.validation:validation-api:2.0.1.Final'
 	implementation 'org.hibernate:hibernate-validator:6.1.4.Final'
 	implementation 'org.glassfish:javax.el:3.0.0'

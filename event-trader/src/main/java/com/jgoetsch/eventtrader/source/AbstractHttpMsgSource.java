@@ -24,7 +24,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -32,6 +31,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -43,7 +43,7 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private String username;
 	private String password;
-	private HttpClient httpClient;
+	private CloseableHttpClient httpClient;
 	private String method = "GET";
 
 	protected HttpUriRequest createRequest() {
@@ -95,7 +95,7 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 		receiveMsgs(httpClient);
 	}
 
-	protected abstract void receiveMsgs(HttpClient client);
+	protected abstract void receiveMsgs(CloseableHttpClient client);
 
 	public String getUsername() {
 		return username;
@@ -121,11 +121,11 @@ public abstract class AbstractHttpMsgSource extends UrlBasedMsgSource {
 		return method;
 	}
 
-	public HttpClient getHttpClient() {
+	public CloseableHttpClient getHttpClient() {
 		return httpClient;
 	}
 
-	public void setHttpClient(HttpClient httpClient) {
+	public void setHttpClient(CloseableHttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 

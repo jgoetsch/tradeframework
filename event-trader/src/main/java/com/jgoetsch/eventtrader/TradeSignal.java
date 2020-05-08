@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,9 +131,9 @@ public class TradeSignal extends Msg {
 	public String getTradeString() {
 		StringBuilder sb = new StringBuilder();
 		if (getType() != null)
-			sb.append(getType().toString());
+			sb.append(getType().getDisplayString());
 		if (getNumShares() != 0)
-			sb.append(" ").append(getNumShares());
+			sb.append(" ").append(new DecimalFormat("#,###").format(getNumShares()));
 		if (getContract() != null)
 			sb.append(" ").append(getContract());
 		if (getPrice() != 0)

@@ -36,6 +36,7 @@ import com.google.code.jgntp.GntpApplicationInfo;
 import com.google.code.jgntp.GntpClient;
 import com.google.code.jgntp.GntpNotificationInfo;
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.TradeSignal;
 
 /**
  * Processor that triggers a Growl notification for an incoming message. By
@@ -215,7 +216,12 @@ public class GrowlNotification<M extends Msg> implements Processor<M> {
 	}
 
 	protected String getTitle(Msg msg) {
-		return msg.getSourceName() != null ? msg.getSourceName() : notificationType;
+		if (msg instanceof TradeSignal) {
+			return ((TradeSignal)msg).getTradeString();
+		}
+		else {
+			return msg.getSourceName() != null ? msg.getSourceName() : notificationType;
+		}
 	}
 
 	protected String getMessageBody(Msg msg) {

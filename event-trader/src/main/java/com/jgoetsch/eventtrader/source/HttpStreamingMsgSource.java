@@ -15,12 +15,13 @@
  */
 package com.jgoetsch.eventtrader.source;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +32,15 @@ public class HttpStreamingMsgSource extends AbstractHttpMsgSource {
 	private Logger log = LoggerFactory.getLogger(HttpStreamingMsgSource.class);
 	private MsgParser msgParser;
 
-	public void receiveMsgs(HttpClient client) {
-		log.info("receiveMsgss");
+	public void receiveMsgs(CloseableHttpClient client) {
 		while (executeRequest(client, createRequest(), getMsgParser()) && afterDisconnect()) {}
 	}
 
-	protected boolean executeRequest(HttpClient client, HttpUriRequest request, MsgParser msgParser) {
-		HttpEntity entity = null;
+	protected boolean executeRequest(CloseableHttpClient client, HttpUriRequest request, MsgParser msgParser) {
+		CloseableHttpResponse rsp = null;
 		try {
-			HttpResponse rsp = client.execute(request);
-			entity = rsp.getEntity();
+			rsp = client.execute(request);
+			HttpEntity entity = rsp.getEntity();
 			if (rsp.getStatusLine().getStatusCode() >= 400 || entity == null) {
 				log.warn("HTTP request to " + request.getURI() + " failed with status " + rsp.getStatusLine());
 
@@ -58,7 +58,13 @@ public class HttpStreamingMsgSource extends AbstractHttpMsgSource {
 			return false;
 		}
 		finally {
-			request.abort();
+			if (rsp != null) {
+				try {
+					rsp.close();
+				} catch (IOException e) {
+					log.error("Failed to close response", e);
+				}
+			}
 		}
 	}
 

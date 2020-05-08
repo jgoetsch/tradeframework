@@ -1,49 +1,34 @@
-package com.jgoetsch.eventtrader.source.parser;
+package com.jgoetsch.eventtrader.source.parser.mapper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
-import org.joda.time.DateTime;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
-import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.tradeframework.Contract;
 
-public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
+public class PdMsgMapper implements MsgMappable {
+	@NotNull String command;
+	@NotNull @Valid BaseMessage<?> message;
 
-	private static class Root {
-		String command;
-		@NotNull @Valid BaseMessage<?> message;
+	@Override
+	public boolean hasMsg() {
+		return Arrays.asList("Commentary", "Trade", "PartialTrade").contains(command);
+	}
 
-		public boolean hasMsg() {
-			return Arrays.asList("Commentary", "Trade", "PartialTrade").contains(command);
-		}
-
-		public Msg mapToMsg() {
-			Msg msg = message.mapToMsg();
-			msg.setSourceType(command);
-			return msg;
-		}
+	@Override
+	public Msg toMsg() {
+		Msg msg = message.toMsg();
+		msg.setSourceType(command);
+		return msg;
 	}
 
 	@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
@@ -58,7 +43,7 @@ public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
 
 		protected abstract M createMsg();
 
-		public M mapToMsg() {
+		public M toMsg() {
 			M msg = createMsg();
 			msg.setSourceName(username);
 			msg.setImageUrl(image);
@@ -76,9 +61,9 @@ public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
 		}
 
 		@Override
-		public Msg mapToMsg() {
-			Msg msg = super.mapToMsg();
-			msg.setDate(new DateTime(date));
+		public Msg toMsg() {
+			Msg msg = super.toMsg();
+			msg.setDate(date.toInstant());
 			msg.setMessage(this.msg);
 			return msg;
 		}
@@ -134,8 +119,8 @@ public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
 		}
 
 		@Override
-		public TradeSignal mapToMsg() {
-			TradeSignal trade = super.mapToMsg();
+		public TradeSignal toMsg() {
+			TradeSignal trade = super.toMsg();
 
 			Contract contract = new Contract();
 			contract.setSymbol(entry.ticker);
@@ -143,7 +128,7 @@ public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
 			trade.setContract(contract);
 			trade.setNumShares(getNumShares());
 			trade.setType(getTradeType());
-			trade.setDate(new DateTime(getDate()));
+			trade.setDate(getDate().toInstant());
 			trade.setPrice(getPrice());
 			trade.setMessage(getMessage());
 
@@ -184,56 +169,12 @@ public class PdJsonMsgParser implements MsgParser, BufferedMsgParser {
 		}
 
 		@Override
-		public TradeSignal mapToMsg() {
-			TradeSignal trade = super.mapToMsg();
+		public TradeSignal toMsg() {
+			TradeSignal trade = super.toMsg();
 			if (partialEntry.adding || !partialEntry.shares.equals(entry.shares))
 				trade.setPartial(true);
 			return trade;
 		}
 	}
 
-	private final ObjectMapper mapper = new ObjectMapper()
-			.setVisibility(PropertyAccessor.ALL, Visibility.NONE)
-			.setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-	private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
-	@Override
-	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws MsgParseException
-	{
-		return parseContent(handler, () -> mapper.readValue(input, Root.class));
-	}
-
-	@Override
-	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException
-	{
-		return parseContent(handler, () -> mapper.readValue(content, Root.class));
-	}
-
-	private boolean parseContent(MsgHandler handler, JsonParsingSupplier<Root> parser) throws MsgParseException
-	{
-		try {
-			Root root = parser.get();
-			if (root.hasMsg()) {
-				Set<ConstraintViolation<Root>> errors = validator.validate(root);
-				if (!errors.isEmpty()) {
-					throw new MsgParseException("Problem with incoming data: " +
-							errors.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
-							.collect(Collectors.joining(", ")));
-				}
-				return handler.newMsg(root.mapToMsg());
-			}
-			else {
-				return false;
-			}
-		} catch (IOException ex) {
-			throw new MsgParseException(ex);
-		}
-	}
-
-	@FunctionalInterface
-	private interface JsonParsingSupplier<T> {
-		T get() throws IOException;
-	}
 }

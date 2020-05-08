@@ -15,10 +15,11 @@
  */
 package com.jgoetsch.eventtrader.source.parser;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -35,7 +36,7 @@ public final class RSSMsgParser extends XMLMsgParser {
 	private String dateElement = "pubDate";
 	private String sourceNameElement = "dc:creator";
 	private String messageElement = "title";
-	private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("EEE, d MMM yy HH:mm:ss Z");
+	private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE, d MMM yy HH:mm:ss Z");
 
 	public RSSMsgParser() throws ParserConfigurationException, SAXException {
 		super();
@@ -68,7 +69,7 @@ public final class RSSMsgParser extends XMLMsgParser {
 				throw new SAXException("Malformed RSS");
 			else {
 				if (dateFormat != null && msgDate.length() > 0)
-					newMsg(new Msg(dateFormat.parseDateTime(msgDate.toString()), msgSourceName.toString(), msgContent.toString()));
+					newMsg(new Msg(dateFormat.parse(msgDate.toString(), Instant::from), msgSourceName.toString(), msgContent.toString()));
 				else
 					newMsg(new Msg(msgSourceName.toString(), msgContent.toString()));
 				msgDate = null;

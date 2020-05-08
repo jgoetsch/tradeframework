@@ -21,15 +21,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +78,7 @@ public class ArchiveMsgSource extends MsgSource {
 	protected Msg parseLine(String line) throws MsgParseException {
 		Matcher m = lineFmt.matcher(line);
 		if (m.matches()) {
-			DateTime time = parseMsgTime(m.group(1));
+			Instant time = parseMsgTime(m.group(1));
 			return new Msg(time, m.group(2), m.group(3));
 		}
 		else
@@ -87,11 +86,11 @@ public class ArchiveMsgSource extends MsgSource {
 
 	}
 
-	private static final DateTimeFormatter timestampFormat = DateTimeFormat.forPattern("E MMM dd HH:mm:ss y").withZone(DateTimeZone.forID("America/New_York"));
+	private static final DateTimeFormatter timestampFormat = DateTimeFormatter.ofPattern("E MMM dd HH:mm:ss y").withZone(ZoneId.of("America/New_York"));
 
-	protected DateTime parseMsgTime(String time) throws MsgParseException {
+	protected Instant parseMsgTime(String time) throws MsgParseException {
 		try {
-			return timestampFormat.parseDateTime(time.replaceAll("_", " ").replaceAll("[EPC][SD]T\\s+", ""));
+			return timestampFormat.parse(time.replaceAll("_", " ").replaceAll("[EPC][SD]T\\s+", ""), Instant::from);
 		} catch (IllegalArgumentException e) {
 			throw new MsgParseException("Invalid date format", e);
 		}
