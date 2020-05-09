@@ -1,5 +1,8 @@
 package com.jgoetsch.eventtrader.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeNotNull;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -9,7 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -22,15 +26,21 @@ import com.jgoetsch.eventtrader.source.PusherSecretAuthorizer;
 import com.jgoetsch.eventtrader.source.parser.JsonMsgParser;
 import com.pusher.client.PusherOptions;
 
-import junit.framework.TestCase;
+public class PusherForwardingTest {
 
-public class PusherForwardingTest extends TestCase {
-
-	private String appId = "226927";
-	private String apiKey = "659ad8bfe96a36e54369";
-	private String apiSecret = "cd282d6f02bf9e437899";
+	private String appId = System.getProperty("pusherAppId");
+	private String apiKey = System.getProperty("pusherApiKey");
+	private String apiSecret = System.getProperty("pusherApiSecret");
 	private String channel = "presence-forwarding";
 
+	@Before
+	public void checkCredentials() {
+		assumeNotNull(appId);
+		assumeNotNull(apiKey);
+		assumeNotNull(apiSecret);
+	}
+
+	@Test
 	public void testPusherForwarding() throws Exception {
 		PusherSecretAuthorizer authorizer = new PusherSecretAuthorizer(appId, apiKey, apiSecret);
 
@@ -72,6 +82,6 @@ public class PusherForwardingTest extends TestCase {
 			Thread.sleep(1000);
 		}
 
-		Assert.assertEquals("Received messages", messages, received);
+		assertEquals("Received messages", messages, received);
 	}
 }
