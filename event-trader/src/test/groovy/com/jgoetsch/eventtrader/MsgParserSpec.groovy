@@ -1,7 +1,5 @@
 package com.jgoetsch.eventtrader
 
-import org.junit.Assert
-
 import com.jgoetsch.eventtrader.source.MsgHandler
 import com.jgoetsch.eventtrader.source.parser.MsgParseException
 import com.jgoetsch.eventtrader.source.parser.JsonMsgParser

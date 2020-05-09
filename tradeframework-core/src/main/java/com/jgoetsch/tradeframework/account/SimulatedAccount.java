@@ -19,6 +19,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +171,7 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 			handleSplitExecution(contract, execution);
 	}
 
-	private static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss").withZone(DateTimeZone.forID("America/New_York"));
+	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.of("America/New_York"));
 
 	private void handleSplitExecution(Contract contract, Execution execution) {
 		MutablePosition position = positions.get(contract);
@@ -183,7 +182,7 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 		cashBalance += position.trade(execution);
 		update();
 		if (executionLog.isInfoEnabled())
-			executionLog.info(dateFormat.print(execution.getDate().getTime()) + ": " + contract + " " + execution + ", @" + position.getQuantity());
+			executionLog.info(dateFormat.format(execution.getDate().toInstant()) + ": " + contract + " " + execution + ", @" + position.getQuantity());
 
 		if (position.getQuantity() == 0) {
 			onPositionClosed(contract, (ClosedPosition) position);
@@ -205,7 +204,7 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 	protected void onPositionClosed(Contract contract, ClosedPosition pos) {
 		if (transactionLog.isInfoEnabled()) {
 			transactionLog.info(String.format("%s\t%s\t%-5s\t%5d\t%8.5f\t%8.5f\t%5.2f\t%+6.2f%%\t%8.2f\t%7.2f\t%10.2f",
-					dateFormat.print(pos.getEntryDate().getTime()), dateFormat.print(pos.getExitDate().getTime()),
+					dateFormat.format(pos.getEntryDate().toInstant()), dateFormat.format(pos.getExitDate().toInstant()),
 					contract, pos.getTransactionQuantity(), pos.getEntryPrice(), pos.getExitPrice(), pos.getExtentPrice(),
 					pos.getPercentGain()*100, pos.getRealizedProfitLoss(), -pos.getCommisions(), getNetLiquidationValue()));
 		}

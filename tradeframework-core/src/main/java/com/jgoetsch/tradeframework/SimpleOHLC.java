@@ -16,11 +16,9 @@
 package com.jgoetsch.tradeframework;
 
 import java.io.Serializable;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * OHLC implementation with settable fields
@@ -103,11 +101,11 @@ public class SimpleOHLC implements OHLC, Serializable {
 		return null;
 	}
 	
-	private static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MM/dd/yy HH:mm:ss z").withZone(DateTimeZone.forID("America/New_York"));
+	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss z").withZone(ZoneId.of("America/New_York"));
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (getDate() != null) {
-			sb.append(dateFormat.print(getDate().getTime())).append(' ');
+			sb.append(dateFormat.format(getDate().toInstant())).append(' ');
 		}
 		sb.append("O=").append(getOpen());
 		sb.append(" H=").append(getHigh());

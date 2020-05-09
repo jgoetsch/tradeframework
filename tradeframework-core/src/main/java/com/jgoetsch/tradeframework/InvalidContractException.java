@@ -15,8 +15,6 @@
  */
 package com.jgoetsch.tradeframework;
 
-import com.jgoetsch.tradeframework.Contract;
-
 public class InvalidContractException extends Exception {
 
 	private static final long serialVersionUID = 1L;

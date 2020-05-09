@@ -16,21 +16,22 @@
 package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.OHLC;
-import com.jgoetsch.tradeframework.TFUtils;
-import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
+import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 import com.jgoetsch.tradeframework.data.HistoricalDataUtils;
 
 public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
@@ -54,6 +55,8 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 		this.bufferLength = bufferLength;
 	}
 
+	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss z").withZone(ZoneId.of("America/New_York"));
+
 	@Override
 	protected final MarketData retrieveNextTick() throws IOException, InvalidContractException {
 		if (curTimestamp == 0)
@@ -65,7 +68,7 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 				bufferEndTime = adjustTimestampToRTH(bufferEndTime, contract);
 				bufferEndTime += HistoricalDataUtils.getPeriodDurationInMillis(dataPeriod) * bufferLength;
 				if (log.isDebugEnabled())
-					log.debug("Requesting historical data for " + contract + " from " + TFUtils.getDateFormat().print(bufferEndTime - HistoricalDataUtils.getPeriodDurationInMillis(dataPeriod) * bufferLength) + " to " + TFUtils.getDateFormat().print(bufferEndTime));
+					log.debug("Requesting historical data for " + contract + " from " + dateFormat.format(Instant.ofEpochMilli(bufferEndTime - HistoricalDataUtils.getPeriodDurationInMillis(dataPeriod) * bufferLength)) + " to " + dateFormat.format(Instant.ofEpochMilli(bufferEndTime)));
 				data = historicalDataSource.getHistoricalData(contract,
 						new Date(bufferEndTime),
 						bufferLength, dataPeriod);
@@ -75,9 +78,9 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 			if (data == null)
 				return null;
 			if (log.isTraceEnabled())
-				log.trace("Received historical data for " + contract + " from " + TFUtils.getDateFormat().print(data[0].getDate().getTime())
-						+ " to " + TFUtils.getDateFormat().print(data[data.length-1].getDate().getTime())
-						+ ", starting at " + TFUtils.getDateFormat().print(curTimestamp));
+				log.trace("Received historical data for " + contract + " from " + dateFormat.format(data[0].getDate().toInstant())
+						+ " to " + dateFormat.format(data[data.length-1].getDate().toInstant())
+						+ ", starting at " + dateFormat.format(Instant.ofEpochMilli(curTimestamp)));
 
 			dataIndex = 0;
 			while (dataIndex < data.length && data[dataIndex].getDate().getTime() <= curTimestamp)
@@ -123,26 +126,26 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 	 */
 	protected long adjustTimestampToRTH(long timestamp, Contract contract) {
 		if ("STK".equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
-			DateTime dt = new DateTime(timestamp, DateTimeZone.forID("America/New_York"));
-			LocalTime time = new LocalTime(dt);
-			if (time.compareTo(new LocalTime(9, 30)) < 0)
-				dt = dt.withHourOfDay(9).withMinuteOfHour(30);
-			else if (time.compareTo(new LocalTime(16, 0)) >= 0) {
-				dt = dt.plusDays(1).withHourOfDay(9).withMinuteOfHour(30);
+			ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("America/New_York"));
+			LocalTime time = dt.toLocalTime();
+			if (time.isBefore(LocalTime.of(9, 30)))
+				dt = dt.withHour(9).withMinute(30);
+			else if (time.isAfter(LocalTime.of(16, 0))) {
+				dt = dt.plusDays(1).withHour(9).withMinute(30);
 			}
-			if (dt.getDayOfWeek() == DateTimeConstants.SATURDAY)
+			if (dt.getDayOfWeek() == DayOfWeek.SATURDAY)
 				dt = dt.plusDays(2);
-			else if (dt.getDayOfWeek() == DateTimeConstants.SUNDAY)
+			else if (dt.getDayOfWeek() == DayOfWeek.SUNDAY)
 				dt = dt.plusDays(1);
-			return dt.getMillis();
+			return dt.toInstant().toEpochMilli();
 		}
 		else if ("FUT".equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
-			DateTime dt = new DateTime(timestamp, DateTimeZone.forID("America/Chicago"));
-			if (dt.getDayOfWeek() == DateTimeConstants.SATURDAY)
-				dt = dt.plusDays(2).withHourOfDay(9).withMinuteOfHour(0);
-			else if (dt.getDayOfWeek() == DateTimeConstants.SUNDAY)
-				dt = dt.plusDays(1).withHourOfDay(9).withMinuteOfHour(0);
-			return dt.getMillis();
+			ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("America/Chicago"));
+			if (dt.getDayOfWeek() == DayOfWeek.SATURDAY)
+				dt = dt.plusDays(2).withHour(9).withMinute(0);
+			else if (dt.getDayOfWeek() == DayOfWeek.SUNDAY)
+				dt = dt.plusDays(1).withHour(9).withMinute(0);
+			return dt.toInstant().toEpochMilli();
 		}
 		else
 			return timestamp;

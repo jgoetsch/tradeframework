@@ -15,11 +15,14 @@
  */
 package com.jgoetsch.eventtrader.test;
 
+import static org.junit.Assert.assertNull;
+
 import java.util.Collection;
 
 import junit.framework.TestCase;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -28,11 +31,12 @@ import com.jgoetsch.eventtrader.extractor.AlertTradeExtractor;
 import com.jgoetsch.eventtrader.extractor.TradeExtractor;
 import com.jgoetsch.tradeframework.Contract;
 
-public class AlertTradeExtractorTest extends TestCase {
+public class AlertTradeExtractorTest {
 
-	public void testTimAlertExtractor() throws Exception {
+	@Test
+	public void testAlertExtractor() throws Exception {
 		TradeExtractor extractor = new AlertTradeExtractor();
-		String src = "TimAlert test";
+		String src = "Alert test";
 
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 1000 DEXO at $6.45")),
 					new TradeSignal(TradeType.SHORT, Contract.stock("DEXO"), 1000, 6.45));

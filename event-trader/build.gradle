@@ -1,5 +1,3 @@
-apply plugin: "groovy"
-
 dependencies {
     api project(':tradeframework-core')
     implementation 'org.apache.httpcomponents:httpclient:4.5.12'
@@ -13,23 +11,19 @@ dependencies {
     	exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     	exclude group: 'org.jboss.netty', module: 'netty'
     }
+    implementation 'io.netty:netty:3.10.6.Final'
     implementation 'com.sun.mail:javax.mail:1.4.5'
     implementation 'com.sun.mail:imap:1.4.5'
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
-    implementation 'io.netty:netty:3.5.2.Final'
     implementation 'org.jsoup:jsoup:1.7.1'
     implementation 'com.pusher:pusher-java-client:2.2.1'
     implementation 'com.pusher:pusher-http-java:1.2.0'
-    implementation 'org.slf4j:slf4j-api:1.7.5'
-    implementation 'org.slf4j:jcl-over-slf4j:1.7.5'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+    implementation 'org.slf4j:jcl-over-slf4j:1.7.30'
 	testImplementation 'junit:junit:4.13'
 	testImplementation "org.spockframework:spock-core:2.0-M2-groovy-3.0"
 	testRuntimeOnly 'org.junit.platform:junit-platform-engine:1.6.2'
 	testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.1.0'
-    testRuntimeOnly 'ch.qos.logback:logback-classic:1.0.7'
+    testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
     compileOnly 'commons-logging:commons-logging:1.1.1'
-}
-
-test {
-	useJUnitPlatform()
 }

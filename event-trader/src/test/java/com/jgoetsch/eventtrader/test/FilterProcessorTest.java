@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Test;
+
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
@@ -20,10 +22,9 @@ import com.jgoetsch.eventtrader.filter.TimeOfDayFilter;
 import com.jgoetsch.eventtrader.filter.UsernameFilter;
 import com.jgoetsch.tradeframework.Contract;
 
-import junit.framework.TestCase;
+public class FilterProcessorTest {
 
-public class FilterProcessorTest extends TestCase {
-
+	@Test
 	public void testFilterChain() throws Exception {
 		List<FilterProcessor<TradeSignal>> filters = new ArrayList<FilterProcessor<TradeSignal>>();
 		
@@ -59,6 +60,7 @@ public class FilterProcessorTest extends TestCase {
 
 	private static final ZoneId tz = ZoneId.of("America/New_York");
 
+	@Test
 	public void testTimeOfDayFilter() throws Exception {
 		TimeOfDayFilter<Msg> afternoonFilter = new TimeOfDayFilter<Msg>();
 		afternoonFilter.setAfter("13:00");
@@ -88,6 +90,7 @@ public class FilterProcessorTest extends TestCase {
 		AssertFilter.shouldNotProcess(middayFilter, afternoonAlert);
 	}
 
+	@Test
 	public void testPriceFilter() throws Exception {
 		PriceFilter priceFilter = new PriceFilter();
 		priceFilter.setMin(2.0);

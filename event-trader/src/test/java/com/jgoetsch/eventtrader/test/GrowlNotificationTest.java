@@ -26,13 +26,13 @@ import junit.framework.TestCase;
 public class GrowlNotificationTest extends TestCase {
 
 	public void testSingleAlert() throws IOException {
-		GrowlNotification growl = new GrowlNotification();
+		GrowlNotification<Msg> growl = new GrowlNotification<Msg>();
 		growl.setAppName("GrowlNotificationTest");
 		growl.setNotificationType("Growl Alert");
 		growl.initialize();
 
-		GrowlNotification growl2 = new GrowlNotification("GrowlNotificationTest", "Secondary alert");
-		GrowlNotification growl3 = new GrowlNotification("GrowlNotificationTest2", "Second app alert");
+		GrowlNotification<Msg> growl2 = new GrowlNotification<Msg>("GrowlNotificationTest", "Secondary alert");
+		GrowlNotification<Msg> growl3 = new GrowlNotification<Msg>("GrowlNotificationTest2", "Second app alert");
 
 		GrowlNotification.autoRegister();
 
@@ -47,7 +47,7 @@ public class GrowlNotificationTest extends TestCase {
 		growlClient.setNotificationTypes(Collections.singleton("Growl Alert"));
 		growlClient.initialize();
 
-		GrowlNotification growl = new GrowlNotification();
+		GrowlNotification<Msg> growl = new GrowlNotification<Msg>();
 		growl.setClient(growlClient);
 		growl.setNotificationType("Growl Alert");
 		growl.initialize();

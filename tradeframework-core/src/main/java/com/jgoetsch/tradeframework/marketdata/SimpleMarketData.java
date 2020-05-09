@@ -17,8 +17,9 @@ package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-
-import com.jgoetsch.tradeframework.TFUtils;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class SimpleMarketData implements MarketData, Serializable {
 
@@ -51,10 +52,12 @@ public class SimpleMarketData implements MarketData, Serializable {
 		this.lastSize = lastSize;
 	}
 
+	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss z").withZone(ZoneId.of("America/New_York"));
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(TFUtils.getDateFormat().print(getTimestamp()));
+		sb.append(dateFormat.format(Instant.ofEpochMilli(getTimestamp())));
 		DecimalFormat df = new DecimalFormat("0.#####");
 		sb.append(": Last=").append(df.format(getLast()));
 		sb.append(", Bid=").append(df.format(getBid()));

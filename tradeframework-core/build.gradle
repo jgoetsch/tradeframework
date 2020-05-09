@@ -1,7 +1,5 @@
-
 dependencies {
-    api 'joda-time:joda-time:1.6.2'
-    api 'net.sourceforge.collections:collections-generic:4.01'
-    implementation 'org.slf4j:slf4j-api:1.7.5'
-    testImplementation 'org.spockframework:spock-core:2.0-M2-groovy-3.0'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+	testImplementation "org.spockframework:spock-core:2.0-M2-groovy-3.0"
+	testRuntimeOnly 'org.junit.platform:junit-platform-engine:1.6.2'
 }

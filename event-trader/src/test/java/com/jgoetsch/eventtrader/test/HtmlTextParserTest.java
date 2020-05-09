@@ -15,23 +15,25 @@
  */
 package com.jgoetsch.eventtrader.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.HtmlTextParser;
 import com.jgoetsch.eventtrader.source.parser.PlainTextMsgParser;
 
-public class HtmlTextParserTest extends TestCase {
+public class HtmlTextParserTest {
 
 	private HtmlTextParser msgParser = new HtmlTextParser(new PlainTextMsgParser());
 	private String content = "<html><body><p>First line</p>Second line<br>third <b>line</b> <h1>More stuff</h1></body></html>";
 
+	@Test
 	public void testText() throws Exception {
 		final List<Msg> msgs = new ArrayList<Msg>();
 		msgParser.parseContent(new ByteArrayInputStream(content.getBytes()), content.length(), "text/html", new MsgHandler() {
@@ -41,6 +43,6 @@ public class HtmlTextParserTest extends TestCase {
 				return true;
 			}
 		});
-		Assert.assertEquals("First lineSecond line third line More stuff", msgs.get(0).getMessage());
+		assertEquals("First lineSecond line third line More stuff", msgs.get(0).getMessage());
 	}
 }

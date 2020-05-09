@@ -16,9 +16,11 @@
 package com.jgoetsch.tradeframework.order.processing;
 
 import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +71,7 @@ public class StopOrderProcessor extends OrderProcessor {
 			this.baseTriggerMethod = baseTriggerMethod;
 		}
 		public boolean isTriggered(MarketData marketData, boolean isSell, double stopPrice) {
-			if (new LocalTime(marketData.getTimestamp(), DateTimeZone.forID("America/New_York")).compareTo(new LocalTime(15, 45)) >= 0)
+			if (!LocalTime.of(15, 45).isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(marketData.getTimestamp()), ZoneId.of("America/New_York")).toLocalTime()))
 				return true;
 			else
 				return baseTriggerMethod.isTriggered(marketData, isSell, stopPrice);
