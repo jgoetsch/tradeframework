@@ -1,0 +1,11 @@
+{
+	"command": "SingleKarmaMessage",
+	"karmaMessage": {
+		"karmaId": 123456,
+		"sender": "test_user1",
+		"receiver": "test_user1",
+		"dateSent": 1589217291368,
+		"karmaType": "CHAT",
+		"id": 123456
+	}
+}

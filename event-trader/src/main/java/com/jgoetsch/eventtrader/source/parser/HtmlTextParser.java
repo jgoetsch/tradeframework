@@ -15,7 +15,6 @@
  */
 package com.jgoetsch.eventtrader.source.parser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -28,29 +27,18 @@ import com.jgoetsch.eventtrader.source.MsgHandler;
 
 public class HtmlTextParser implements MsgParser {
 
-	private MsgParser innerParser = new FullBufferedMsgParser();
+	private BufferedMsgParser bufferedMsgParser;
 	private Pattern charsetPattern = Pattern.compile("charset=([^;]+)");
 
-	public HtmlTextParser() {
-	}
-
-	public HtmlTextParser(MsgParser innerParser) {
-		this.innerParser = innerParser;
+	public HtmlTextParser(BufferedMsgParser bufferedMsgParser) {
+		this.bufferedMsgParser = bufferedMsgParser;
 	}
 
 	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
 		Matcher charset = charsetPattern.matcher(contentType);
 		Document doc = Jsoup.parse(input, charset.find() ? charset.group(1) : null, "");
 		String text = doc.text();
-		return innerParser.parseContent(new ByteArrayInputStream(text.getBytes()), text.length(), "text/plain", handler);
-	}
-
-	public void setInnerParser(MsgParser innerParser) {
-		this.innerParser = innerParser;
-	}
-
-	public MsgParser getInnerParser() {
-		return innerParser;
+		return bufferedMsgParser.parseContent(text, "text/plain", handler);
 	}
 
 }

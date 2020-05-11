@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class PatternMsgParser extends FullBufferedMsgParser {
+public class PatternMsgParser implements BufferedMsgParser {
 
 	private Pattern pattern;
 	private String sourceFormat;

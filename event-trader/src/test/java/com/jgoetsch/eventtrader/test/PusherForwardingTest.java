@@ -24,6 +24,7 @@ import com.jgoetsch.eventtrader.processor.PusherForwardingProcessor;
 import com.jgoetsch.eventtrader.source.PusherMsgSource;
 import com.jgoetsch.eventtrader.source.PusherSecretAuthorizer;
 import com.jgoetsch.eventtrader.source.parser.JsonMsgParser;
+import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 
 public class PusherForwardingTest {
@@ -42,15 +43,11 @@ public class PusherForwardingTest {
 
 	@Test
 	public void testPusherForwarding() throws Exception {
-		PusherSecretAuthorizer authorizer = new PusherSecretAuthorizer(appId, apiKey, apiSecret);
-
 		PusherOptions options = new PusherOptions();
-		options.setAuthorizer(authorizer);
+		options.setAuthorizer(new PusherSecretAuthorizer(appId, apiKey, apiSecret));
 
-		PusherMsgSource listener = new PusherMsgSource();
-		listener.setAppKey(apiKey);
+		PusherMsgSource listener = new PusherMsgSource(new Pusher(apiKey, options));
 		listener.setChannels(Collections.singletonList(channel));
-		listener.setPusherOptions(options);
 		listener.setMsgParser(new JsonMsgParser(Msg.class));
 
 		PusherPresenceFilter<Msg> presenceFilter = new PusherPresenceFilter<Msg>(appId, apiKey, apiSecret);

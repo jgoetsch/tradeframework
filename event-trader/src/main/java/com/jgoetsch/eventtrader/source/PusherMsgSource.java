@@ -1,5 +1,6 @@
 package com.jgoetsch.eventtrader.source;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -10,11 +11,8 @@ import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.pusher.client.Pusher;
-import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
-import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -23,15 +21,18 @@ import com.pusher.client.connection.ConnectionStateChange;
 public class PusherMsgSource extends MsgSource {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
-	private String appKey;
-	private PusherOptions pusherOptions;
 	private BufferedMsgParser msgParser;
 	private Collection<String> channels;
+	private String[] eventNames = { "message" };
+
+	private final Pusher pusher;
+
+	public PusherMsgSource(Pusher pusher) {
+		this.pusher = pusher;
+	}
 
 	@Override
 	protected void receiveMsgs() {
-		Pusher pusher = pusherOptions != null ? new Pusher(appKey, pusherOptions) : new Pusher(appKey);
-
 		pusher.connect(new ConnectionEventListener() {
 		    public void onConnectionStateChange(ConnectionStateChange change) {
 			    	log.info("State changed to " + change.getCurrentState() + " from " + change.getPreviousState());
@@ -47,23 +48,23 @@ public class PusherMsgSource extends MsgSource {
 		    }
 		}, ConnectionState.ALL);
 
-		SubscriptionEventListener messageListener = new PresenceChannelEventListener() {
+		PresenceChannelEventListener messageListener = new PresenceChannelEventListener() {
 		    public void onEvent(PusherEvent event) {
-		        log.debug(event.getData());
+		        log.debug("[{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData());
 
 				try {
 					msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this);
 				} catch (MsgParseException e) {
-					log.error("Message parse error, content was:\n" + event.getData(), e);
+					log.error("Error parsing message [{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData(), e);
 				}
 		    }
 
 			public void onSubscriptionSucceeded(String message) {
-				log.info("Subscribed: " + message);
+				log.info("Subscribed to channel " + message);
 			}
 
 			public void onAuthenticationFailure(String message, Exception e) {
-				log.error("Failed to subscribe: " + message, e);
+				log.error("Failed to subscribe to channel " + message, e);
 			}
 
 			public void onUsersInformationReceived(String channelName, Set<User> users) {
@@ -77,16 +78,12 @@ public class PusherMsgSource extends MsgSource {
 		};
 
 		for (String channelName : channels) {
-			Channel channel;
 			if(channelName.startsWith("private-"))
-				channel = pusher.subscribePrivate(channelName);
+				pusher.subscribePrivate(channelName, messageListener, eventNames);
 			else if (channelName.startsWith("presence-"))
-				channel = pusher.subscribePresence(channelName);
+				pusher.subscribePresence(channelName, messageListener, eventNames);
 			else
-				channel = pusher.subscribe(channelName);
-			channel.bind("message", messageListener);
-			channel.bind("Msg", messageListener);
-			channel.bind("TradeSignal", messageListener);
+				pusher.subscribe(channelName, messageListener, eventNames);
 		}
 
 		for (;;) {
@@ -95,22 +92,6 @@ public class PusherMsgSource extends MsgSource {
 			} catch (InterruptedException e) {
 			}
 		}
-	}
-
-	public String getAppKey() {
-		return appKey;
-	}
-
-	public void setAppKey(String appKey) {
-		this.appKey = appKey;
-	}
-
-	public PusherOptions getPusherOptions() {
-		return pusherOptions;
-	}
-
-	public void setPusherOptions(PusherOptions pusherOptions) {
-		this.pusherOptions = pusherOptions;
 	}
 
 	public BufferedMsgParser getMsgParser() {
@@ -127,6 +108,14 @@ public class PusherMsgSource extends MsgSource {
 
 	public void setChannels(Collection<String> channels) {
 		this.channels = channels;
+	}
+
+	public Collection<String> getEventNames() {
+		return Arrays.asList(eventNames);
+	}
+
+	public void setEventNames(Collection<String> eventNames) {
+		this.eventNames = eventNames.toArray(new String[0]);
 	}
 
 }

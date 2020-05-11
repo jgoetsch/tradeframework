@@ -22,18 +22,21 @@ import java.io.InputStreamReader;
 
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public abstract class LineBufferedMsgParser implements MsgParser, BufferedMsgParser {
+public abstract class LineBufferingMsgParser implements MsgParser {
+	private BufferedMsgParser bufferedMsgParser;
+
+	public LineBufferingMsgParser(BufferedMsgParser bufferedMsgParser) {
+		this.bufferedMsgParser = bufferedMsgParser;
+	}
 
 	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		String line;
 		while ((line = reader.readLine()) != null) {
-			if (!parseContent(line, contentType, handler))
+			if (!bufferedMsgParser.parseContent(line, contentType, handler))
 				return false;
 		}
 		return true;
 	}
-
-	public abstract boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException;
 
 }

@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +36,17 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class EventTraderSpringLauncher {
 	private static Logger log = LoggerFactory.getLogger(EventTraderSpringLauncher.class);
 
-	public static void main(String[] args) {
-		if (args.length < 1) {
+	public static void main(String[] a) {
+		List<String> args = a.length < 1 ? Arrays.asList("config/*.xml") : Arrays.asList(a);
+		if (args.get(0).equalsIgnoreCase("-h") || args.get(0).equalsIgnoreCase("help")) {
 			System.out.println("Usage: " + EventTraderSpringLauncher.class.getSimpleName() + " <files>...");
 			System.out.println("       files - List of paths to spring bean definition xml files.");
 			System.out.println("               Each object defined that implements Runnable will be executed");
 			System.out.println("               in its own thread.");
 		}
 		else {
-			AbstractApplicationContext context = new ClassPathXmlApplicationContext(args);
+			args.forEach(arg -> log.info("Using bean configs: {}", arg));
+			AbstractApplicationContext context = new ClassPathXmlApplicationContext(args.toArray(new String[0]));
 
 			// auto register growl notifications after all GrowlNotification objects have been instantiated
 			// if it is found on the classpath
@@ -56,6 +59,7 @@ public class EventTraderSpringLauncher {
 			Map<String, Runnable> runnables = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, Runnable.class);
 			List<Thread> threads = new ArrayList<Thread>(runnables.size());
 			for (final Map.Entry<String, Runnable> runner : runnables.entrySet()) {
+				log.info("Running bean {} [{}]", runner.getKey(), runner.getValue().getClass().getSimpleName());
 				final Thread th = new Thread(runner.getValue(), runner.getKey());
 				threads.add(th);
 				th.start();

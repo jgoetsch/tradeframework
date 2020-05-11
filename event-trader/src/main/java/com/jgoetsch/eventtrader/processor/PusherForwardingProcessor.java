@@ -14,6 +14,7 @@ import com.pusher.rest.Pusher;
 public class PusherForwardingProcessor implements Processor<Msg> {
 
 	private List<String> channels;
+	private String eventName = "message";
 
 	private final Pusher pusher;
 
@@ -34,7 +35,7 @@ public class PusherForwardingProcessor implements Processor<Msg> {
 	}
 
 	public void process(Msg msg, Map<Object, Object> context) throws Exception {
-		pusher.trigger(channels, msg.getClass().getSimpleName(), msg);
+		pusher.trigger(channels, eventName, msg);
 	}
 
 	public List<String> getChannels() {
@@ -43,6 +44,14 @@ public class PusherForwardingProcessor implements Processor<Msg> {
 
 	public void setChannels(List<String> channels) {
 		this.channels = channels;
+	}
+
+	public String getEventName() {
+		return eventName;
+	}
+
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
 	}
 
 }

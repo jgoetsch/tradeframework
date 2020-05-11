@@ -62,13 +62,17 @@ class MsgParserSpec extends Specification {
 		'trade_add_buy' | TradeType.BUY   | "WXYZ"  | 5000       | 2.19    | true
 	}
 
-	def "Does not parse unrecognized command"() {
+	@Unroll
+	def "Does not parse #unknownCommand"() {
 		when:
-		def result = parseMsgFromJson('unrecognized_command')
+		def result = parseMsgFromJson(unknownCommand)
 		
 		then:
 		result == null
 		noExceptionThrown()
+		
+		where:
+		unknownCommand << ['unknown_command_1', 'unknown_command_2']
 	}
 	
 	@Unroll

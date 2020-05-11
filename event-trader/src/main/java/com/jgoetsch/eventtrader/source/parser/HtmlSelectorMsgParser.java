@@ -30,11 +30,8 @@ import com.jgoetsch.eventtrader.source.MsgHandler;
 
 public class HtmlSelectorMsgParser implements MsgParser {
 
-	private String selector;
-	private Pattern charsetPattern = Pattern.compile("charset=([^;]+)");
-
-	public HtmlSelectorMsgParser() {
-	}
+	private final String selector;
+	private final Pattern charsetPattern = Pattern.compile("charset=([^;]+)");
 
 	public HtmlSelectorMsgParser(String selector) {
 		this.selector = selector;
@@ -54,14 +51,6 @@ public class HtmlSelectorMsgParser implements MsgParser {
 
 	protected Msg createMsg(Element node) {
 		return new Msg(null, node.text());
-	}
-
-	public String getSelector() {
-		return selector;
-	}
-
-	public void setSelector(String selector) {
-		this.selector = selector;
 	}
 
 }

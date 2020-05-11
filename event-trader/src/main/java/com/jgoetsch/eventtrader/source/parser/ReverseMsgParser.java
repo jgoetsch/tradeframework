@@ -15,23 +15,18 @@
  */
 package com.jgoetsch.eventtrader.source.parser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class ReverseMsgParser extends FullBufferedMsgParser {
+public class ReverseMsgParser implements BufferedMsgParser {
 
 	Logger log = LoggerFactory.getLogger(ReverseMsgParser.class);
-	private MsgParser msgParser;
+	private BufferedMsgParser bufferedMsgParser;
 
-	public ReverseMsgParser() { }
-	public ReverseMsgParser(MsgParser msgParser) {
-		this.msgParser = msgParser;
+	public ReverseMsgParser(BufferedMsgParser bufferedMsgParser) {
+		this.bufferedMsgParser = bufferedMsgParser;
 	}
 
 	@Override
@@ -40,22 +35,10 @@ public class ReverseMsgParser extends FullBufferedMsgParser {
 		int prev = content.length();
 		for (int i = prev; i > 0; prev = i, i = content.lastIndexOf('\n', prev - 1)) {
 			buffer.append(content.substring(i, prev));
+			if (!bufferedMsgParser.parseContent(content.substring(i, prev), contentType, handler))
+				return false;
 		}
-		String reverse = buffer.toString();
-		try {
-			InputStream in = new ByteArrayInputStream(reverse.getBytes());
-			return msgParser.parseContent(in, reverse.length(), contentType, handler);
-		} catch (IOException e) {
-			throw new MsgParseException(e);
-		}
-	}
-
-	public void setMsgParser(MsgParser msgParser) {
-		this.msgParser = msgParser;
-	}
-
-	public MsgParser getMsgParser() {
-		return msgParser;
+		return true;
 	}
 
 }

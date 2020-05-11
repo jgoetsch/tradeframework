@@ -20,11 +20,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class FullBufferedMsgParser implements MsgParser, BufferedMsgParser {
+public class FullBufferingMsgParser implements MsgParser {
 	private int maxLength = -1;
+	
+	private final BufferedMsgParser bufferedMsgParser;
+	
+	public FullBufferingMsgParser(BufferedMsgParser bufferedMsgParser) {
+		this.bufferedMsgParser = bufferedMsgParser;
+	}
 
 	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws IOException, MsgParseException {
         if (length > Integer.MAX_VALUE) {
@@ -47,12 +52,7 @@ public class FullBufferedMsgParser implements MsgParser, BufferedMsgParser {
         }
         if (maxLength > -1)
         	buffer.setLength(maxLength);
-        return parseContent(buffer.toString(), contentType, handler);
-	}
-
-	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException
-	{
-		return handler.newMsg(new Msg(null, content));
+        return bufferedMsgParser.parseContent(buffer.toString(), contentType, handler);
 	}
 
 	public void setMaxLength(int maxLength) {

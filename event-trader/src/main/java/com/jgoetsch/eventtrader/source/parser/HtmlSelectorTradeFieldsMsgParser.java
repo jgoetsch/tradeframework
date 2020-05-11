@@ -8,9 +8,9 @@ import com.jgoetsch.eventtrader.TradeType;
 
 public class HtmlSelectorTradeFieldsMsgParser extends HtmlSelectorMsgParser {
 
-	private String messageSelector;
-	private String symbolSelector;
-	private String typeSelector;
+	private final String messageSelector;
+	private final String symbolSelector;
+	private final String typeSelector;
 
 	public HtmlSelectorTradeFieldsMsgParser(String selector, String messageSelector, String symbolSelector, String typeSelector) {
 		super(selector);
@@ -35,30 +35,6 @@ public class HtmlSelectorTradeFieldsMsgParser extends HtmlSelectorMsgParser {
 		else {
 			return null;
 		}
-	}
-
-	public String getMessageSelector() {
-		return messageSelector;
-	}
-
-	public void setMessageSelector(String messageSelector) {
-		this.messageSelector = messageSelector;
-	}
-
-	public String getSymbolSelector() {
-		return symbolSelector;
-	}
-
-	public void setSymbolSelector(String symbolSelector) {
-		this.symbolSelector = symbolSelector;
-	}
-
-	public String getTypeSelector() {
-		return typeSelector;
-	}
-
-	public void setTypeSelector(String typeSelector) {
-		this.typeSelector = typeSelector;
 	}
 
 }

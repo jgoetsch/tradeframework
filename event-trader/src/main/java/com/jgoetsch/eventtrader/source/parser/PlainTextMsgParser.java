@@ -18,7 +18,7 @@ package com.jgoetsch.eventtrader.source.parser;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 
-public class PlainTextMsgParser extends LineBufferedMsgParser {
+public class PlainTextMsgParser implements BufferedMsgParser {
 
 	@Override
 	public boolean parseContent(String content, String contentType, MsgHandler handler) {
