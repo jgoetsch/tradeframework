@@ -11,6 +11,7 @@ import javax.validation.Validator;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -37,38 +38,50 @@ public class JsonMsgParser implements MsgParser, BufferedMsgParser {
 	@Override
 	public boolean parseContent(InputStream input, long length, String contentType, MsgHandler handler) throws MsgParseException
 	{
-		return parseContent(handler, () -> reader.readValue(input));
+		return parseContent(handler, null, input);
 	}
 
 	@Override
 	public boolean parseContent(String content, String contentType, MsgHandler handler) throws MsgParseException
 	{
-		return parseContent(handler, () -> reader.readValue(content));
+		return parseContent(handler, content, null);
 	}
 
-	private boolean parseContent(MsgHandler handler, JsonParsingSupplier<MsgMappable> parser) throws MsgParseException
+	private boolean parseContent(MsgHandler handler, String content, InputStream input) throws MsgParseException
 	{
 		try {
-			MsgMappable rawObject = parser.get();
+			MsgMappable rawObject = content != null ? reader.readValue(content) : reader.readValue(input);
 			Set<ConstraintViolation<MsgMappable>> errors = validator.validate(rawObject);
 			if (!errors.isEmpty()) {
-				throw new MsgParseException("Problem with received data: " +
+				throw new MsgParseException(buildExceptionMsg("Missing or invalid fields in parsed input: " +
 						errors.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
-						.collect(Collectors.joining(", ")));
+						.collect(Collectors.joining(", ")), content, null)
+						);
 			}
 			return handler.newMsg(rawObject.toMsg());
 		}
 		catch (InvalidTypeIdException ex) {
-			throw new UnrecognizedMsgTypeException(ex.getMessage(), ex.getTypeId(), ex);
+			throw new UnrecognizedMsgTypeException(buildExceptionMsg(ex.getOriginalMessage(), content, ex), ex.getTypeId(), ex);
+		}
+		catch (JsonProcessingException ex) {
+			throw new MsgParseException(buildExceptionMsg(ex.getOriginalMessage(), content, ex), ex);
 		}
 		catch (IOException ex) {
 			throw new MsgParseException(ex.getMessage(), ex);
 		}
 	}
 
-	@FunctionalInterface
-	private interface JsonParsingSupplier<T> {
-		T get() throws IOException;
+	private String buildExceptionMsg(String msg, String content, JsonProcessingException ex) {
+		StringBuilder builder = new StringBuilder(msg);
+		if (ex != null && ex.getLocation() != null) {
+			builder.append("\n at line: ").append(ex.getLocation().getLineNr());
+			builder.append(" col: ").append(ex.getLocation().getColumnNr());
+			builder.append(" of source: ");
+		}
+		else {
+			builder.append("\n in source: ");
+		}
+		builder.append(content != null ? content : "(InputStream)");
+		return builder.toString();
 	}
-
 }

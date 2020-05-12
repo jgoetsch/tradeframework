@@ -11,7 +11,7 @@ import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
 import com.jgoetsch.eventtrader.source.parser.UnrecognizedMsgTypeException;
-import com.pusher.client.Pusher;
+import com.pusher.client.Client;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.User;
@@ -19,16 +19,16 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 
-public class PusherMsgSource extends MsgSource {
+public class PusherMsgSource extends AsynchronousMsgSource {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private BufferedMsgParser msgParser;
 	private Collection<String> channels;
 	private String[] eventNames = { "message" };
 
-	private final Pusher pusher;
+	private final Client pusher;
 
-	public PusherMsgSource(Pusher pusher) {
+	public PusherMsgSource(Client pusher) {
 		this.pusher = pusher;
 	}
 
@@ -45,19 +45,21 @@ public class PusherMsgSource extends MsgSource {
 		    }
 
 		    public void onError(String message, String code, Exception e) {
-		        log.error("There was a problem connecting!", e);
+		        log.error("Problem with connection: {}", message, e);
 		    }
 		}, ConnectionState.ALL);
 
 		PresenceChannelEventListener messageListener = new PresenceChannelEventListener() {
 		    public void onEvent(PusherEvent event) {
 				try {
-					msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this);
-			        log.debug("Received [{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData());
+					if (!msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this)) {
+						shutdown();
+					}
+			        log.debug("[channel: {}, event:{}] Received: {}", event.getChannelName(), event.getEventName(), event.getData());
 				} catch (UnrecognizedMsgTypeException e) {
-					log.warn("Unrecognized type [{}:{}] {}", event.getChannelName(), event.getEventName(), e.getMessage());
+					log.warn("[channel: {}, event:{}] UnrecognizedMsgTypeException: {}", event.getChannelName(), event.getEventName(), e.getMessage());
 				} catch (MsgParseException e) {
-					log.error("Error parsing [{}:{}] {}", event.getChannelName(), event.getEventName(), e.getMessage());
+					log.error("[channel: {}, event:{}] MsgParseException: {}", event.getChannelName(), event.getEventName(), e.getMessage());
 				}
 		    }
 
@@ -88,12 +90,8 @@ public class PusherMsgSource extends MsgSource {
 				pusher.subscribe(channelName, messageListener, eventNames);
 		}
 
-		for (;;) {
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-			}
-		}
+		enterWaitingLoop();
+		pusher.disconnect();
 	}
 
 	public BufferedMsgParser getMsgParser() {

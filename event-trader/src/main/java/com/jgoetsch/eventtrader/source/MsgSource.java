@@ -32,9 +32,10 @@ public abstract class MsgSource implements Runnable, MsgHandler {
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private Collection<? extends Processor<Msg>> processors;
 	private int numEvents = -1;
-	private BlockingQueue<Msg> msgQueue;
 	private String defaultImageURL;
 	private Thread mainThread;
+
+	private final BlockingQueue<Msg> msgQueue = new ArrayBlockingQueue<Msg>(16);
 
 	private class MsgProcessingConsumer implements Runnable {
 		public void run() {
@@ -55,8 +56,9 @@ public abstract class MsgSource implements Runnable, MsgHandler {
 							}
 						}
 					}
+				} catch (InterruptedException e) {
+					return;
 				}
-				catch (InterruptedException e) { }
 			}
 		}
 	}
@@ -70,7 +72,6 @@ public abstract class MsgSource implements Runnable, MsgHandler {
 	};
 
 	public void run() {
-		msgQueue = new ArrayBlockingQueue<Msg>(16);
 		mainThread = Thread.currentThread();
 		Thread t = new Thread(new MsgProcessingConsumer(), Thread.currentThread().getName() + "-p");
 		t.start();

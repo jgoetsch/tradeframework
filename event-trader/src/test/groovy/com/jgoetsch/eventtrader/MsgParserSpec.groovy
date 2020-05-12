@@ -84,7 +84,7 @@ class MsgParserSpec extends Specification {
 	}
 	
 	@Unroll
-	def "Throws exception for #exceptionMessage"() {
+	def "Throws exception for #dataFile"() {
 		when:
 		def result = parseMsgFromJson(dataFile)
 		
@@ -94,11 +94,11 @@ class MsgParserSpec extends Specification {
 		result == null
 
 		where:
-		dataFile    | exceptionMessage
-		'invalid_1' | "message.partialEntry must not be null"
-		'invalid_2' | "message.msg must not be null"
-		'invalid_3' | "Missing type id"
-		
+		dataFile          | exceptionMessage
+		'missing_field_1' | "message.partialEntry must not be null"
+		'missing_field_2' | "message.msg must not be null"
+		'missing_type_id' | "Missing type id"
+		'malformed'       | "Unexpected end-of-input"
 	}
 
 	Msg parseMsgFromJson(String dataFile) {

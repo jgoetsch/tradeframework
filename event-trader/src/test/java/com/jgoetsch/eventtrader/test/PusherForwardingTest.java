@@ -1,6 +1,7 @@
 package com.jgoetsch.eventtrader.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeNotNull;
 
 import java.time.ZoneId;
@@ -34,6 +35,13 @@ public class PusherForwardingTest {
 	private String apiSecret = System.getProperty("pusherApiSecret");
 	private String channel = "presence-forwarding";
 
+	private List<Msg> messages = Arrays.asList(
+			new Msg("system", "Test message #1"),
+			new Msg("jgoetsch", "Test message #2"),
+			new Msg(ZonedDateTime.of(2016, 6, 10, 9, 30, 0, 0, ZoneId.of("America/New_York")).toInstant(), "test_user1", "Test message #3"),
+			new TradeSignal(TradeType.BUY, "ZXYW", new Msg("test_user2", "Testing \"14^#%52234"))
+	);
+
 	@Before
 	public void checkCredentials() {
 		assumeNotNull(appId);
@@ -49,6 +57,7 @@ public class PusherForwardingTest {
 		PusherMsgSource listener = new PusherMsgSource(new Pusher(apiKey, options));
 		listener.setChannels(Collections.singletonList(channel));
 		listener.setMsgParser(new JsonMsgParser(Msg.class));
+		listener.setNumEvents(messages.size());
 
 		PusherPresenceFilter<Msg> presenceFilter = new PusherPresenceFilter<Msg>(appId, apiKey, apiSecret);
 		presenceFilter.setChannel(channel);
@@ -60,7 +69,9 @@ public class PusherForwardingTest {
 				received.add(msg);
 			}
 		}));
-		new Thread(listener).start();
+
+		Thread th = new Thread(listener);
+		th.start();
 		Thread.sleep(2000);
 
 		AssertFilter.shouldProcess(presenceFilter, new Msg("system", "test"));
@@ -68,17 +79,12 @@ public class PusherForwardingTest {
 		PusherForwardingProcessor processor = new PusherForwardingProcessor(appId, apiKey, apiSecret);
 		processor.setChannels(Collections.singletonList(channel));
 
-		List<Msg> messages = Arrays.asList(
-				new Msg("system", "Test message #1"),
-				new Msg("jgoetsch", "Test message #2"),
-				new Msg(ZonedDateTime.of(2016, 6, 10, 9, 30, 0, 0, ZoneId.of("America/New_York")).toInstant(), "test_user1", "Test message #3"),
-				new TradeSignal(TradeType.BUY, "ZXYW", new Msg("test_user2", "Testing \"14^#%52234"))
-		);
 		for (Msg msg : messages) {
 			processor.process(msg, new HashMap<Object,Object>());
-			Thread.sleep(1000);
+			Thread.sleep(100);
 		}
-
+		th.join(10000L);
+		assertFalse(th.isAlive());
 		assertEquals("Received messages", messages, received);
 	}
 }

@@ -15,21 +15,18 @@ import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.tradeframework.Contract;
 
 
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "command", visible = true)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "command")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PdMsgMapper.Commentary.class, name = "Commentary"),
         @JsonSubTypes.Type(value = PdMsgMapper.Trade.class, name = "Trade"),
         @JsonSubTypes.Type(value = PdMsgMapper.PartialTrade.class, name = "PartialTrade"),
 })
 public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implements MsgMappable {
-	@NotNull String command;
 	@NotNull @Valid M message;
 
 	@Override
 	public Msg toMsg() {
-		Msg msg = message.toMsg();
-		msg.setSourceType(command);
-		return msg;
+		return message.toMsg();
 	}
 
 	public static class Commentary extends PdMsgMapper<CommentaryMessage> {}
