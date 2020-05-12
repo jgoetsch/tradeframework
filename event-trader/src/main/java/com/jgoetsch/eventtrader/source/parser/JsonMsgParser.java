@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jgoetsch.eventtrader.source.MsgHandler;
 import com.jgoetsch.eventtrader.source.parser.mapper.MsgMappable;
@@ -49,20 +50,19 @@ public class JsonMsgParser implements MsgParser, BufferedMsgParser {
 	{
 		try {
 			MsgMappable rawObject = parser.get();
-			if (rawObject.hasMsg()) {
-				Set<ConstraintViolation<MsgMappable>> errors = validator.validate(rawObject);
-				if (!errors.isEmpty()) {
-					throw new MsgParseException("Problem with received data: " +
-							errors.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
-							.collect(Collectors.joining(", ")));
-				}
-				return handler.newMsg(rawObject.toMsg());
+			Set<ConstraintViolation<MsgMappable>> errors = validator.validate(rawObject);
+			if (!errors.isEmpty()) {
+				throw new MsgParseException("Problem with received data: " +
+						errors.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
+						.collect(Collectors.joining(", ")));
 			}
-			else {
-				return false;
-			}
-		} catch (IOException ex) {
-			throw new MsgParseException(ex);
+			return handler.newMsg(rawObject.toMsg());
+		}
+		catch (InvalidTypeIdException ex) {
+			throw new UnrecognizedMsgTypeException(ex.getMessage(), ex.getTypeId(), ex);
+		}
+		catch (IOException ex) {
+			throw new MsgParseException(ex.getMessage(), ex);
 		}
 	}
 

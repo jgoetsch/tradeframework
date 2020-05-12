@@ -83,12 +83,16 @@ public abstract class MsgSource implements Runnable, MsgHandler {
 	}
 
 	public boolean newMsg(Msg msg) {
-		if (msg.getImageUrl() == null)
-			msg.setImageUrl(getDefaultImageURL());
-		try {
-			msgQueue.put(msg);
-		} catch (InterruptedException e) { }
-		return (numEvents < 0 || --numEvents > 0);
+		if (msg != null) {
+			if (msg.getImageUrl() == null)
+				msg.setImageUrl(getDefaultImageURL());
+			try {
+				msgQueue.put(msg);
+			} catch (InterruptedException e) { }
+			return (numEvents < 0 || --numEvents > 0);
+		}
+		else
+			return true;
 	}
 
 	protected abstract void receiveMsgs();

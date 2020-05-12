@@ -1,6 +1,5 @@
 package com.jgoetsch.eventtrader.source.parser.mapper;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.validation.Valid;
@@ -15,14 +14,16 @@ import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.tradeframework.Contract;
 
-public class PdMsgMapper implements MsgMappable {
-	@NotNull String command;
-	@NotNull @Valid BaseMessage<?> message;
 
-	@Override
-	public boolean hasMsg() {
-		return Arrays.asList("Commentary", "Trade", "PartialTrade").contains(command);
-	}
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "command", visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = PdMsgMapper.Commentary.class, name = "Commentary"),
+        @JsonSubTypes.Type(value = PdMsgMapper.Trade.class, name = "Trade"),
+        @JsonSubTypes.Type(value = PdMsgMapper.PartialTrade.class, name = "PartialTrade"),
+})
+public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implements MsgMappable {
+	@NotNull String command;
+	@NotNull @Valid M message;
 
 	@Override
 	public Msg toMsg() {
@@ -31,13 +32,13 @@ public class PdMsgMapper implements MsgMappable {
 		return msg;
 	}
 
-	@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-	@JsonSubTypes({
-	        @JsonSubTypes.Type(value = Commentary.class, name = "DingMessage"),
-	        @JsonSubTypes.Type(value = Trade.class, name = "EntryDingMessage"),
-	        @JsonSubTypes.Type(value = PartialTrade.class, name = "PartialEntryDingMessage"),
-	})
-	private static abstract class BaseMessage<M extends Msg> {
+	public static class Commentary extends PdMsgMapper<CommentaryMessage> {}
+
+	public static class Trade extends PdMsgMapper<TradeMessage> {}
+
+	public static class PartialTrade extends PdMsgMapper<PartialTradeMessage> {}
+
+	public static abstract class BaseMessage<M extends Msg> {
 		String username;
 		String image;
 
@@ -51,7 +52,7 @@ public class PdMsgMapper implements MsgMappable {
 		}
 	}
 
-	private static class Commentary extends BaseMessage<Msg> {
+	private static class CommentaryMessage extends BaseMessage<Msg> {
 		@NotNull Date date;
 		@NotNull String msg;
 
@@ -69,7 +70,7 @@ public class PdMsgMapper implements MsgMappable {
 		}
 	}
 
-	private static class Trade extends BaseMessage<TradeSignal> {
+	private static class TradeMessage extends BaseMessage<TradeSignal> {
 		@NotNull @Valid Entry entry;
 
 		private static class Entry {
@@ -136,7 +137,7 @@ public class PdMsgMapper implements MsgMappable {
 		}
 	}
 
-	private static class PartialTrade extends Trade {
+	private static class PartialTradeMessage extends TradeMessage {
 		@NotNull @Valid PartialEntry partialEntry;
 
 		private static class PartialEntry {

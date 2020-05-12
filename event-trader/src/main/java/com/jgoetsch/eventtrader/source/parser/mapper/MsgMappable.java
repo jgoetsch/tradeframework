@@ -4,10 +4,6 @@ import com.jgoetsch.eventtrader.Msg;
 
 public interface MsgMappable {
 
-	default boolean hasMsg() {
-		return true;
-	}
-
 	Msg toMsg();
 
 }

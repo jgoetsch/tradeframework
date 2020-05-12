@@ -1,7 +1,11 @@
 package com.jgoetsch.eventtrader
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import com.jgoetsch.eventtrader.source.MsgHandler
 import com.jgoetsch.eventtrader.source.parser.MsgParseException
+import com.jgoetsch.eventtrader.source.parser.UnrecognizedMsgTypeException
 import com.jgoetsch.eventtrader.source.parser.JsonMsgParser
 import com.jgoetsch.eventtrader.source.parser.mapper.PdMsgMapper
 import com.jgoetsch.tradeframework.Contract
@@ -10,7 +14,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class MsgParserSpec extends Specification {
-
+	Logger log = LoggerFactory.getLogger(getClass());
+	
 	def msgParser = new JsonMsgParser(PdMsgMapper)
 
 	@Unroll
@@ -63,28 +68,31 @@ class MsgParserSpec extends Specification {
 	}
 
 	@Unroll
-	def "Does not parse #unknownCommand"() {
-		when:
-		def result = parseMsgFromJson(unknownCommand)
-		
-		then:
-		result == null
-		noExceptionThrown()
-		
-		where:
-		unknownCommand << ['unknown_command_1', 'unknown_command_2']
-	}
-	
-	@Unroll
-	def "Throws exception on #dataFile: #exceptionMessage"() {
+	def "Throws exception on unrecognized #command"() {
 		when:
 		def result = parseMsgFromJson(dataFile)
 		
 		then:
+		UnrecognizedMsgTypeException e = thrown()
+		e.getTypeId() == command
 		result == null
+
+		where:
+		dataFile                 | command
+		'unrecognized_command_1' | 'UserTrade'
+		'unrecognized_command_2' | 'SingleKarmaMessage'
+	}
+	
+	@Unroll
+	def "Throws exception for #exceptionMessage"() {
+		when:
+		def result = parseMsgFromJson(dataFile)
+		
+		then:
 		MsgParseException e = thrown()
 		e.message.contains(exceptionMessage)
-		
+		result == null
+
 		where:
 		dataFile    | exceptionMessage
 		'invalid_1' | "message.partialEntry must not be null"

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.source.parser.BufferedMsgParser;
 import com.jgoetsch.eventtrader.source.parser.MsgParseException;
+import com.jgoetsch.eventtrader.source.parser.UnrecognizedMsgTypeException;
 import com.pusher.client.Pusher;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
@@ -44,18 +45,19 @@ public class PusherMsgSource extends MsgSource {
 		    }
 
 		    public void onError(String message, String code, Exception e) {
-		        log.info("There was a problem connecting!", e);
+		        log.error("There was a problem connecting!", e);
 		    }
 		}, ConnectionState.ALL);
 
 		PresenceChannelEventListener messageListener = new PresenceChannelEventListener() {
 		    public void onEvent(PusherEvent event) {
-		        log.debug("[{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData());
-
 				try {
 					msgParser.parseContent(event.getData(), event.getEventName(), PusherMsgSource.this);
+			        log.debug("Received [{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData());
+				} catch (UnrecognizedMsgTypeException e) {
+					log.warn("Unrecognized type [{}:{}] {}", event.getChannelName(), event.getEventName(), e.getMessage());
 				} catch (MsgParseException e) {
-					log.error("Error parsing message [{}:{}] {}", event.getChannelName(), event.getEventName(), event.getData(), e);
+					log.error("Error parsing [{}:{}] {}", event.getChannelName(), event.getEventName(), e.getMessage());
 				}
 		    }
 
