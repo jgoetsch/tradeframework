@@ -1,5 +1,6 @@
 package com.jgoetsch.eventtrader.test;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -43,19 +44,19 @@ public class FilterProcessorTest {
 		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.BUY, "MSFT", null));
 		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "ISNS", null));
 		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, Contract.futures("HE", "102016", "GLOBEX"), null));
-		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.SELL, Contract.stock("TASR"), 5000, 1.23, null));
+		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.SELL, Contract.stock("TASR"), 5000, new BigDecimal("1.23"), null));
 
-		TradeSignal partialTrade = new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 1000, 8.86, null);
+		TradeSignal partialTrade = new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 1000, new BigDecimal("8.86"), null);
 		AssertFilter.shouldProcess(filterChain, partialTrade);
 		partialTrade.setPartial(true);
 		AssertFilter.shouldNotProcess(filterChain, partialTrade);
 
 		UsernameFilter<TradeSignal> usernameFilter = new UsernameFilter<TradeSignal>();
-		usernameFilter.setUsernames(Collections.singleton("timothysykes"));
+		usernameFilter.setUsernames(Collections.singleton("trader1"));
 		filters.add(usernameFilter);
-		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.BUY, "GLUU", new Msg("timothysykes", "Bought some GLUU")));
+		AssertFilter.shouldProcess(filterChain, new TradeSignal(TradeType.BUY, "GLUU", new Msg("trader1", "Bought some GLUU")));
 		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "GLUU", new Msg("someotherguy", "Bought some GLUU")));
-		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "DGLY", new Msg("timothysykes", "Buying banned stock")));
+		AssertFilter.shouldNotProcess(filterChain, new TradeSignal(TradeType.BUY, "DGLY", new Msg("trader1", "Buying banned stock")));
 	}
 
 	private static final ZoneId tz = ZoneId.of("America/New_York");
@@ -64,6 +65,7 @@ public class FilterProcessorTest {
 	public void testTimeOfDayFilter() throws Exception {
 		TimeOfDayFilter<Msg> afternoonFilter = new TimeOfDayFilter<Msg>();
 		afternoonFilter.setAfter("13:00");
+		afternoonFilter.setTimeZone(tz);
 		Msg morningAlert = new Msg(ZonedDateTime.of(2017, 10, 11, 9, 47, 0, 0, tz).toInstant(), "Test", "Morning alert");
 		Msg middayAlert = new Msg(ZonedDateTime.of(2017, 10, 11, 12, 05, 0, 0, tz).toInstant(), "Test", "Midday alert");
 		Msg afternoonAlert = new Msg(ZonedDateTime.of(2017, 10, 11, 15, 25, 0, 0, tz).toInstant(), "Test", "Afternoon alert");
@@ -78,6 +80,7 @@ public class FilterProcessorTest {
 
 		TimeOfDayFilter<Msg> morningFilter = new TimeOfDayFilter<Msg>();
 		morningFilter.setBefore("10:30");
+		morningFilter.setTimeZone(tz);
 		AssertFilter.shouldProcess(morningFilter, morningAlert);
 		AssertFilter.shouldNotProcess(morningFilter, middayAlert);
 		AssertFilter.shouldNotProcess(morningFilter, afternoonAlert);
@@ -85,6 +88,7 @@ public class FilterProcessorTest {
 		TimeOfDayFilter<Msg> middayFilter = new TimeOfDayFilter<Msg>();
 		middayFilter.setBefore("13:20");
 		middayFilter.setAfter("11:00");
+		middayFilter.setTimeZone(tz);
 		AssertFilter.shouldNotProcess(middayFilter, morningAlert);
 		AssertFilter.shouldProcess(middayFilter, middayAlert);
 		AssertFilter.shouldNotProcess(middayFilter, afternoonAlert);
@@ -93,10 +97,10 @@ public class FilterProcessorTest {
 	@Test
 	public void testPriceFilter() throws Exception {
 		PriceFilter priceFilter = new PriceFilter();
-		priceFilter.setMin(2.0);
-		AssertFilter.shouldProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, 180.00));
-		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("LQMT"), 10000, 0.26));
-		priceFilter.setMax(20.0);
-		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, 180.00));
+		priceFilter.setMin(new BigDecimal("2.0"));
+		AssertFilter.shouldProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, BigDecimal.valueOf(180)));
+		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("LQMT"), 10000, BigDecimal.valueOf(0.26)));
+		priceFilter.setMax(new BigDecimal("20.0"));
+		AssertFilter.shouldNotProcess(priceFilter, new TradeSignal(TradeType.BUY, Contract.stock("AAPL"), 100, BigDecimal.valueOf(180)));
 	}
 }

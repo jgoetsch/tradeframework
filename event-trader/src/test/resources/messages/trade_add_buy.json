@@ -16,14 +16,14 @@
 			"dateAdded": 1588776363000,
 			"entryDate": 1588776363000,
 			"entryComments": "Taking long position on stock",
-			"entryPrice": 2.2,
+			"entryPrice": 12.2,
 			"exitPrice": 0.0,
 			"openTrade": true,
 			"entryType": "STOCK",
 			"callOption": true,
 			"optionStrike": 0.0,
 			"type": "Long Stock",
-			"username": "timothysykes",
+			"username": "test_user1",
 			"shortSell": false,
 			"shortUrl": "1xxxxx",
 			"percentage": 0.0,
@@ -37,7 +37,7 @@
 					"adding": true,
 					"tradeDate": 1588777300294,
 					"shares": 5000,
-					"price": 2.19,
+					"price": 12.19,
 					"comments": "Adding shares to long position",
 					"sharesRemaining": 7500,
 					"short": false
@@ -48,7 +48,7 @@
 					"adding": true,
 					"tradeDate": 1588776363000,
 					"shares": 2500,
-					"price": 2.22,
+					"price": 12.22,
 					"sharesRemaining": 2500,
 					"short": false
 				}
@@ -64,7 +64,7 @@
 			"adding": true,
 			"tradeDate": 1588777300294,
 			"shares": 5000,
-			"price": 2.19,
+			"price": 12.19,
 			"comments": "Adding shares to long position",
 			"sharesRemaining": 7500,
 			"short": false

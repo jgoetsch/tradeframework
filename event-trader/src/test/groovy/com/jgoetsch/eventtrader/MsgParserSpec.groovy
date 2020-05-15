@@ -1,8 +1,5 @@
 package com.jgoetsch.eventtrader
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import com.jgoetsch.eventtrader.source.MsgHandler
 import com.jgoetsch.eventtrader.source.parser.MsgParseException
 import com.jgoetsch.eventtrader.source.parser.UnrecognizedMsgTypeException
@@ -14,8 +11,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class MsgParserSpec extends Specification {
-	Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	def msgParser = new JsonMsgParser(PdMsgMapper)
 
 	@Unroll
@@ -54,17 +50,18 @@ class MsgParserSpec extends Specification {
 			getType() == tradeType
 			getContract() == Contract.stock(ticker)
 			getNumShares() == numShares
-			getPrice() == price
+			getPrice().equals(new BigDecimal(price))
 			isPartial() == partial
+			getTradeString() == tradeString
 		}
 
 		where:
-		dataFile        | tradeType       | ticker  | numShares  | price   | partial
-		'trade_buy'     | TradeType.BUY   | "WXYZ"  | 2000       | 0.1301  | false
-		'trade_sell'    | TradeType.SELL  | "WXYZ"  | 15000      | 0.195   | false
-		'trade_short'   | TradeType.SHORT | "ABCD"  | 15000      | 1.32    | false
-		'trade_cover'   | TradeType.COVER | "ABCD"  | 15000      | 1.17    | false
-		'trade_add_buy' | TradeType.BUY   | "WXYZ"  | 5000       | 2.19    | true
+		dataFile        | tradeType       | ticker  | numShares  | price     | partial | tradeString
+		'trade_buy'     | TradeType.BUY   | "WXYZ"  | 2000       | '0.1301'  | false   | "Buy 2,000 WXYZ at \$0.1301"
+		'trade_sell'    | TradeType.SELL  | "WXYZ"  | 15000      | '0.195'   | false   | "Sell 15,000 WXYZ at \$0.195"
+		'trade_short'   | TradeType.SHORT | "ABCD"  | 15000      | '1.0'     | false   | "Short 15,000 ABCD at \$1.00"
+		'trade_cover'   | TradeType.COVER | "ABCD"  | 15000      | '1.17'    | false   | "Cover 15,000 ABCD at \$1.17"
+		'trade_add_buy' | TradeType.BUY   | "WXYZ"  | 5000       | '12.19'   | true    | "Buy 5,000 WXYZ at \$12.19"
 	}
 
 	@Unroll

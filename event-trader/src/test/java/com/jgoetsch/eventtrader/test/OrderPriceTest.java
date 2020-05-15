@@ -17,6 +17,7 @@ package com.jgoetsch.eventtrader.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -31,6 +32,7 @@ import com.jgoetsch.eventtrader.order.price.ConstrainedPrice;
 import com.jgoetsch.eventtrader.order.price.LastPrice;
 import com.jgoetsch.eventtrader.order.price.MidpointPrice;
 import com.jgoetsch.eventtrader.order.price.OffsetOrderPrice;
+import com.jgoetsch.eventtrader.order.price.PriceMappedTickSize;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.marketdata.SimpleMarketData;
@@ -39,37 +41,36 @@ public class OrderPriceTest {
 
 	@Test
 	public void testAskPrice() throws Exception {
-		testOffsetPrice(new AskPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 41, 40, 0.01);
+		testOffsetPrice(new AskPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 41, 40, new BigDecimal("0.01"));
 	}
 
 	@Test
 	public void testBidPrice() throws Exception {
-		testOffsetPrice(new BidPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 40, 41, 0.01);
+		testOffsetPrice(new BidPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 40, 41, new BigDecimal("0.01"));
 	}
 
 	@Test
 	public void testLastPrice() throws Exception {
-		testOffsetPrice(new LastPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 40.8, 40.8, 0.01);
+		testOffsetPrice(new LastPrice(), new SimpleMarketData(40.0, 41.0, 40.8), 40.8, 40.8, new BigDecimal("0.01"));
 	}
 	
 	@Test
 	public void testClosePrice() throws Exception {
 		SimpleMarketData marketData = new SimpleMarketData(40.0, 41.0, 40.8);
 		marketData.setClose(37.0);
-		testOffsetPrice(new ClosePrice(), marketData, 37, 37, 0.01);
+		testOffsetPrice(new ClosePrice(), marketData, 37, 37, new BigDecimal("0.01"));
 	}
 
 	@Test
 	public void testMidpointPrice() throws Exception {
 		MidpointPrice orderPrice = new MidpointPrice();
-		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 41.0, 40.8), 40.5, 40.5, 0.01);
-		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.09, 40.09, 0.01);
-		orderPrice.setTickSize(0.0001);
-		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.0875, 40.0875, 0.025);
-		orderPrice.setTickSize(0.025);
-		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.075, 40.075, 0.025);
-		orderPrice.setTickSize(0.5);
-		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.0, 40.0, 0.5);
+		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 41.0, 40.8), 40.5, 40.5, new BigDecimal("0.01"));
+		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.09, 40.09, new BigDecimal("0.01"));
+		testOffsetPrice(orderPrice, new SimpleMarketData(0.10, 0.175, 0.125), 0.1375, 0.1375, new BigDecimal("0.025"));
+		orderPrice.setTickRounding(new PriceMappedTickSize(new BigDecimal("0.025")));
+		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.075, 40.1, new BigDecimal("0.025"));
+		orderPrice.setTickRounding(new PriceMappedTickSize(new BigDecimal("0.5")));
+		testOffsetPrice(orderPrice, new SimpleMarketData(40.0, 40.175, 40.125), 40.0, 40.0, new BigDecimal("0.5"));
 	}
 
 	@Test
@@ -85,11 +86,12 @@ public class OrderPriceTest {
 		assertEquals(39.9, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), new SimpleMarketData(40, 40.1, 40.8)), .0001);
 	}
 
-	private void testOffsetPrice(OffsetOrderPrice orderPrice, MarketData marketData, double expectedBuy, double expectedSell, double tickSize) throws Exception {
+	private void testOffsetPrice(OffsetOrderPrice orderPrice, MarketData marketData, double expectedBuy, double expectedSell, BigDecimal tickSize) throws Exception {
 		for (int i = -5; i < 5; i++) {
-			orderPrice.setOffset(i * tickSize);
-			assertEquals(expectedBuy + i * tickSize, orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), marketData), .0001);
-			assertEquals(expectedSell - i * tickSize, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), marketData), .0001);
+			double offs = tickSize.multiply(new BigDecimal(i)).doubleValue();
+			orderPrice.setOffset(offs);
+			assertEquals(expectedBuy + offs, orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), marketData), .0001);
+			assertEquals(expectedSell - offs, orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), marketData), .0001);
 		}
 	}
 }

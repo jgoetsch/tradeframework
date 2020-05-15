@@ -15,8 +15,8 @@
  */
 package com.jgoetsch.eventtrader;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class TradeSignal extends Msg {
 
 	private TradeType type;
 	private int numShares;
-	private double price;
+	private BigDecimal price;
 	private Contract contract;
 	private boolean partial;
 
@@ -73,11 +73,11 @@ public class TradeSignal extends Msg {
 		this.contract = Contract.stock(symbol);
 	}
 
-	public TradeSignal(TradeType type, Contract contract, int numShares, double price) {
+	public TradeSignal(TradeType type, Contract contract, int numShares, BigDecimal price) {
 		this(type, contract, numShares, price, null);
 	}
 
-	public TradeSignal(TradeType type, Contract contract, int numShares, double price, Msg msg) {
+	public TradeSignal(TradeType type, Contract contract, int numShares, BigDecimal price, Msg msg) {
 		super(msg);
 		this.type = type;
 		this.contract = contract;
@@ -116,7 +116,8 @@ public class TradeSignal extends Msg {
 			return false;
 		if (getNumShares() != other.getNumShares())
 			return false;
-		if (getPrice() != other.getPrice())
+		if (getPrice() != null && other.getPrice() != null && !getPrice().equals(other.getPrice())
+				|| getPrice() == null ^ other.getPrice() == null)
 			return false;
 		if (getContract() == null || !getContract().equals(other.getContract()))
 			return false;
@@ -136,8 +137,8 @@ public class TradeSignal extends Msg {
 			sb.append(" ").append(new DecimalFormat("#,###").format(getNumShares()));
 		if (getContract() != null)
 			sb.append(" ").append(getContract());
-		if (getPrice() != 0)
-			sb.append(" at ").append(DecimalFormat.getCurrencyInstance().format(getPrice()));
+		if (getPrice() != null)
+			sb.append(" at ").append(new DecimalFormat("$0.00####").format(getPrice()));
 		return sb.toString();
 	}
 
@@ -165,11 +166,11 @@ public class TradeSignal extends Msg {
 		this.contract = contract;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 

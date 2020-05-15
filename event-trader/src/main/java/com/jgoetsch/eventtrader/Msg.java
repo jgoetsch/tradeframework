@@ -17,6 +17,7 @@ package com.jgoetsch.eventtrader;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -77,7 +78,7 @@ public class Msg implements Serializable, MsgMappable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (getDate() != null)
-			sb.append(getDate().toString()).append(" - ");
+			sb.append(dateFormat.format(getDate().atZone(ZoneId.systemDefault()))).append(" - ");
 		if (getSourceName() != null)
 			sb.append(getSourceName()).append(": ");
 		if (getMessage() != null && getMessage().length() > MAX_MSG_DISPLAY_LENGTH) {

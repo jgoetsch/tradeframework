@@ -1,5 +1,6 @@
 package com.jgoetsch.eventtrader.source.parser.mapper;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.validation.Valid;
@@ -77,7 +78,7 @@ public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implemen
 			@NotNull EntryType entryType;
 			@NotNull Boolean shortSell;
 			@NotNull Integer shares;
-			@NotNull Double entryPrice;
+			@NotNull BigDecimal entryPrice;
 
 			enum EntryType {
 				STOCK(Contract.STOCK),
@@ -103,7 +104,7 @@ public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implemen
 			return entry.entryDate;
 		}
 
-		protected double getPrice() {
+		protected BigDecimal getPrice() {
 			return entry.entryPrice;
 		}
 
@@ -141,7 +142,7 @@ public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implemen
 			@NotNull Boolean adding;
 			@NotNull Date tradeDate;
 			@NotNull Integer shares;
-			@NotNull Double price;
+			@NotNull BigDecimal price;
 			@NotNull String comments;
 		}
 
@@ -158,7 +159,7 @@ public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implemen
 			return partialEntry.tradeDate;
 		}
 
-		protected double getPrice() {
+		protected BigDecimal getPrice() {
 			return partialEntry.price;
 		}
 

@@ -28,7 +28,7 @@ public class TradeSignalPrice extends OffsetOrderPrice {
 
 	@Override
 	protected Double getBaseValue(TradeSignal trade, MarketData marketData) {
-		return trade.getPrice();
+		return trade.getPrice().doubleValue();
 	}
 
 }

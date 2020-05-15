@@ -17,9 +17,8 @@ package com.jgoetsch.eventtrader.test;
 
 import static org.junit.Assert.assertNull;
 
+import java.math.BigDecimal;
 import java.util.Collection;
-
-import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,49 +38,49 @@ public class AlertTradeExtractorTest {
 		String src = "Alert test";
 
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 1000 DEXO at $6.45")),
-					new TradeSignal(TradeType.SHORT, Contract.stock("DEXO"), 1000, 6.45));
+					new TradeSignal(TradeType.SHORT, Contract.stock("DEXO"), 1000, new BigDecimal("6.45")));
 		assertTrade(extractor.parseTrades(new Msg(src, "Shorted 7k DEXO at 6.42")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("DEXO"), 7000, 6.42));
+				new TradeSignal(TradeType.SHORT, Contract.stock("DEXO"), 7000, new BigDecimal("6.42")));
 		assertNull(extractor.parseTrades(new Msg(src, "shorted 1000 dexo at $6.45")));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "bought 100000 GBOED at $0.13")),
-				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 100000, 0.13));
+				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 100000, new BigDecimal("0.13")));
 		assertTrade(extractor.parseTrades(new Msg(src, "bought 100k GBOED at $.13")),
-				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 100000, 0.13));
+				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 100000, new BigDecimal("0.13")));
 		assertTrade(extractor.parseTrades(new Msg(src, "BUY 50K GBOED at .035")),
-				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 50000, 0.035));
+				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 50000, new BigDecimal("0.035")));
 		assertTrade(extractor.parseTrades(new Msg(src, "bought 50K GBOED at 6 cents")),
-				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 50000, 0.06));
+				new TradeSignal(TradeType.BUY, Contract.stock("GBOED"), 50000, new BigDecimal("0.06")));
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 25,000 CPMCF at 64 cents")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("CPMCF"), 25000, 0.64));
+				new TradeSignal(TradeType.SHORT, Contract.stock("CPMCF"), 25000, new BigDecimal("0.64")));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "Reshorted 30k CPMCF at .36 premarket, I'd wait to get a better price, but shares are going fast")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("CPMCF"), 30000, 0.36));
+				new TradeSignal(TradeType.SHORT, Contract.stock("CPMCF"), 30000, new BigDecimal("0.36")));
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 3.5k GSL at 5.15 on the intraday breakdown, ")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("GSL"), 3500, 5.15));
+				new TradeSignal(TradeType.SHORT, Contract.stock("GSL"), 3500, new BigDecimal("5.15")));
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 200 CDTID at 36.50, risky but small postiion, goal is low 30s")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("CDTID"), 200, 36.50));
+				new TradeSignal(TradeType.SHORT, Contract.stock("CDTID"), 200, new BigDecimal("36.50")));
 		assertTrade(extractor.parseTrades(new Msg(src, "covered 200 CDTID at 33ish, near my goal of the low 30s")),
-				new TradeSignal(TradeType.COVER, Contract.stock("CDTID"), 200, 33));
+				new TradeSignal(TradeType.COVER, Contract.stock("CDTID"), 200, new BigDecimal("33")));
 		assertTrade(extractor.parseTrades(new Msg(src, "shorted 9k RITT at 3.90ish via Thinkorswim, nice to hold overnight")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("RITT"), 9000, 3.90));
+				new TradeSignal(TradeType.SHORT, Contract.stock("RITT"), 9000, new BigDecimal("3.90")));
 		assertTrade(extractor.parseTrades(new Msg(src, "reshorted 20k PIP at 4.21, looks to be breaking down again, ")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("PIP"), 20000, 4.21));
+				new TradeSignal(TradeType.SHORT, Contract.stock("PIP"), 20000, new BigDecimal("4.21")));
 		assertTrade(extractor.parseTrades(new Msg(src, "Shorted 3k AENY at 96 cents via IB, pure pump stock up 100% off its lows, ")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("AENY"), 3000, 0.96));
+				new TradeSignal(TradeType.SHORT, Contract.stock("AENY"), 3000, new BigDecimal("0.96")));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "bought 5k ZAGG at 7.25, solid afternoon breakout, this could keep going LQMT-style since its an AAPL related penny stock, goal is 8+ tomorrow")),
-				new TradeSignal(TradeType.BUY, Contract.stock("ZAGG"), 5000, 7.25));
+				new TradeSignal(TradeType.BUY, Contract.stock("ZAGG"), 5000, new BigDecimal("7.25")));
 		//assertTrade(extractor.parseTrades(new Msg(src, "Sold ZAGG at 7.40ish for small profit, sellers look persistent")),
 		//		new TradeSignal(TradeType.SELL, Contract.stock("ZAGG"), 0, 7.40));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "Reshorted 30k POTG at 1.0867, shares became available so I gotta focus")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("POTG"), 30000, 1.0867));
+				new TradeSignal(TradeType.SHORT, Contract.stock("POTG"), 30000, new BigDecimal("1.0867")));
 		//assertTrade(extractor.parseTrades(new Msg(src, "Sold RYUN for small gains at $2.42ish, gotta focus")),
 		//		new TradeSignal(TradeType.SELL, Contract.stock("RYUN"), 0, 2.42));
 		
 		assertTrade(extractor.parseTrades(new Msg(src, "Reshorted 17k SAPX in the 3.30s on the slight bounce off day low of 3.07")),
-				new TradeSignal(TradeType.SHORT, Contract.stock("SAPX"), 17000, 0));
+				new TradeSignal(TradeType.SHORT, Contract.stock("SAPX"), 17000, null));
 		
 		assertNull(extractor.parseTrades(new Msg(src, "i bought 10,000 XCO at 2.30. it's up 40% today")));
 		//		new TradeSignal(TradeType.BUY, Contract.stock("XCO"), 10000, 2.30));
@@ -91,10 +90,10 @@ public class AlertTradeExtractorTest {
 		assertNull(extractor.parseTrades(new Msg(src, "added 5000 MOSY at 2.08")));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "swing trade: bought 5k WATT at ¤15.57")),
-				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, 15.57));
+				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, new BigDecimal("15.57")));
 
 		assertTrade(extractor.parseTrades(new Msg(src, "momentum alert - bought 5k WATT at ¤15.57")),
-				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, 15.57));
+				new TradeSignal(TradeType.BUY, Contract.stock("WATT"), 5000, new BigDecimal("15.57")));
 
 	}
 

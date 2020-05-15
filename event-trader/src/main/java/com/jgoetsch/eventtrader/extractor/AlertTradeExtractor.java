@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.eventtrader.extractor;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Collection;
@@ -65,10 +66,10 @@ public class AlertTradeExtractor extends TradeExtractor {
 			}
 			trade.setContract(Contract.stock(mAlert.group(3)));
 			try {
-				trade.setPrice(Double.parseDouble(mAlert.group(4)));
+				trade.setPrice(new BigDecimal(mAlert.group(4)));
 			} catch (NumberFormatException e) { }
 			if ("cents".equalsIgnoreCase(mAlert.group(5)))
-				trade.setPrice(trade.getPrice() / 100);
+				trade.setPrice(trade.getPrice().divide(BigDecimal.valueOf(100)));
 
 			return Collections.singletonList(trade);
 		}

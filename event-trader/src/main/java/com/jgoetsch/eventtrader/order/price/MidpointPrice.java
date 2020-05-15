@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.util.Arrays;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
@@ -29,7 +31,7 @@ public class MidpointPrice extends OffsetOrderPrice {
 
 	@Override
 	protected Double getBaseValue(TradeSignal trade, MarketData marketData) {
-		return Math.rint(((marketData.getBid() + marketData.getAsk()) / 2) / getTickSize()) * getTickSize();
+		return Arrays.asList(marketData.getBid(), marketData.getAsk()).stream().mapToDouble(v -> v).average().getAsDouble();
 	}
 
 }

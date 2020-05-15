@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -28,17 +29,18 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
  *
  */
 public abstract class OffsetOrderPrice implements OrderPrice {
-
 	private double offset = 0.0;
 	private boolean isPercentage = false;
-	private double tickSize = 0.01;
+	private TickRounding tickRounding = TickRounding.DEFAULT_STOCK;
 
 	public final double getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
 		double base = getBaseValue(trade, marketData);
 		if (base == 0)
 			throw new DataUnavailableException("Market data for " + getClass().getSimpleName() + " not available");
-		else
-			return base + getOffset(trade, marketData, base);
+
+		BigDecimal baseDecimal = BigDecimal.valueOf(base);
+		BigDecimal offs = getOffset(trade.getType().isSell(), baseDecimal);
+		return tickRounding.roundToTick(baseDecimal.add(offs), trade.getType().isSell()).doubleValue();
 	}
 
 	/**
@@ -61,8 +63,13 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * @param marketData
 	 * @return offset to add to base price
 	 */
-	protected double getOffset(TradeSignal trade, MarketData marketData, double basePrice) {
-		return Math.rint(((trade.getType().isSell() ? -getOffset() : getOffset()) * (isPercentage() ? basePrice : 1)) / tickSize) * tickSize;
+	protected BigDecimal getOffset(boolean isSell, BigDecimal basePrice) {
+		BigDecimal offs = BigDecimal.valueOf(getOffset());
+		if (isSell)
+			offs = offs.negate();
+		if (isPercentage())
+			offs = offs.multiply(basePrice);
+		return offs;
 	}
 
 	@Override
@@ -87,12 +94,12 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 		return isPercentage;
 	}
 
-	public final void setTickSize(double tickSize) {
-		this.tickSize = tickSize;
+	public TickRounding getTickRounding() {
+		return tickRounding;
 	}
 
-	public final double getTickSize() {
-		return tickSize;
+	public void setTickRounding(TickRounding tickRounding) {
+		this.tickRounding = tickRounding;
 	}
 
 }
