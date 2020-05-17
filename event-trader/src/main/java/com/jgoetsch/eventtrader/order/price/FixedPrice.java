@@ -15,29 +15,31 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class FixedPrice implements OrderPrice {
 
-	private double price;
+	private BigDecimal price;
 
 	public FixedPrice() {
 	}
 
-	public FixedPrice(double price) {
+	public FixedPrice(BigDecimal price) {
 		this.price = price;
 	}
 
-	public double getValue(TradeSignal trade, MarketData marketData) {
+	public BigDecimal getValue(TradeSignal trade, MarketData marketData) {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 

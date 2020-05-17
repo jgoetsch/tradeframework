@@ -15,7 +15,7 @@
  */
 package com.jgoetsch.tradeframework.data;
 
-public class DataUnavailableException extends Exception {
+public class DataUnavailableException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public DataUnavailableException() {

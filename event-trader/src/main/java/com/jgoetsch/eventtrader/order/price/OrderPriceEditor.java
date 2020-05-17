@@ -16,7 +16,8 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.beans.PropertyEditorSupport;
-import java.text.NumberFormat;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,16 +68,20 @@ public class OrderPriceEditor extends PropertyEditorSupport {
 					}
 					else {
 						try {
-							OrderPrice priceObj = (OrderPrice) orderPriceClass.newInstance();
+							OrderPrice priceObj = (OrderPrice) orderPriceClass.getDeclaredConstructor().newInstance();
 							if (offset.length() > 0) {
 								if (priceObj instanceof OffsetOrderPrice) {
 									try {
+										DecimalFormat df;
 										if (offset.contains("%")) {
-											((OffsetOrderPrice)priceObj).setOffset(NumberFormat.getPercentInstance().parse(offset).doubleValue());
+											df = (DecimalFormat)DecimalFormat.getPercentInstance();
 											((OffsetOrderPrice)priceObj).setPercentage(true);
 										}
-										else
-											((OffsetOrderPrice)priceObj).setOffset(NumberFormat.getNumberInstance().parse(offset).doubleValue());
+										else {
+											df = (DecimalFormat)DecimalFormat.getNumberInstance();
+										}
+										df.setParseBigDecimal(true);
+										((OffsetOrderPrice)priceObj).setOffset((BigDecimal)df.parse(offset));
 									} catch (ParseException e) {
 										throw new IllegalArgumentException("Invalid price offset format (must be decimal number or percentage): " + e.getMessage());
 									}
@@ -85,9 +90,7 @@ public class OrderPriceEditor extends PropertyEditorSupport {
 									throw new IllegalArgumentException("Order price class \"" + className + "\" cannot be used with an offset amount");
 							}
 							prices.add(priceObj);
-						}  catch (InstantiationException e) {
-							throw new IllegalArgumentException("Order price class \"" + className + "\" cannot be instantiated", e);
-						} catch (IllegalAccessException e) {
+						}  catch (ReflectiveOperationException e) {
 							throw new IllegalArgumentException("Order price class \"" + className + "\" cannot be instantiated", e);
 						}
 					}
@@ -97,7 +100,7 @@ public class OrderPriceEditor extends PropertyEditorSupport {
 			}
 			else {
 				try {
-					prices.add(new FixedPrice(Double.valueOf(tok)));
+					prices.add(new FixedPrice(new BigDecimal(tok)));
 				} catch (NumberFormatException e) {
 					throw new IllegalArgumentException("Invalid order price format: " + tok);
 				}

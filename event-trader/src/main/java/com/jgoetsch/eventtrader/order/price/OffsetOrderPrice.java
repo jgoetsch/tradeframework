@@ -16,7 +16,13 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.function.UnaryOperator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
@@ -29,18 +35,23 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
  *
  */
 public abstract class OffsetOrderPrice implements OrderPrice {
-	private double offset = 0.0;
+	private BigDecimal offset = BigDecimal.ZERO;
 	private boolean isPercentage = false;
-	private TickRounding tickRounding = TickRounding.DEFAULT_STOCK;
+	private UnaryOperator<BigDecimal> buyTickRounding = TickRounding.DEFAULT_STOCK_BUY;
+	private UnaryOperator<BigDecimal> sellTickRounding = TickRounding.DEFAULT_STOCK_SELL;
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public final double getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
-		double base = getBaseValue(trade, marketData);
-		if (base == 0)
-			throw new DataUnavailableException("Market data for " + getClass().getSimpleName() + " not available");
-
-		BigDecimal baseDecimal = BigDecimal.valueOf(base);
-		BigDecimal offs = getOffset(trade.getType().isSell(), baseDecimal);
-		return tickRounding.roundToTick(baseDecimal.add(offs), trade.getType().isSell()).doubleValue();
+	public final BigDecimal getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
+		BigDecimal base = getBaseValue(trade, marketData);
+		if (base != null) {
+			BigDecimal calculated =
+					(trade.isSell() ? sellTickRounding : buyTickRounding)
+					.apply(base.add(getActualOffset(trade.isSell(), base)));
+			log.trace("[{}] calculated price {} from base {}", toString(), calculated, base);
+			return calculated;
+		}
+		else
+			throw new DataUnavailableException("Required data for " + getClass().getSimpleName() + " not available");
 	}
 
 	/**
@@ -51,7 +62,11 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * @param marketData
 	 * @return base price extracted from the marketData
 	 */
-	protected abstract Double getBaseValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException;
+	protected abstract BigDecimal getBaseValue(TradeSignal trade, MarketData marketData);
+
+	protected final BigDecimal fromDouble(double value) throws DataUnavailableException {
+		return value != 0 ? BigDecimal.valueOf(value) : null;
+	}
 
 	/**
 	 * Returns the actual offset amount to be added to the base price. By
@@ -63,8 +78,8 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * @param marketData
 	 * @return offset to add to base price
 	 */
-	protected BigDecimal getOffset(boolean isSell, BigDecimal basePrice) {
-		BigDecimal offs = BigDecimal.valueOf(getOffset());
+	protected BigDecimal getActualOffset(boolean isSell, BigDecimal basePrice) {
+		BigDecimal offs = offset;
 		if (isSell)
 			offs = offs.negate();
 		if (isPercentage())
@@ -74,15 +89,20 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 
 	@Override
 	public String toString() {
-		NumberFormat nf = isPercentage ? NumberFormat.getPercentInstance() : NumberFormat.getNumberInstance();
-		return getClass().getSimpleName() + (offset >= 0 ? " + " : " - ") + nf.format(Math.abs(offset));
+		StringBuilder builder = new StringBuilder(getClass().getSimpleName());
+		builder.append(offset.signum() < 0 ? "-" : "+");
+		if (isPercentage)
+			builder.append(offset.abs().movePointRight(2)).append("%");
+		else
+			builder.append(offset.abs());
+		return builder.toString();
 	}
 
-	public final void setOffset(double offset) {
+	public final void setOffset(BigDecimal offset) {
 		this.offset = offset;
 	}
 
-	public final double getOffset() {
+	public final BigDecimal getOffset() {
 		return offset;
 	}
 
@@ -94,12 +114,20 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 		return isPercentage;
 	}
 
-	public TickRounding getTickRounding() {
-		return tickRounding;
+	public UnaryOperator<BigDecimal> getBuyTickRounding() {
+		return buyTickRounding;
 	}
 
-	public void setTickRounding(TickRounding tickRounding) {
-		this.tickRounding = tickRounding;
+	public void setBuyTickRounding(UnaryOperator<BigDecimal> tickRounding) {
+		this.buyTickRounding = tickRounding;
+	}
+
+	public UnaryOperator<BigDecimal> getSellTickRounding() {
+		return sellTickRounding;
+	}
+
+	public void setSellTickRounding(UnaryOperator<BigDecimal> tickRounding) {
+		this.sellTickRounding = tickRounding;
 	}
 
 }

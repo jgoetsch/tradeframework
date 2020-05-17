@@ -1,40 +1,43 @@
 package com.jgoetsch.eventtrader
 
-import com.jgoetsch.eventtrader.order.price.PriceMappedTickSize
+import com.jgoetsch.eventtrader.order.price.PriceMappedTickRounding
 import com.jgoetsch.eventtrader.order.price.TickRounding
 import spock.lang.Specification
+import spock.lang.Unroll
+import java.math.RoundingMode
+import java.util.Map
 
 class TickRoundingSpec extends Specification {
 
-	def "TickRounding.DEFAULT_STOCK round to 4 decimals up to 1.00 and 2 above 1.00"() {
+	@Unroll
+	def "#tickRounding rounds #price to #result"() {
 		expect:
-		TickRounding.DEFAULT_STOCK.roundToTick(price, sell) == result
+		tickRounding.apply(price) == result
 
 		where:
-		sell  | price    | result
-		false | 2.53     | 2.53
-		false | 3.534    | 3.53
-		false | 3.539991 | 3.54
-		false | 1.005    | 1.00
-		true  | 1.005    | 1.01
-		false | 0.0923   | 0.0923
-		true  | 0.723333 | 0.7233
-		false | 0.99995  | 0.9999
-		true  | 0.99995  | 1.00
-		false | 10/3     | 3.33
-		false | 1/3      | 0.3333
+		tickRounding                          | price      | result
+		TickRounding.DEFAULT_STOCK_BUY        | 2.53       | 2.53
+		TickRounding.DEFAULT_STOCK_BUY        | 3.534      | 3.53
+		TickRounding.DEFAULT_STOCK_BUY        | 3.539991   | 3.54
+		TickRounding.DEFAULT_STOCK_BUY        | 1.005      | 1.00
+		TickRounding.DEFAULT_STOCK_SELL       | 1.005      | 1.01
+		TickRounding.DEFAULT_STOCK_BUY        | 0.0923     | 0.0923
+		TickRounding.DEFAULT_STOCK_SELL       | 0.723333   | 0.7233
+		TickRounding.DEFAULT_STOCK_BUY        | 0.99995    | 0.9999
+		TickRounding.DEFAULT_STOCK_SELL       | 0.99995    | 1.00
+		TickRounding.DEFAULT_STOCK_BUY        | 10/3       | 3.33
+		TickRounding.DEFAULT_STOCK_BUY        | 1/3        | 0.3333
+		TickRounding.DEFAULT_STOCK_SELL       | Math.PI    | 3.14
+		TickRounding.DEFAULT_STOCK_BUY        | Math.PI/10 | 0.3142
+		pmtr([0.0: 0.01, 5.0: 0.05])             | 2.53    | 2.53
+		pmtr([0.0: 0.01, 5.0: 0.05])             | 5.53    | 5.55
+		pmtr([0.0: 0.01, 5.0: 0.25])             | 5.53    | 5.50
+		pmtr([0.0: 0.01, 9.9: 0.25, 50.0: 12.0]) | 100/3   | 33.25
+		pmtr([0.0: 0.01, 5.0: 0.25, 50.0: 12.0]) | 70.0    | 72.0
+		pmtr([0.0: 0.01, 40.0: 0.025])           | 40.1375 | 40.15
 	}
-	
-	def "PriceMappedTickSize rounds price to tick"() {
-		expect:
-		new PriceMappedTickSize(rounding).roundToTick(price, true) == result
 
-		where:
-		rounding  | price    | result
-		[(Double.valueOf(0)): new BigDecimal(".01"),(Double.valueOf(5)): new BigDecimal("0.05")] | 2.53     | 2.53
-		[(Double.valueOf(0)): new BigDecimal(".01"),(Double.valueOf(5)): new BigDecimal("0.05")] | 5.53     | 5.55
-		[(Double.valueOf(0)): new BigDecimal(".01"),(Double.valueOf(5)): new BigDecimal("0.25")] | 5.53     | 5.50
-		[(Double.valueOf(0)): new BigDecimal(".01"),(Double.valueOf(5)): new BigDecimal("0.25"),(Double.valueOf(50)): new BigDecimal("12")] | 70 | 72
-		[(Double.valueOf(0)): new BigDecimal(".01"),(Double.valueOf(40)): new BigDecimal("0.025")] | (40.0+40.175)/2.0 + (0.025 * 2) | 40.15
+	def pmtr(priceFloorsToTickSizes) {
+		new PriceMappedTickRounding(priceFloorsToTickSizes, RoundingMode.HALF_UP)
 	}
 }

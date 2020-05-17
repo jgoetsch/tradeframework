@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
@@ -28,8 +30,8 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
 public class BidPrice extends OffsetOrderPrice {
 
 	@Override
-	protected Double getBaseValue(TradeSignal trade, MarketData marketData) {
-		return trade.getType().isBuy() ? marketData.getBid() : marketData.getAsk();
+	protected BigDecimal getBaseValue(TradeSignal trade, MarketData marketData) {
+		return fromDouble(trade.isSell() ? marketData.getAsk() : marketData.getBid());
 	}
 
 }

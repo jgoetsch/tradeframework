@@ -15,12 +15,14 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public interface OrderPrice {
 
-	public double getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException;
+	public BigDecimal getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException;
 
 }

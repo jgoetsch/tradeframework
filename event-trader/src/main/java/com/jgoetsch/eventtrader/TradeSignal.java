@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jgoetsch.tradeframework.Contract;
+import com.jgoetsch.tradeframework.data.DataUnavailableException;
 
 /**
  * A {@link com.jgoetsch.eventtrader.Msg Msg} from which a signal to
@@ -140,6 +141,20 @@ public class TradeSignal extends Msg {
 		if (getPrice() != null)
 			sb.append(" at ").append(new DecimalFormat("$0.00####").format(getPrice()));
 		return sb.toString();
+	}
+
+	public boolean isSell() {
+		if (type != null)
+			return type.isSell();
+		else
+			throw new DataUnavailableException("Buy/sell designation not available in TradeSignal [" + toString() + "]");
+	}
+
+	public boolean isExit() {
+		if (type != null)
+			return type.isExit();
+		else
+			throw new DataUnavailableException("Entry/exit designation not available in TradeSignal [" + toString() + "]");
 	}
 
 	public TradeType getType() {

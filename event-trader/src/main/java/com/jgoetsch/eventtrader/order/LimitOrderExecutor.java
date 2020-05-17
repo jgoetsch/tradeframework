@@ -39,7 +39,7 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 	protected void prepareOrder(Order order, TradeSignal trade, MarketData marketData) throws OrderException, DataUnavailableException
 	{
 		order.setType(Order.TYPE_LIMIT);
-		order.setLimitPrice(limitPrice.getValue(trade, marketData));
+		order.setLimitPrice(limitPrice.getValue(trade, marketData).doubleValue());
 		order.setAllowOutsideRth(allowOutsideRth);
 	}
 
@@ -50,7 +50,7 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 
 	@Override
 	protected double getIntendedPrice(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
-		return limitPrice.getValue(trade, marketData);
+		return limitPrice.getValue(trade, marketData).doubleValue();
 	}
 
 	public void setLimitPrice(OrderPrice limitPrice) {

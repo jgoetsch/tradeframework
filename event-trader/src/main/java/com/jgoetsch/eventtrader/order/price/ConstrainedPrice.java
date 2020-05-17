@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -31,19 +32,14 @@ public class ConstrainedPrice implements OrderPrice {
 	}
 
 	public ConstrainedPrice(Collection<? extends OrderPrice> prices) {
+		if (prices == null || prices.isEmpty())
+			throw new IllegalArgumentException("Must specify at least one OrderPrice");
 		this.prices = prices;
 	}
 
-	public double getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
-		double price = -1;
-		for (OrderPrice priceCalc : prices) {
-			double pr = priceCalc.getValue(trade, marketData);
-			if (price == -1)
-				price = pr;
-			else
-				price = trade.getType().isBuy() != aggressive ? Math.min(price, pr) : Math.max(price, pr);
-		}
-		return price;
+	public BigDecimal getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
+		return prices.stream().map(p -> p.getValue(trade, marketData))
+				.reduce(trade.isSell() == aggressive ? BigDecimal::min : BigDecimal::max).get();
 	}
 
 	public void initialize() {
