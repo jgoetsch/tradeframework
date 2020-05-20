@@ -25,13 +25,15 @@ package com.jgoetsch.tradeframework;
 public class ContractDetails extends Contract {
 
 	public String marketName;
-	public String tradingClass;
 	public double minTick;
 	public int priceMagnifier;
 	public String orderTypes;
 	public String validExchanges;
 	public int underConId;
 	public String longName;
+	public String industry;
+	public String category;
+	public String subcategory;
 
 	public ContractDetails() {
 		super();
@@ -47,14 +49,6 @@ public class ContractDetails extends Contract {
 
 	public void setMarketName(String marketName) {
 		this.marketName = marketName;
-	}
-
-	public String getTradingClass() {
-		return tradingClass;
-	}
-
-	public void setTradingClass(String tradingClass) {
-		this.tradingClass = tradingClass;
 	}
 
 	public double getMinTick() {
@@ -103,6 +97,30 @@ public class ContractDetails extends Contract {
 
 	public void setLongName(String longName) {
 		this.longName = longName;
+	}
+
+	public String getIndustry() {
+		return industry;
+	}
+
+	public void setIndustry(String industry) {
+		this.industry = industry;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public String getSubcategory() {
+		return subcategory;
+	}
+
+	public void setSubcategory(String subcategory) {
+		this.subcategory = subcategory;
 	}
 
 }

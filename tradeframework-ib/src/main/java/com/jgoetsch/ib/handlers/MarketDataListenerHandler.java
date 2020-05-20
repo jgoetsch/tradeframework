@@ -18,6 +18,7 @@ package com.jgoetsch.ib.handlers;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ib.client.TickAttrib;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.marketdata.MarketDataListener;
 
@@ -44,8 +45,8 @@ public class MarketDataListenerHandler extends MarketDataHandler {
 	}
 
 	@Override
-	protected synchronized void onTickPrice(int field, double price, int canAutoExecute) {
-		super.onTickPrice(field, price, canAutoExecute);
+	protected synchronized void onTickPrice(int field, double price, TickAttrib attrib) {
+		super.onTickPrice(field, price, attrib);
 		if (getStatus() == STATUS_SUCCESS) {
 			for (MarketDataListener listener : listeners)
 				listener.tick(contract, this);

@@ -22,7 +22,7 @@ import com.jgoetsch.tradeframework.Execution;
 
 /**
  * Provides static methods to convert Interactive Brokers TWS specific data
- * objects to and from the equivilent TradeFramework data objects.
+ * objects to and from the equivalent TradeFramework data objects.
  * 
  * @author jgoetsch
  * 
@@ -35,26 +35,26 @@ public class TWSUtils {
 	/**
 	 * Convert a TradeFramework contract object into an IB contract object.
 	 * @param contract <code>com.jgoetsch.tradeframework.Contract</code> object
-	 * @return equivilent object of type <code>com.ib.client.Contract</code>
+	 * @return equivalent object of type <code>com.ib.client.Contract</code>
 	 */
 	public static com.ib.client.Contract toTWSContract(Contract contract) {
 		com.ib.client.Contract twsContract = new com.ib.client.Contract();
 
 		if ("Stock".equalsIgnoreCase(contract.getType()))
-			twsContract.m_secType = Contract.STOCK;
+			twsContract.secType(Contract.STOCK);
 		else if ("Futures".equalsIgnoreCase(contract.getType()))
-			twsContract.m_secType = Contract.FUTURES;
+			twsContract.secType(Contract.FUTURES);
 		else if ("Option".equalsIgnoreCase(contract.getType()))
-			twsContract.m_secType = Contract.OPTIONS;
+			twsContract.secType(Contract.OPTIONS);
 		else
-			twsContract.m_secType = contract.getType();
+			twsContract.secType(contract.getType());
 
-		twsContract.m_symbol = contract.getSymbol();
-		twsContract.m_exchange = contract.getExchange();
-		twsContract.m_currency = contract.getCurrency();
-		twsContract.m_expiry = contract.getExpiry();
+		twsContract.symbol(contract.getSymbol());
+		twsContract.exchange(contract.getExchange());
+		twsContract.currency(contract.getCurrency());
+		twsContract.lastTradeDateOrContractMonth(contract.getExpiry());
 		if (contract.getMultiplier() > 1)
-			twsContract.m_multiplier = Long.toString(contract.getMultiplier());
+			twsContract.multiplier(Long.toString(contract.getMultiplier()));
 		return twsContract;
 	}
 
@@ -65,13 +65,13 @@ public class TWSUtils {
 	 */
 	public static Contract fromTWSContract(com.ib.client.Contract twsContract) {
 		Contract contract = new com.jgoetsch.tradeframework.Contract();
-		contract.setType(twsContract.m_secType);
-		contract.setSymbol(twsContract.m_symbol);
-		contract.setExchange(twsContract.m_exchange);
-		contract.setCurrency(twsContract.m_currency);
-		contract.setExpiry(twsContract.m_expiry);
-		if (twsContract.m_multiplier != null && twsContract.m_multiplier.length() > 0)
-			contract.setMultiplier(Long.parseLong(twsContract.m_multiplier));
+		contract.setType(twsContract.getSecType());
+		contract.setSymbol(twsContract.symbol());
+		contract.setExchange(twsContract.exchange());
+		contract.setCurrency(twsContract.currency());
+		contract.setExpiry(twsContract.lastTradeDateOrContractMonth());
+		if (twsContract.multiplier() != null && twsContract.multiplier().length() > 0)
+			contract.setMultiplier(Long.parseLong(twsContract.multiplier()));
 		return contract;
 	}
 
@@ -81,15 +81,17 @@ public class TWSUtils {
 	 * @return equivalent object of type <code>com.jgoetsch.tradeframework.ContractDetails</code>
 	 */
 	public static ContractDetails fromTWSContractDetails(com.ib.client.ContractDetails twsContractDetails) {
-		ContractDetails contractDetails = new com.jgoetsch.tradeframework.ContractDetails(fromTWSContract(twsContractDetails.m_summary));
-		contractDetails.setMarketName(twsContractDetails.m_marketName);
-		contractDetails.setTradingClass(twsContractDetails.m_tradingClass);
-		contractDetails.setMinTick(twsContractDetails.m_minTick);
-		contractDetails.setPriceMagnifier(twsContractDetails.m_priceMagnifier);
-		contractDetails.setOrderTypes(twsContractDetails.m_orderTypes);
-		contractDetails.setValidExchanges(twsContractDetails.m_validExchanges);
-		contractDetails.setUnderConId(twsContractDetails.m_underConId);
-		contractDetails.setLongName(twsContractDetails.m_longName);
+		ContractDetails contractDetails = new com.jgoetsch.tradeframework.ContractDetails(fromTWSContract(twsContractDetails.contract()));
+		contractDetails.setMarketName(twsContractDetails.marketName());
+		contractDetails.setMinTick(twsContractDetails.minTick());
+		contractDetails.setPriceMagnifier(twsContractDetails.priceMagnifier());
+		contractDetails.setOrderTypes(twsContractDetails.orderTypes());
+		contractDetails.setValidExchanges(twsContractDetails.validExchanges());
+		contractDetails.setUnderConId(twsContractDetails.underConid());
+		contractDetails.setLongName(twsContractDetails.longName());
+		contractDetails.setIndustry(twsContractDetails.industry());
+		contractDetails.setCategory(twsContractDetails.category());
+		contractDetails.setSubcategory(twsContractDetails.subcategory());
 		return contractDetails;
 	}
 
@@ -100,16 +102,16 @@ public class TWSUtils {
 	 */
 	public static com.ib.client.Order toTWSOrder(Order order) {
 		com.ib.client.Order twsOrder = new com.ib.client.Order();
-		twsOrder.m_action = order.getQuantity() > 0 ? "BUY" : "SELL";
-		twsOrder.m_totalQuantity = Math.abs(order.getQuantity());
-		twsOrder.m_orderType = order.getType();
-		twsOrder.m_tif = order.getTimeInForce();
-		twsOrder.m_outsideRth = order.getAllowOutsideRth();
-		twsOrder.m_lmtPrice = order.getLimitPrice();
-		twsOrder.m_auxPrice = order.getAuxPrice();
-		twsOrder.m_trailStopPrice = order.getTrailStopPrice();
-		twsOrder.m_transmit = order.isTransmit();
-		twsOrder.m_account = order.getAccount();
+		twsOrder.action(order.getQuantity() > 0 ? "BUY" : "SELL");
+		twsOrder.totalQuantity(Math.abs(order.getQuantity()));
+		twsOrder.orderType(order.getType());
+		twsOrder.tif(order.getTimeInForce());
+		twsOrder.outsideRth(order.getAllowOutsideRth());
+		twsOrder.lmtPrice(order.getLimitPrice());
+		twsOrder.auxPrice(order.getAuxPrice());
+		twsOrder.trailStopPrice(order.getTrailStopPrice());
+		twsOrder.transmit(order.isTransmit());
+		twsOrder.account(order.getAccount());
 		return twsOrder;
 	}
 
@@ -120,14 +122,14 @@ public class TWSUtils {
 	 */
 	public static Order fromTWSOrder(com.ib.client.Order twsOrder) {
 		Order order = new Order();
-		order.setType(twsOrder.m_orderType);
-		order.setQuantity("SELL".equalsIgnoreCase(twsOrder.m_action) ? -twsOrder.m_totalQuantity : twsOrder.m_totalQuantity);
-		order.setTimeInForce(twsOrder.m_tif);
-		order.setLimitPrice(twsOrder.m_lmtPrice);
-		order.setAuxPrice(twsOrder.m_auxPrice);
-		order.setTrailStopPrice(twsOrder.m_trailStopPrice);
-		order.setAccount(twsOrder.m_account);
-		order.setTransmit(twsOrder.m_transmit);
+		order.setType(twsOrder.getOrderType());
+		order.setQuantity(Double.valueOf("SELL".equalsIgnoreCase(twsOrder.getAction()) ? -twsOrder.totalQuantity() : twsOrder.totalQuantity()).intValue());
+		order.setTimeInForce(twsOrder.getTif());
+		order.setLimitPrice(twsOrder.lmtPrice());
+		order.setAuxPrice(twsOrder.auxPrice());
+		order.setTrailStopPrice(twsOrder.trailStopPrice());
+		order.setAccount(twsOrder.account());
+		order.setTransmit(twsOrder.transmit());
 		return order;
 	}
 
@@ -138,8 +140,8 @@ public class TWSUtils {
 	 */
 	public static Execution fromTWSExecution(com.ib.client.Execution twsExecution) {
 		Execution execution = new Execution();
-		execution.setQuantity("SLD".equalsIgnoreCase(twsExecution.m_side) ? -twsExecution.m_shares : twsExecution.m_shares);
-		execution.setPrice(twsExecution.m_price);
+		execution.setQuantity(Double.valueOf("SLD".equalsIgnoreCase(twsExecution.side()) ? -twsExecution.shares() : twsExecution.shares()).intValue());
+		execution.setPrice(twsExecution.price());
 		return execution;
 	}
 

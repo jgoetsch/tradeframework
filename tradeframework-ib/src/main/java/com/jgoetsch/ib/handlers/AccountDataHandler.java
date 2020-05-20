@@ -67,12 +67,12 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	}
 
 	@Override
-	public synchronized void updatePortfolio(com.ib.client.Contract contract, int position,
+	public synchronized void updatePortfolio(com.ib.client.Contract contract, double position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
 		if (accountCode == null || accountCode.equals(accountName)) {
-			positions.put(TWSUtils.fromTWSContract(contract), new PresetPosition(position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL));
+			positions.put(TWSUtils.fromTWSContract(contract), new PresetPosition(Double.valueOf(position).intValue(), marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL));
 		}
 	}
 

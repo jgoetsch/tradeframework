@@ -13,7 +13,7 @@ public class PriceFilter extends FilterProcessor<TradeSignal> {
 	@Override
 	protected boolean handleProcessing(TradeSignal msg, Map<Object, Object> context) throws Exception {
 		BigDecimal priceValue = msg.getPrice();
-		return priceValue != null && (min == null || priceValue.compareTo(min) >= 0) && (max == null || priceValue.compareTo(max) <= 0);
+		return priceValue != null && (min == null || priceValue.compareTo(min) >= 0) && (max == null || priceValue.compareTo(max) < 0);
 	}
 
 	public BigDecimal getMin() {

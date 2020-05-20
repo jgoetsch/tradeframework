@@ -22,6 +22,7 @@ import com.ib.client.Contract;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
+import com.ib.client.TickAttrib;
 import com.ib.client.TickType;
 import com.jgoetsch.ib.TWSUtils;
 
@@ -41,7 +42,7 @@ public class MessageLogger extends BaseHandler {
 	private Logger orderLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".order");
 	private Logger execLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".execDetails");
 	private Logger accountLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".account");
-	private Logger marketDataLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".marketDataLog");
+	private Logger marketDataLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".marketData");
 
 	@Override
 	public int getStatus() {
@@ -54,7 +55,7 @@ public class MessageLogger extends BaseHandler {
 	}
 
 	@Override
-	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
+	public void tickPrice(int tickerId, int field, double price, TickAttrib attrib) {
 		marketDataLog.debug("tickPrice: id=" + tickerId + ", " + TickType.getField(field) + "=" + price);
 	}
 
@@ -107,7 +108,7 @@ public class MessageLogger extends BaseHandler {
 	}
 
 	@Override
-	public void updatePortfolio(Contract contract, int position,
+	public void updatePortfolio(Contract contract, double position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
@@ -125,13 +126,13 @@ public class MessageLogger extends BaseHandler {
 	{
 		if (orderLog.isDebugEnabled())
 			orderLog.debug("openOrder: id=" + orderId + ", contract=" + TWSUtils.fromTWSContract(contract) + ", order=" + TWSUtils.fromTWSOrder(order)
-					+ ", orderState=" + orderState.m_status);
+					+ ", orderState=" + orderState.status());
 	}
 
 	@Override
-	public void orderStatus(int orderId, String status, int filled,
-			int remaining, double avgFillPrice, int permId, int parentId,
-			double lastFillPrice, int clientId, String whyHeld)
+	public void orderStatus(int orderId, String status, double filled,
+			double remaining, double avgFillPrice, int permId, int parentId,
+			double lastFillPrice, int clientId, String whyHeld, double mktCapPrice)
 	{
 		if (orderLog.isDebugEnabled())
 			orderLog.debug("orderStatus: id=" + orderId + ", status=" + status + ", filled=" + filled + ", remaining=" + remaining

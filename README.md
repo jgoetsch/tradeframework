@@ -25,6 +25,11 @@ The API interfaces, common classes and simulated implementations.
 ### tradeframework-ib
 Interactive Brokers TWS API implementation.
 
+<b>Note:</b> Has a dependency on TWS API version 9.76, which must be downloaded from 
+https://interactivebrokers.github.io and installed into the maven local repository
+(using `mvn install` command) or made available in a private repository, as IB does
+not publish the API artifacts on any public repositories.
+
 ### tradeframework-yahoo
 HistoricalDataSource implementation which fetches historical data at a daily
 or greater level from csv web service available at Yahoo Finance.

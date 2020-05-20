@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import com.ib.client.TickAttrib;
 import com.ib.client.TickType;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
@@ -45,19 +46,23 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 	}
 
 	@Override
-	protected synchronized void onTickPrice(int field, double price, int canAutoExecute) {
-		if (field == TickType.BID)
-			setBid(price);
-		else if (field == TickType.ASK)
-			setAsk(price);
-		else if (field == TickType.LAST)
-			setLast(price);
-		else if (field == TickType.HIGH)
-			setHigh(price);
-		else if (field == TickType.LOW)
-			setLow(price);
-		else if (field == TickType.CLOSE)
-			setClose(price);
+	protected synchronized void onTickPrice(int field, double price, TickAttrib attrib) {
+		switch (TickType.get(field)) {
+			case BID:
+				setBid(price); break;
+			case ASK:
+				setAsk(price); break;
+			case LAST:
+				setLast(price); break;
+			case HIGH:
+				setHigh(price); break;
+			case LOW:
+				setLow(price); break;
+			case CLOSE:
+				setClose(price); break;
+			default:
+				break;
+		}
 		timestamp = System.currentTimeMillis();
 		if (getBid() != 0 && getAsk() != 0 && getLast() != 0)
 			onTickSnapshotEnd();
@@ -65,21 +70,29 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 
 	@Override
 	protected synchronized void onTickSize(int field, int size) {
-		if (field == TickType.BID_SIZE)
-			setBidSize(size);
-		else if (field == TickType.ASK_SIZE)
-			setAskSize(size);
-		else if (field == TickType.LAST_SIZE)
-			setLastSize(size);
-		else if (field == TickType.VOLUME)
-			setVolume(size);
+		switch (TickType.get(field)) {
+			case BID_SIZE:
+				setBidSize(size); break;
+			case ASK_SIZE:
+				setAskSize(size); break;
+			case LAST_SIZE:
+				setLastSize(size); break;
+			case VOLUME:
+				setVolume(size); break;
+			default:
+				break;
+		}
 		timestamp = System.currentTimeMillis();
 	}
 
 	@Override
 	protected synchronized void onTickString(int tickType, String value) {
-		if (tickType == TickType.LAST_TIMESTAMP)
-			setLastTimestamp(Long.parseLong(value));
+		switch (TickType.get(tickType)) {
+			case LAST_TIMESTAMP:
+				setLastTimestamp(Long.parseLong(value)); break;
+			default:
+				break;
+		}
 		timestamp = System.currentTimeMillis();
 	}
 

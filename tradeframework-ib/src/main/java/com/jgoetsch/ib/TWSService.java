@@ -18,16 +18,18 @@ package com.jgoetsch.ib;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ib.client.EClientSocket;
+import com.ib.client.EJavaSignal;
+import com.ib.client.EReader;
+import com.ib.client.EReaderSignal;
 import com.ib.client.EWrapper;
 import com.jgoetsch.ib.handlers.AccountDataHandler;
 import com.jgoetsch.ib.handlers.AccountDataListenerHandler;
@@ -72,18 +74,17 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	private int port = 7496;
 	private int clientId = 1;
 
+	private final EReaderSignal readerSignal = new EJavaSignal();
+
 	public TWSService() {
 		super();
 		handlerManager = new SimpleHandlerDelegatingWrapper();
 		handlerManager.addHandler(new MessageLogger());
-		eClientSocket = new EClientSocket((EWrapper)handlerManager);
+		eClientSocket = new EClientSocket((EWrapper)handlerManager, readerSignal);
 	}
 
 	public TWSService(String host, int port, int clientid) throws NotConnectedException {
-		super();
-		handlerManager = new SimpleHandlerDelegatingWrapper();
-		handlerManager.addHandler(new MessageLogger());
-		eClientSocket = new EClientSocket((EWrapper)handlerManager);
+		this();
 		if (!connect(host, port, clientid))
 			throw new NotConnectedException();
 	}
@@ -91,9 +92,24 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	public boolean connect() {
 		NextValidIdHandler h = new NextValidIdHandler();
 		handlerManager.addHandler(h);
+		eClientSocket.eConnect(host, port, clientId);
+
+		// start reader and processor threads
+		final EReader reader = new EReader(eClientSocket, readerSignal);   
+		reader.start();
+		new Thread(() -> {
+		    while (eClientSocket.isConnected()) {
+		    	readerSignal.waitForSignal();
+		        try {
+		            reader.processMsgs();
+		        } catch (Exception e) {
+		            log.error("Exception thrown from EReader processing messages", e);
+		        }
+		    }
+		}).start();
+
 		boolean success;
 		synchronized (h) {
-			eClientSocket.eConnect(host, port, clientId);
 			success = h.block();
 			curRequestId = h.getId();
 		}
@@ -213,7 +229,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		handlerManager.addHandler(mkd);
 		boolean success;
 		synchronized (mkd) {
-			eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true);
+			eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true, false, Collections.emptyList());
 			success = mkd.block();
 		}
 		handlerManager.removeHandler(mkd);
@@ -239,7 +255,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 				mkdlHandler = new MarketDataListenerHandler(tickerId, contract);
 				marketDataSubscriptions.put(contract, mkdlHandler);
 				handlerManager.addHandler(mkdlHandler);
-				eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, false);
+				eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, false, false, Collections.emptyList());
 			}
 			mkdlHandler.addListener(marketDataListener);
 		}
@@ -288,8 +304,6 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	private static final String histDurationUnit[] = { "S", "S", "S", "S", "S", "S", "S", "S", "S", "S", "S", "D", "W", "M", "M", "Y" };
 	private static final int histDurationMultiplier[] = { 1, 5, 15, 30, 60, 120, 180, 300, 900, 1800, 3600, 1, 1, 1, 3, 1 };
 
-	private Queue<Long> historicalReqs = new LinkedList<Long>();
-
 	public OHLC[] getHistoricalData(Contract contract, Date endDate, int numPeriods, int periodUnit) throws InvalidContractException, DataUnavailableException
 	{
 		String duration = (numPeriods * histDurationMultiplier[periodUnit]) + " " + histDurationUnit[periodUnit];
@@ -310,7 +324,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 			int tickerId = getNextId();
 			hdh = new HistoricalDataHandler(tickerId);
 			handlerManager.addHandler(hdh);
-			eClientSocket.reqHistoricalData(tickerId, TWSUtils.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", onlyRTH ? 1 : 0, 2);
+			eClientSocket.reqHistoricalData(tickerId, TWSUtils.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", onlyRTH ? 1 : 0, 2, false, Collections.emptyList());
 			synchronized (hdh) {
 				success = hdh.block();
 			}

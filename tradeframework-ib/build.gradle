@@ -1,6 +1,14 @@
+repositories {
+	mavenLocal {
+		content {
+			includeGroup 'com.interactivebrokers'
+		}
+	}
+}
 
 dependencies {
     api project(':tradeframework-core')
+	api 'com.interactivebrokers:tws-api:9.73.01-SNAPSHOT'
 	implementation 'net.sourceforge.collections:collections-generic:4.01'
     implementation 'org.slf4j:slf4j-api:1.7.30'
 }

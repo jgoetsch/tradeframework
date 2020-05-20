@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.ib.client.Bar;
 import com.jgoetsch.tradeframework.OHLC;
 import com.jgoetsch.tradeframework.SimpleOHLC;
 import com.jgoetsch.tradeframework.data.HistoricalDataSource;
@@ -29,7 +30,7 @@ import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 public class HistoricalDataHandler extends BaseIdHandler {
 
 	private List<OHLC> data;
-	private volatile boolean finished;
+	private boolean finished;
 
 	public HistoricalDataHandler(int tickerId) {
 		super(tickerId);
@@ -39,51 +40,49 @@ public class HistoricalDataHandler extends BaseIdHandler {
 
 	@Override
 	public int getStatus() {
-		if (finished)
-			return STATUS_SUCCESS;
-		else if (getErrorCode() == 162 || getErrorCode() == 200)
-			return STATUS_FAILED;
-		else
-			return super.getStatus();
+		synchronized(this) {
+			if (finished)
+				return STATUS_SUCCESS;
+			else if (getErrorCode() == 162 || getErrorCode() == 200)
+				return STATUS_FAILED;
+		}
+		return super.getStatus();
 	}
 
 	@Override
-	protected void onHistoricalData(String date, double open, double high,
-			double low, double close, int volume, int count, double WAP, boolean hasGaps)
+	protected void onHistoricalData(Bar bar)
 	{
-		if (date.startsWith("finished")) {
-			synchronized (this) {
-				finished = true;
-				this.notifyAll();
+		SimpleOHLC ohlc = new SimpleOHLC();
+		ohlc.setOpen(bar.open());
+		ohlc.setHigh(bar.high());
+		ohlc.setLow(bar.low());
+		ohlc.setClose(bar.close());
+		ohlc.setVolume(bar.volume() * 100);
+		try {
+			if (bar.time().length() == 8) {
+				DateFormat df = new SimpleDateFormat("yyyyMMdd");
+				df.setTimeZone(HistoricalDataSource.timeZone);
+				ohlc.setDate(df.parse(bar.time()));
 			}
+			else
+				ohlc.setDate(new Date(Long.parseLong(bar.time()) * 1000));
 		}
-		else {
-			SimpleOHLC ohlc = new SimpleOHLC();
-			ohlc.setOpen(open);
-			ohlc.setHigh(high);
-			ohlc.setLow(low);
-			ohlc.setClose(close);
-			ohlc.setVolume(volume * 100);
-			try {
-				if (date.length() == 8) {
-					DateFormat df = new SimpleDateFormat("yyyyMMdd");
-					df.setTimeZone(HistoricalDataSource.timeZone);
-					ohlc.setDate(df.parse(date));
-				}
-				else
-					ohlc.setDate(new Date(Long.parseLong(date) * 1000));
-			}
-			catch (ParseException e) {
-				e.printStackTrace();
-			}
-			catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
+		catch (ParseException e) {
+			e.printStackTrace();
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
 
-			synchronized (this) {
-				data.add(ohlc);
-			}
+		synchronized (this) {
+			data.add(ohlc);
 		}
+	}
+
+	@Override
+	protected synchronized void onHistoricalDataEnd(String startDateStr, String endDateStr) {
+		finished = true;
+		this.notifyAll();
 	}
 
 	public OHLC[] getData() {

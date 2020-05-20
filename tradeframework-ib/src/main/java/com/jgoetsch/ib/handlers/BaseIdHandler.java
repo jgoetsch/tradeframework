@@ -15,11 +15,13 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import com.ib.client.Bar;
 import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
+import com.ib.client.TickAttrib;
 
 /**
  * Base EWrapper implementation that is created with an id and handles events with
@@ -72,12 +74,17 @@ public class BaseIdHandler extends BaseHandler {
 	}
 
 	@Override
-	public final void historicalData(int reqId, String date, double open,
-			double high, double low, double close, int volume, int count,
-			double WAP, boolean hasGaps)
+	public final void historicalData(int reqId, Bar bar)
 	{
 		if (id == reqId)
-			onHistoricalData(date, open, high, low, close, volume, count, WAP, hasGaps);
+			onHistoricalData(bar);
+	}
+
+	@Override
+	public final void historicalDataEnd(int reqId, String startDateStr, String endDateStr)
+	{
+		if (id == reqId)
+			onHistoricalDataEnd(startDateStr, endDateStr);
 	}
 
 	@Override
@@ -89,12 +96,12 @@ public class BaseIdHandler extends BaseHandler {
 	}
 
 	@Override
-	public final void orderStatus(int orderId, String status, int filled,
-			int remaining, double avgFillPrice, int permId, int parentId,
-			double lastFillPrice, int clientId, String whyHeld)
+	public final void orderStatus(int orderId, String status, double filled,
+			double remaining, double avgFillPrice, int permId, int parentId,
+			double lastFillPrice, int clientId, String whyHeld, double mktCapPrice)
 	{
 		if (id == orderId)
-			onOrderStatus(status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+			onOrderStatus(status, Double.valueOf(filled).intValue(), Double.valueOf(remaining).intValue(), avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
 	}
 
 	@Override
@@ -136,18 +143,18 @@ public class BaseIdHandler extends BaseHandler {
 	}
 
 	@Override
-	public final void tickOptionComputation(int tickerId, int field,
-			double impliedVol, double delta, double modelPrice, double pvDividend)
+	public final void tickOptionComputation(int tickerId, int field, double impliedVol, double delta, double optPrice,
+			double pvDividend, double gamma, double vega, double theta, double undPrice)
 	{
 		if (id == tickerId)
-			onTickOptionComputation(field, impliedVol, delta, modelPrice, pvDividend);
+			onTickOptionComputation(field, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice);
 	}
 
 	@Override
-	public final void tickPrice(int tickerId, int field, double price, int canAutoExecute)
+	public final void tickPrice(int tickerId, int field, double price, TickAttrib attrib)
 	{
 		if (id == tickerId)
-			onTickPrice(field, price, canAutoExecute);
+			onTickPrice(field, price, attrib);
 	}
 
 	@Override
@@ -178,7 +185,8 @@ public class BaseIdHandler extends BaseHandler {
 
 	@Override
 	public final void updateMktDepthL2(int tickerId, int position,
-			String marketMaker, int operation, int side, double price, int size)
+			String marketMaker, int operation, int side, double price, int size, boolean isSmartDepth)
+	
 	{
 		if (id == tickerId)
 			onUpdateMktDepthL2(position, marketMaker, operation, side, price, size);
@@ -216,9 +224,10 @@ public class BaseIdHandler extends BaseHandler {
 	protected void onFundamentalData(String data) {
 	}
 
-	protected void onHistoricalData(String date, double open,
-			double high, double low, double close, int volume, int count,
-			double WAP, boolean hasGaps) {
+	protected void onHistoricalData(Bar bar) {
+	}
+
+	protected void onHistoricalDataEnd(String startDateStr, String endDateStr) {
 	}
 
 	protected void onOpenOrder(Contract contract, Order order,
@@ -255,9 +264,8 @@ public class BaseIdHandler extends BaseHandler {
 	protected void onTickGeneric(int tickType, double value) {
 	}
 
-	protected void onTickOptionComputation(int field,
-			double impliedVol, double delta, double modelPrice,
-			double pvDividend) {
+	protected void onTickOptionComputation(int field, double impliedVol, double delta, double optPrice,
+			double pvDividend, double gamma, double vega, double theta, double undPrice) {
 	}
 
 	/**
@@ -267,7 +275,7 @@ public class BaseIdHandler extends BaseHandler {
 	 * @param canAutoExecute param from tickPrice call
 	 */
 	protected void onTickPrice(int field, double price,
-			int canAutoExecute) {
+			TickAttrib attrib) {
 	}
 
 	/**

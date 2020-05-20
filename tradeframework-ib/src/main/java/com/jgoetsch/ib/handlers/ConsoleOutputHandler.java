@@ -39,7 +39,7 @@ public class ConsoleOutputHandler extends BaseHandler {
 	*/
 	public void execDetails(int orderId, Contract contract, Execution execution) {
 		System.out.println(TWSUtils.fromTWSExecution(execution) + " " + TWSUtils.fromTWSContract(contract));
-		System.out.println(execution.m_time);
+		System.out.println(execution.time());
 	}
 
 	public void error(Exception e) {

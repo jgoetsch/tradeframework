@@ -61,7 +61,7 @@ public class AccountDataListenerHandler extends AccountDataHandler {
 	}
 
 	@Override
-	public synchronized void updatePortfolio(Contract contract, int position,
+	public synchronized void updatePortfolio(Contract contract, double position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
