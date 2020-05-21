@@ -11,4 +11,9 @@ dependencies {
 	api 'com.interactivebrokers:tws-api:9.73.01-SNAPSHOT'
 	implementation 'net.sourceforge.collections:collections-generic:4.01'
     implementation 'org.slf4j:slf4j-api:1.7.30'
+	testImplementation "org.spockframework:spock-core:2.0-M2-groovy-3.0"
+	testRuntimeOnly 'cglib:cglib-nodep:3.3.0'
+	testRuntimeOnly 'org.objenesis:objenesis:3.1'
+	testRuntimeOnly 'org.junit.platform:junit-platform-engine:1.6.2'
+    testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
 }

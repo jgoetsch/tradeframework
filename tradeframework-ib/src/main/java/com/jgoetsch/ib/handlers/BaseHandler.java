@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,8 +63,7 @@ public class BaseHandler implements EWrapper {
 	public static final int STATUS_SUCCESS = 1;
 	public static final int STATUS_FAILED = 2;
 
-	protected final static int MAX_WAIT_COUNT = 2; // 5 secs
-	protected final static int WAIT_TIME = 2500;
+	public final static int WAIT_TIME = 2500;
 
 	public synchronized int getErrorCode() {
 		return errorCode;
@@ -97,11 +98,14 @@ public class BaseHandler implements EWrapper {
 	 * @return true if handler reported success, false if failed or timed out
 	 */
 	public final boolean block() {
-		int waitCount = 0;
-		while (getStatus() == BaseHandler.STATUS_WORKING && (++waitCount) <= MAX_WAIT_COUNT) {
+		long timeout;
+		Instant until = Instant.now().plusMillis(WAIT_TIME);
+		while (getStatus() == BaseHandler.STATUS_WORKING && (timeout = Duration.between(Instant.now(), until).toMillis()) > 0) {
 			try {
-				this.wait(WAIT_TIME);
-			} catch (InterruptedException e) {}
+				this.wait(timeout);
+			} catch (InterruptedException e) {
+				return false;
+			}
 		}
 		return (getStatus() == STATUS_SUCCESS);
 	}

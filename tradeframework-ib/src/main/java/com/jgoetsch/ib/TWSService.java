@@ -74,15 +74,27 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	private int port = 7496;
 	private int clientId = 1;
 
-	private final EReaderSignal readerSignal = new EJavaSignal();
+	private final EReaderSignal readerSignal;
 
 	public TWSService() {
-		super();
 		handlerManager = new SimpleHandlerDelegatingWrapper();
 		handlerManager.addHandler(new MessageLogger());
+		readerSignal = new EJavaSignal();
 		eClientSocket = new EClientSocket((EWrapper)handlerManager, readerSignal);
 	}
 
+	/**
+	 * Constructor for mock testing
+	 */
+	public TWSService(EClientSocket clientSocket, HandlerManager handlerManager) {
+		this.eClientSocket = clientSocket;
+		this.handlerManager = handlerManager;
+		this.readerSignal = null;
+	}
+
+	/**
+	 * Construct and connect to specified host/port/clientid
+	 */
 	public TWSService(String host, int port, int clientid) throws NotConnectedException {
 		this();
 		if (!connect(host, port, clientid))
@@ -95,18 +107,20 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		eClientSocket.eConnect(host, port, clientId);
 
 		// start reader and processor threads
-		final EReader reader = new EReader(eClientSocket, readerSignal);   
-		reader.start();
-		new Thread(() -> {
-		    while (eClientSocket.isConnected()) {
-		    	readerSignal.waitForSignal();
-		        try {
-		            reader.processMsgs();
-		        } catch (Exception e) {
-		            log.error("Exception thrown from EReader processing messages", e);
-		        }
-		    }
-		}).start();
+		if (readerSignal != null) {
+			final EReader reader = new EReader(eClientSocket, readerSignal);   
+			reader.start();
+			new Thread(() -> {
+			    while (eClientSocket.isConnected()) {
+			    	readerSignal.waitForSignal();
+			        try {
+			            reader.processMsgs();
+			        } catch (Exception e) {
+			            log.error("Exception thrown from EReader processing messages", e);
+			        }
+			    }
+			}).start();
+		}
 
 		boolean success;
 		synchronized (h) {
@@ -139,6 +153,8 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	}
 
 	protected synchronized int getNextId() {
+		if (curRequestId < 0)
+			throw new IllegalStateException("NextValidId is not set, connect() failed or was not called");
 		return curRequestId++;
 	}
 
