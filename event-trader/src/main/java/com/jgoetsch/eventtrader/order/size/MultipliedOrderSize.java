@@ -15,31 +15,34 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
-import java.text.NumberFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 
 public abstract class MultipliedOrderSize implements OrderSize {
 
-	private double multiplier = 1;
+	private BigDecimal multiplier = BigDecimal.ONE;
 
 	public int getValue(TradeSignal trade, double price, Map<Object, Object> context) {
-		return (int)(getBaseValue(trade, price, context) * multiplier);
+		return multiplier.multiply(BigDecimal.valueOf(getBaseValue(trade, price, context)))
+				.setScale(0, RoundingMode.HALF_DOWN).intValue();
 	}
 
 	protected abstract int getBaseValue(TradeSignal trade, double price, Map<Object, Object> context);
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + (multiplier != 1 ? " * " + NumberFormat.getNumberInstance().format(multiplier) : "");
+		StringBuilder builder = new StringBuilder(getClass().getSimpleName());
+		return builder.append("*").append(multiplier).toString();
 	}
 
-	public void setMultiplier(double multiplier) {
+	public void setMultiplier(BigDecimal multiplier) {
 		this.multiplier = multiplier;
 	}
 
-	public double getMultiplier() {
+	public BigDecimal getMultiplier() {
 		return multiplier;
 	}
 

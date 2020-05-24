@@ -108,7 +108,8 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 
 		// start reader and processor threads
 		if (readerSignal != null) {
-			final EReader reader = new EReader(eClientSocket, readerSignal);   
+			final EReader reader = new EReader(eClientSocket, readerSignal);
+			reader.setName("tws-reader");
 			reader.start();
 			new Thread(() -> {
 			    while (eClientSocket.isConnected()) {
@@ -119,7 +120,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 			            log.error("Exception thrown from EReader processing messages", e);
 			        }
 			    }
-			}).start();
+			}, "tws-msg-proc").start();
 		}
 
 		boolean success;
@@ -129,9 +130,9 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		}
 		handlerManager.removeHandler(h);
 		if (success)
-			log.info("Connected to TWS at " + host + ":" + port + " as clientId " + clientId + ", initial order id = " + curRequestId);
+			log.info("Connected to TWS at {}:{} clientid:{}, initial order id is {}", host, port, clientId, curRequestId);
 		else
-			log.warn("Failed to connect to TWS at " + host + ":" + port + " as clientId " + clientId);
+			log.warn("Failed to connect to TWS at {}:{} clientid:{}", host, port, clientId);
 		return success;
 	}
 
@@ -143,6 +144,8 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	}
 
 	public void close() {
+		log.info("Disconnecting from TWS {}:{}", host, port);
+		handlerManager.removeAllHandlers();
 		if (eClientSocket.isConnected()) {
 			eClientSocket.eDisconnect();
 		}

@@ -52,7 +52,7 @@ public class ConstrainedSize implements OrderSize {
 
 	@Override
 	public String toString() {
-		return "ConstrainedSize: " + sizes;
+		return sizes.toString();
 	}
 
 	public void setSizes(Collection<OrderSize> sizes) {

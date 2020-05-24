@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericGroovyApplicationContext;
 
 /**
  * A simple launcher class with a main method to launch EventTrader apps defined in
@@ -37,7 +37,7 @@ public class EventTraderSpringLauncher {
 	private static Logger log = LoggerFactory.getLogger(EventTraderSpringLauncher.class);
 
 	public static void main(String[] a) {
-		List<String> args = a.length < 1 ? Arrays.asList("config/*.xml") : Arrays.asList(a);
+		List<String> args = a.length < 1 ? Arrays.asList("config/*") : Arrays.asList(a);
 		if (args.get(0).equalsIgnoreCase("-h") || args.get(0).equalsIgnoreCase("help")) {
 			System.out.println("Usage: " + EventTraderSpringLauncher.class.getSimpleName() + " <files>...");
 			System.out.println("       files - List of paths to spring bean definition xml files.");
@@ -46,7 +46,7 @@ public class EventTraderSpringLauncher {
 		}
 		else {
 			args.forEach(arg -> log.info("Using bean configs: {}", arg));
-			AbstractApplicationContext context = new ClassPathXmlApplicationContext(args.toArray(new String[0]));
+			AbstractApplicationContext context = new GenericGroovyApplicationContext(args.toArray(new String[0]));
 
 			// auto register growl notifications after all GrowlNotification objects have been instantiated
 			// if it is found on the classpath

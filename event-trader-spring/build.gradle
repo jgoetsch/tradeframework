@@ -2,4 +2,5 @@
 dependencies {
     api 'org.springframework:spring-context:5.2.6.RELEASE'
     implementation 'org.slf4j:slf4j-api:1.7.5'
+	runtimeOnly 'org.codehaus.groovy:groovy:3.0.4'
 }

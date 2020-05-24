@@ -79,6 +79,12 @@ public class SingleHandlerManager implements HandlerManager {
 		handlerReverseMap.remove(handler);
 	}
 
+	@Override
+	public synchronized void removeAllHandlers() {
+		handlerMap.clear();
+		handlerReverseMap.clear();
+	}
+
 	public Collection<EWrapper> getHandlers(String eventName, int objectId) {
 		EWrapper handler, noObjectHandler;
 		synchronized (this) {

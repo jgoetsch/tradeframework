@@ -1,5 +1,7 @@
 package com.jgoetsch.eventtrader
 
+import com.jgoetsch.eventtrader.Msg
+import com.jgoetsch.eventtrader.TradeSignal
 import com.jgoetsch.eventtrader.order.price.AskPrice
 import com.jgoetsch.eventtrader.order.price.BidPrice
 import com.jgoetsch.eventtrader.order.price.ClosePrice

@@ -16,9 +16,6 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;

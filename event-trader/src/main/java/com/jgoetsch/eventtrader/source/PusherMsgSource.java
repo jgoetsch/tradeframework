@@ -81,14 +81,18 @@ public class PusherMsgSource extends AsynchronousMsgSource {
 			}
 		};
 
-		for (String channelName : channels) {
-			if(channelName.startsWith("private-"))
-				pusher.subscribePrivate(channelName, messageListener, eventNames);
-			else if (channelName.startsWith("presence-"))
-				pusher.subscribePresence(channelName, messageListener, eventNames);
-			else
-				pusher.subscribe(channelName, messageListener, eventNames);
+		if (channels != null && !channels.isEmpty()) {
+			for (String channelName : channels) {
+				if(channelName.startsWith("private-"))
+					pusher.subscribePrivate(channelName, messageListener, eventNames);
+				else if (channelName.startsWith("presence-"))
+					pusher.subscribePresence(channelName, messageListener, eventNames);
+				else
+					pusher.subscribe(channelName, messageListener, eventNames);
+			}
 		}
+		else 
+			log.warn("No channels are configured for subscription");
 
 		enterWaitingLoop();
 		pusher.disconnect();

@@ -15,13 +15,11 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
-import java.beans.PropertyEditorSupport;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
+import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.regex.Pattern;
+
+import com.jgoetsch.eventtrader.order.BaseOrderAttributeEditor;
 
 /**
  * Property editor to accept an integer position size value as a
@@ -32,75 +30,34 @@ import java.util.regex.Pattern;
  * @author jgoetsch
  * 
  */
-public class OrderSizeEditor extends PropertyEditorSupport {
+public class OrderSizeEditor extends BaseOrderAttributeEditor<OrderSize> {
 
-	static final Pattern sizeDef = Pattern.compile("\\s*([\\w\\.\\$]+)\\s*(\\*?\\s*[\\d\\.]*)\\s*");
-	static final Pattern numberPattern = Pattern.compile("[\\d\\.\\$]+");
-
-	private String getFullClassName(String className) {
-		String fullName = className;
-		if (!className.contains("."))
-			fullName = getClass().getPackage().getName() + "." + fullName;
-		if (!className.endsWith("Size"))
-			fullName = fullName + "Size";
-		return fullName;
+	public OrderSizeEditor() {
+		super(OrderSize.class, "Size", Pattern.compile("\\s*(\\$?[\\w\\.]+)\\s*(?:(\\*)\\s*([\\d\\.]+\\%?))?\\s*"));
 	}
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		List<OrderSize> orderSizes = new ArrayList<OrderSize>();
-		for (String tok : text.split("\\s*,\\s*")) {
-			Matcher m = sizeDef.matcher(tok);
-			if (m.matches()) {
-				String className = m.group(1);
-				String multiplier = m.group(2).replaceAll("\\*\\s*", "");
-
-				OrderSize sizeObj;
-				if (numberPattern.matcher(className).matches()) {
-					try {
-						if (tok.contains("$"))
-							sizeObj = new FixedAmount(NumberFormat.getCurrencyInstance().parse(tok).doubleValue());
-						else
-							sizeObj = new FixedSize(NumberFormat.getIntegerInstance().parse(tok).intValue());
-					} catch (ParseException e) {
-						throw new IllegalArgumentException("Invalid order size format: " + tok);
-					}
-				}
-				else {
-					try {
-						sizeObj = (OrderSize)Class.forName(getFullClassName(className)).newInstance();
-					} catch (ClassNotFoundException e) {
-						throw new IllegalArgumentException("Order size class \"" + className + "\" does not exist or is invalid", e);
-					} catch (InstantiationException e) {
-						throw new IllegalArgumentException("Order size class \"" + className + "\" cannot be instantiated", e);
-					} catch (IllegalAccessException e) {
-						throw new IllegalArgumentException("Order size class \"" + className + "\" cannot be instantiated", e);
-					}
-				}
-				if (multiplier.length() > 0) {
-					if (sizeObj instanceof MultipliedOrderSize) {
-						try {
-							((MultipliedOrderSize)sizeObj).setMultiplier(NumberFormat.getNumberInstance().parse(multiplier).doubleValue());
-						} catch (ParseException e) {
-							throw new IllegalArgumentException("Invalid size multiplier format (must be decimal number): " + e.getMessage());
-						}
-					}
-					else
-						throw new IllegalArgumentException("Order size class \"" + className + "\" cannot be used with a multiplier");
-				}
-
-				orderSizes.add(sizeObj);
-			}
-			else {
-				throw new IllegalArgumentException("Invalid order size format: " + tok);
-			}
-		}
-		if (orderSizes.size() > 1)
-			setValue(new ConstrainedSize(orderSizes));
-		else if (orderSizes.size() == 1)
-			setValue(orderSizes.iterator().next());
+	protected OrderSize createFixed(String specifier) {
+		if (specifier.startsWith("$"))
+			return new FixedAmount(new BigDecimal(specifier.substring(1)));
 		else
-			throw new IllegalArgumentException("Bad order size: " + text);
+			return new FixedSize(Integer.parseInt(specifier));
+	}
+
+	@Override
+	protected void applyModifier(OrderSize target, String operation, BigDecimal value, String originalModifier) {
+		if (target instanceof MultipliedOrderSize)
+			((MultipliedOrderSize) target).setMultiplier(value);
+		else
+			throw new IllegalArgumentException("Order size class \"" + target.getClass().getSimpleName() + "\" cannot be used with a multiplier");
+	}
+
+	@Override
+	protected OrderSize collectResults(Collection<OrderSize> results) {
+		if (results.size() > 1)
+			return new ConstrainedSize(results);
+		else
+			return results.stream().findFirst().orElse(null);
 	}
 
 }

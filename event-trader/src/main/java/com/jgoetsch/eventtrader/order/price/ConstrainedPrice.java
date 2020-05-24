@@ -65,7 +65,7 @@ public class ConstrainedPrice implements OrderPrice {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + ": " + prices.toString();
+		return prices.toString();
 	}
 
 }

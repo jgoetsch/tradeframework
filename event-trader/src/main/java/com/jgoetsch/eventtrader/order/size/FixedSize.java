@@ -42,7 +42,7 @@ public class FixedSize implements OrderSize {
 
 	@Override
 	public String toString() {
-		return "FixedSize: " + size;
+		return String.valueOf(size);
 	}
 
 	public void setSize(int size) {

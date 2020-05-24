@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -29,34 +31,34 @@ import com.jgoetsch.tradeframework.PropertyNotSetException;
  */
 public class FixedAmount implements OrderSize {
 
-	private double amount;
+	private BigDecimal amount;
 
 	public FixedAmount() {
 	}
 
-	public FixedAmount(double amount) {
+	public FixedAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
 
 	public int getValue(TradeSignal trade, double price, Map<Object, Object> context) {
-		return (int)(getAmount() / price);
+		return getAmount().divide(BigDecimal.valueOf(price), 0, RoundingMode.HALF_DOWN).intValue();
 	}
 
 	public void initialize() {
-		if (amount == 0)
+		if (amount == null)
 			throw new PropertyNotSetException("amount");
 	}
 
 	@Override
 	public String toString() {
-		return "FixedAmount: $" + amount;
+		return "$" + amount;
 	}
 
-	public final void setAmount(double amount) {
+	public final void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
 
-	public final double getAmount() {
+	public final BigDecimal getAmount() {
 		return amount;
 	}
 

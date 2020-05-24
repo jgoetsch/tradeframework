@@ -37,14 +37,21 @@ public class SimpleHandlerDelegatingWrapper extends HandlerDelegatingWrapper imp
 		handlers = new HashSet<EWrapper>();
 	}
 	
+	@Override
 	public synchronized void addHandler(EWrapper handler) {
 		handlers.add(handler);
 	}
 	
+	@Override
 	public synchronized void removeHandler(EWrapper handler) {
 		handlers.remove(handler);
 	}
-	
+
+	@Override
+	public synchronized void removeAllHandlers() {
+		handlers.clear();
+	}
+
 	@Override
 	protected synchronized void callHandlers(String eventName, int objId, HandlerCallback callback) {
 		for (EWrapper handler : handlers) {
@@ -53,30 +60,37 @@ public class SimpleHandlerDelegatingWrapper extends HandlerDelegatingWrapper imp
 		}
 	}
 
+	@Override
 	public void addHandler(String eventName, int objectId, EWrapper handler) {
 		addHandler(handler);
 	}
 
+	@Override
 	public void addHandler(String eventName, EWrapper handler) {
 		addHandler(handler);
 	}
 
+	@Override
 	public void addHandler(String[] eventNames, int objectId, EWrapper handler) {
 		addHandler(handler);
 	}
 
+	@Override
 	public void addHandler(String[] eventNames, EWrapper handler) {
 		addHandler(handler);
 	}
 
+	@Override
 	public synchronized Collection<EWrapper> getHandlers(String eventName, int objectId) {
 		return new HashSet<EWrapper>(handlers);
 	}
 
+	@Override
 	public synchronized Collection<EWrapper> getHandlers(String eventName) {
 		return new HashSet<EWrapper>(handlers);
 	}
 
+	@Override
 	public synchronized Collection<EWrapper> getHandlers() {
 		return new HashSet<EWrapper>(handlers);
 	}

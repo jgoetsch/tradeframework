@@ -33,6 +33,8 @@ public interface HandlerManager {
 
 	public void removeHandler(EWrapper handler);
 
+	public void removeAllHandlers();
+
 	public Collection<EWrapper> getHandlers(String eventName, int objectId);
 
 	public Collection<EWrapper> getHandlers(String eventName);

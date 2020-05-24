@@ -25,9 +25,4 @@ public class TradeSignalSize extends MultipliedOrderSize {
 		return trade.getNumShares();
 	}
 
-	@Override
-	public String toString() {
-		return "TradeSignalSize";
-	}
-
 }
