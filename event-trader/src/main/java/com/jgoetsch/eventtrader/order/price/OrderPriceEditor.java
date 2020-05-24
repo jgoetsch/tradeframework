@@ -15,18 +15,11 @@
  */
 package com.jgoetsch.eventtrader.order.price;
 
-import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jgoetsch.eventtrader.order.BaseOrderAttributeEditor;
-import com.jgoetsch.eventtrader.order.size.ConstrainedSize;
 
 /**
  * Property editor to accept an integer position size value as a
