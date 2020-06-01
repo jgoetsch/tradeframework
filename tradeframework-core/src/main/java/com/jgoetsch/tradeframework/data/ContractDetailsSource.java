@@ -15,14 +15,13 @@
  */
 package com.jgoetsch.tradeframework.data;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.ContractDetails;
-import com.jgoetsch.tradeframework.InvalidContractException;
 
 public interface ContractDetailsSource {
 
-	public ContractDetails getContractDetails(Contract contract) throws IOException, InvalidContractException, DataUnavailableException;
+	public CompletableFuture<ContractDetails> getContractDetails(Contract contract);
 
 }

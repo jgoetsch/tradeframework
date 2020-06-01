@@ -17,9 +17,9 @@ package com.jgoetsch.eventtrader.filter;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filtering message processor that will process messages only between the specified
@@ -46,7 +46,7 @@ public class TimeOfDayFilter<M extends Msg> extends FilterProcessor<M> {
 	}
 
 	@Override
-	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
+	protected boolean handleProcessing(M msg, ProcessorContext context) {
 		LocalTime msgTime = LocalTime.ofInstant(msg.getDate(), timeZone);
 		return (after == null || msgTime.compareTo(after) >= 0)
 				&& (before == null || msgTime.compareTo(before) < 0);

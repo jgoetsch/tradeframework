@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Proxy class to implement a single AccountDataSource from a MultiAccountDataSource
  * given an account id.
@@ -40,11 +42,11 @@ public class SingleAccountDataSourceProxy implements AccountDataSource {
 		accountDataSource.cancelAccountDataSubscription(listener, accountCode);
 	}
 
-	public AccountData getAccountDataSnapshot() {
+	public CompletableFuture<AccountData> getAccountDataSnapshot() {
 		return accountDataSource.getAccountDataSnapshot(accountCode);
 	}
 
-	public double getAccountValue(String valueType) {
+	public CompletableFuture<Double> getAccountValue(String valueType) {
 		return accountDataSource.getAccountValue(valueType, accountCode);
 	}
 

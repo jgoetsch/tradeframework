@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order;
 
+import java.util.function.Supplier;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.order.price.OrderPrice;
 import com.jgoetsch.tradeframework.Order;
@@ -36,7 +38,7 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 	private boolean allowOutsideRth;
 
 	@Override
-	protected void prepareOrder(Order order, TradeSignal trade, MarketData marketData) throws OrderException, DataUnavailableException
+	protected void prepareOrder(Order order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException
 	{
 		order.setType(Order.TYPE_LIMIT);
 		order.setLimitPrice(limitPrice.getValue(trade, marketData).doubleValue());
@@ -49,7 +51,7 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 	}
 
 	@Override
-	protected double getIntendedPrice(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
+	protected double getIntendedPrice(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
 		return limitPrice.getValue(trade, marketData).doubleValue();
 	}
 

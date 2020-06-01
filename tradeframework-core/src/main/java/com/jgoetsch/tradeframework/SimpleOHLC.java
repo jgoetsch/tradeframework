@@ -113,4 +113,5 @@ public class SimpleOHLC implements OHLC, Serializable {
 		sb.append(" C=").append(getClose());
 		return sb.toString();
 	}
+
 }

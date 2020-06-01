@@ -18,6 +18,7 @@ package com.jgoetsch.eventtrader.filter;
 import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filters out the same trade of the same symbol multiple times in a row
@@ -30,7 +31,7 @@ public class DuplicateTradeFilter extends FilterProcessor<TradeSignal> {
 	TradeSignal last;
 
 	@Override
-	protected synchronized boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected synchronized boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		if (last != null && last.getContract().equals(trade.getContract()) && last.getType().equals(trade.getType()))
 			return false;
 		else {

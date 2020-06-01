@@ -16,10 +16,10 @@
 package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filters TradeSignal messages to the given types (any of BUY, SELL, SHORT, or COVER).
@@ -32,7 +32,7 @@ public class TradeTypeFilter extends FilterProcessor<TradeSignal> {
 	private Collection<TradeType> tradeTypes;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		return tradeTypes.contains(trade.getType());
 	}
 

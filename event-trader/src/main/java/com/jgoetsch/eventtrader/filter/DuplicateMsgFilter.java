@@ -15,9 +15,8 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filters out duplicate messages.
@@ -30,7 +29,7 @@ public class DuplicateMsgFilter extends FilterProcessor<Msg> {
 	Msg last;
 
 	@Override
-	protected boolean handleProcessing(Msg trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(Msg trade, ProcessorContext context) {
 		if (last != null && last.getMessage().equalsIgnoreCase(trade.getMessage()))
 			return false;
 		else {

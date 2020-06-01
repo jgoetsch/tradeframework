@@ -1,12 +1,11 @@
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.pusher.rest.Pusher;
 import com.pusher.rest.data.Result;
 import com.pusher.rest.data.Result.Status;
@@ -27,7 +26,7 @@ public class PusherPresenceFilter<M extends Msg> extends FilterProcessor<M> {
 	}
 
 	@Override
-	protected boolean handleProcessing(M msg, Map<Object, Object> context) throws Exception {
+	protected boolean handleProcessing(M msg, ProcessorContext context) throws Exception {
 
 		Result result = pusher.get("/channels/" + channel);
 		if (result.getStatus() == Status.SUCCESS) {

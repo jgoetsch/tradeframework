@@ -15,7 +15,9 @@
  */
 package com.jgoetsch.tradeframework;
 
-public class InvalidContractException extends Exception {
+import com.jgoetsch.tradeframework.data.DataUnavailableException;
+
+public class InvalidContractException extends DataUnavailableException {
 
 	private static final long serialVersionUID = 1L;
 	private final Contract contract;

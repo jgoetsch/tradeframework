@@ -22,6 +22,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,36 +174,35 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	/*
 	 * Account data
 	 */
-	public double getAccountValue(String valueType) {
+	public CompletableFuture<Double> getAccountValue(String valueType) {
 		return getAccountValue(valueType, "");
 	}
 
-	public double getAccountValue(String valueType, String acctCode) {
-		AccountData acctData = getAccountDataSnapshot(acctCode);
-		return acctData != null ? acctData.getValue(valueType) : 0;
+	public CompletableFuture<Double> getAccountValue(String valueType, String acctCode) {
+		return getAccountDataSnapshot(acctCode).thenApply(data -> data != null ? data.getValue(valueType) : 0);
 	}
 
-	public AccountData getAccountDataSnapshot() {
+	public CompletableFuture<AccountData> getAccountDataSnapshot() {
 		return getAccountDataSnapshot("");
 	}
 
-	public synchronized AccountData getAccountDataSnapshot(String accountCode) {
+	public CompletableFuture<AccountData> getAccountDataSnapshot(String accountCode) {
 		AccountDataHandler v = new AccountDataHandler();
 		long startTime = System.currentTimeMillis();
 		handlerManager.addHandler(v);
 		eClientSocket.reqAccountUpdates(true, accountCode);
-		boolean success;
-		synchronized (v) {
-			success = v.block();
-		}
-		eClientSocket.reqAccountUpdates(false, accountCode);
-
-		if (log.isDebugEnabled() && success)
-			log.debug("Received account data snapshot in " + (System.currentTimeMillis() - startTime) + " ms");
-		else if (log.isWarnEnabled() && !success)
-			log.warn("Timeout receiving account data snapshot in " + (System.currentTimeMillis() - startTime) + " ms");
-		handlerManager.removeHandler(v);
-		return v.getNetLiquidationValue() > 0 ? v : null;
+		return v.getCompletableFuture()
+				.whenComplete((m, e) -> {
+					eClientSocket.reqAccountUpdates(false, accountCode);
+					handlerManager.removeHandler(v);
+				})
+				.orTimeout(3000, TimeUnit.MILLISECONDS)
+				.whenComplete((m, e) -> {
+					if (e == null)
+						log.debug("Received account data snapshot in {} ms", System.currentTimeMillis() - startTime);
+					else
+						log.warn("Error receiving account data snapshot in {} ms", System.currentTimeMillis() - startTime, e);
+				});
 	}
 
 	public void subscribeAccountData(AccountDataListener listener) {
@@ -241,29 +244,29 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		}
 	}
 
-	public MarketData getMktDataSnapshot(Contract contract) throws InvalidContractException {
+	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract) {
 		int tickerId = getNextId();
 		MarketDataHandler mkd = new MarketDataHandler(tickerId);
 		long startTime = System.currentTimeMillis();
 		handlerManager.addHandler(mkd);
-		boolean success;
-		synchronized (mkd) {
-			eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true, false, Collections.emptyList());
-			success = mkd.block();
-		}
-		handlerManager.removeHandler(mkd);
-
-		if (log.isDebugEnabled() && success)
-			log.debug("Received market data snapshot for " + contract + " in " + (System.currentTimeMillis() - startTime) + " ms");
-		else if (log.isWarnEnabled() && !success)
-			log.warn("Timeout waiting for market data snapshot for " + contract + " in " + (System.currentTimeMillis() - startTime) + " ms");
-		if (!success && (mkd.getErrorCode() == 200 || mkd.getErrorCode() == 203))
-			throw new InvalidContractException(contract, mkd.getErrorMsg());
-		return mkd;
+		eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true, false, Collections.emptyList());
+		return mkd.getCompletableFuture()
+				.whenComplete((m, e) -> handlerManager.removeHandler(mkd))
+				.orTimeout(2500, TimeUnit.MILLISECONDS)
+				.whenComplete((m, e) -> {
+					if (e == null)
+						log.debug("Received contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime);
+					else
+						log.warn("Error receiving contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime, e);
+				});
 	}
 
-	public MarketData getDataSnapshot(Contract contract) throws IOException, InvalidContractException, DataUnavailableException {
-		return getMktDataSnapshot(contract);
+	public MarketData getDataSnapshot(Contract contract) throws IOException {
+		try {
+			return getMktDataSnapshot(contract).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new IOException(e);
+		}
 	}
 
 	public void subscribeMarketData(Contract contract, MarketDataListener marketDataListener) {
@@ -295,25 +298,20 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		}
 	}
 
-	public ContractDetails getContractDetails(Contract contract) throws IOException, InvalidContractException {
+	public CompletableFuture<ContractDetails> getContractDetails(Contract contract) {
 		int tickerId = getNextId();
 		ContractDetailsHandler mkd = new ContractDetailsHandler(tickerId);
 		long startTime = System.currentTimeMillis();
 		handlerManager.addHandler(mkd);
-		boolean success;
-		synchronized (mkd) {
-			eClientSocket.reqContractDetails(tickerId, TWSUtils.toTWSContract(contract));
-			success = mkd.block();
-		}
-		handlerManager.removeHandler(mkd);
-
-		if (log.isDebugEnabled() && success)
-			log.debug("Received contract details for " + contract + " in " + (System.currentTimeMillis() - startTime) + " ms");
-		else if (log.isWarnEnabled() && !success)
-			log.warn("Timeout waiting for contract details for " + contract + " in " + (System.currentTimeMillis() - startTime) + " ms");
-		if (!success && (mkd.getErrorCode() == 200 || mkd.getErrorCode() == 203))
-			throw new InvalidContractException(contract, mkd.getErrorMsg());
-		return mkd.getContractDetails();
+		eClientSocket.reqContractDetails(tickerId, TWSUtils.toTWSContract(contract));
+		return mkd.getCompletableFuture().whenComplete((m, e) -> handlerManager.removeHandler(mkd))
+				.orTimeout(2500, TimeUnit.MILLISECONDS)
+				.whenComplete((m, e) -> {
+					if (e == null)
+						log.debug("Received contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime);
+					else
+						log.warn("Error receiving contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime, e);
+				});
 	}
 
 	/*

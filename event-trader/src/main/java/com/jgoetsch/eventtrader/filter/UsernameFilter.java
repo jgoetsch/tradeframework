@@ -17,10 +17,10 @@ package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filters out all Msgs not from the given usernames.
@@ -33,7 +33,7 @@ public class UsernameFilter<M extends Msg> extends FilterProcessor<M> {
 	private Set<String> usernames;
 
 	@Override
-	protected boolean handleProcessing(M trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(M trade, ProcessorContext context) {
 		return usernames.contains(trade.getSourceName().toUpperCase());
 	}
 

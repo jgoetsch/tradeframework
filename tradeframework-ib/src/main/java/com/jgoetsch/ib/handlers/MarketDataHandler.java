@@ -15,8 +15,11 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.ib.client.TickAttrib;
 import com.ib.client.TickType;
+import com.jgoetsch.ib.TWSException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class MarketDataHandler extends BaseIdHandler implements MarketData {
@@ -34,15 +37,14 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 	private long lastTimestamp;
 	private long timestamp;
 
-	private boolean isDone = false;
+	private final CompletableFuture<MarketData> future = new CompletableFuture<MarketData>();
 
 	public MarketDataHandler(int tickerId) {
 		super(tickerId);
 	}
 
-	@Override
-	public int getStatus() {
-		return isDone ? STATUS_SUCCESS : super.getStatus();
+	public CompletableFuture<MarketData> getCompletableFuture() {
+		return future;
 	}
 
 	@Override
@@ -64,8 +66,6 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 				break;
 		}
 		timestamp = System.currentTimeMillis();
-		if (getBid() != 0 && getAsk() != 0 && getLast() != 0)
-			onTickSnapshotEnd();
 	}
 
 	@Override
@@ -97,17 +97,21 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 	}
 
 	@Override
-	protected synchronized void onTickSnapshotEnd() {
-		isDone = true;
-		this.notifyAll();
+	protected void onTickSnapshotEnd() {
+		future.complete(this);
+	}
+	@Override
+	protected void onError(int errorCode, String errorMsg) {
+		future.completeExceptionally(new TWSException(errorCode, errorMsg));
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Last=").append(getLast());
-		sb.append(";Bid=").append(getBid());
-		sb.append(";Ask=").append(getAsk());
+		sb.append("(").append(getBidSize()).append(") ");
+		sb.append(getBid()).append(" / ").append(getAsk());
+		sb.append(" (").append(getAskSize()).append(") L:");
+		sb.append(getLast());
 		return sb.toString();
 	}
 

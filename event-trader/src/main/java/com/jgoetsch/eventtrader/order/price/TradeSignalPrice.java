@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
+import java.util.function.Supplier;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
@@ -29,7 +30,7 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
 public class TradeSignalPrice extends OffsetOrderPrice {
 
 	@Override
-	protected BigDecimal getBaseValue(TradeSignal trade, MarketData marketData) {
+	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) {
 		return trade.getPrice();
 	}
 

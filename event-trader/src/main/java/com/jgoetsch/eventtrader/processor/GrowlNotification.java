@@ -192,7 +192,7 @@ public class GrowlNotification<M extends Msg> implements Processor<M> {
 		}
 	}
 
-	public void process(M msg, Map<Object,Object> context) {
+	public void process(M msg, ProcessorContext context) {
 		if (client != null) {
 			try {
 				BufferedImage image = null;

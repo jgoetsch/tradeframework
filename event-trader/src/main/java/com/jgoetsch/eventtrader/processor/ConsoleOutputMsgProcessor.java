@@ -16,7 +16,6 @@
 package com.jgoetsch.eventtrader.processor;
 
 import java.io.PrintStream;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
@@ -29,7 +28,7 @@ public class ConsoleOutputMsgProcessor<M extends Msg> implements Processor<M> {
 		this.out = out;
 	}
 
-	public void process(M msg, Map<Object,Object> context) throws Exception {
+	public void process(M msg, ProcessorContext context) throws Exception {
 		if (format == null)
 			out.println(msg);
 	}

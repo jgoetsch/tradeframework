@@ -15,13 +15,10 @@
  */
 package com.jgoetsch.eventtrader.processor;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
-import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.PropertyNotSetException;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
@@ -49,23 +46,21 @@ public abstract class MarketDataAwareProcessor implements Processor<TradeSignal>
 			throw new PropertyNotSetException("marketDataSource");
 	}
 
-	public final void process(TradeSignal trade, Map<Object, Object> context) throws Exception {
+	public final void process(TradeSignal trade, ProcessorContext context) throws Exception {
 		try {
-			MarketData contractData = ContextCacheUtil.getMarketData(marketDataSource, trade.getContract(), context);
+			MarketData contractData = context.getMarketData(marketDataSource, trade.getContract());
 			if (contractData != null && contractData.getBid() > 0 && contractData.getAsk() > 0) {
 				log.debug("Market data for " + trade.getContract() + ": " + contractData);
 				process(trade, contractData, context);
 			}
 			else
 				log.warn("Market data not available for contract " + trade.getContract());
-		} catch (InvalidContractException e) {
-			log.warn(e.getMessage());
 		} catch (DataUnavailableException e) {
 			log.warn(e.getMessage());
 		}
 	}
 
-	protected abstract void process(TradeSignal trade, MarketData contractData, Map<Object, Object> context) throws Exception;
+	protected abstract void process(TradeSignal trade, MarketData contractData, ProcessorContext context) throws Exception;
 
 	public MarketDataSource getMarketDataSource() {
 		return marketDataSource;

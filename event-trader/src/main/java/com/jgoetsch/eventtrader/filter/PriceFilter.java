@@ -1,9 +1,9 @@
 package com.jgoetsch.eventtrader.filter;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public class PriceFilter extends FilterProcessor<TradeSignal> {
 
@@ -11,7 +11,7 @@ public class PriceFilter extends FilterProcessor<TradeSignal> {
 	private BigDecimal max;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal msg, Map<Object, Object> context) throws Exception {
+	protected boolean handleProcessing(TradeSignal msg, ProcessorContext context) throws Exception {
 		BigDecimal priceValue = msg.getPrice();
 		return priceValue != null && (min == null || priceValue.compareTo(min) >= 0) && (max == null || priceValue.compareTo(max) < 0);
 	}

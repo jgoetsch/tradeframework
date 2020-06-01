@@ -15,13 +15,11 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
-import com.jgoetsch.eventtrader.processor.ContextCacheUtil;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.account.AccountData;
 import com.jgoetsch.tradeframework.account.AccountDataSource;
 import com.jgoetsch.tradeframework.account.Position;
@@ -40,11 +38,11 @@ public class ExistingPositionFilter extends FilterProcessor<TradeSignal> {
 	private AccountDataSource accountDataSource;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		if (trade.getType().isExit())
 			return true;
 		else {
-			AccountData account = ContextCacheUtil.getAccountData(accountDataSource, context);
+			AccountData account = context.getAccountData(accountDataSource);
 			if (account == null)
 				return true;
 			else {

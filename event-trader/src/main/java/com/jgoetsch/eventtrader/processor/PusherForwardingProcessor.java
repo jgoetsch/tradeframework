@@ -1,7 +1,6 @@
 package com.jgoetsch.eventtrader.processor;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -34,7 +33,7 @@ public class PusherForwardingProcessor implements Processor<Msg> {
 		});
 	}
 
-	public void process(Msg msg, Map<Object, Object> context) throws Exception {
+	public void process(Msg msg, ProcessorContext context) throws Exception {
 		pusher.trigger(channels, eventName, msg);
 	}
 

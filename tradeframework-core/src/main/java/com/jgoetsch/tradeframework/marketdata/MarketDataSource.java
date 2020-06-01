@@ -17,6 +17,7 @@ package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
@@ -27,7 +28,7 @@ public interface MarketDataSource extends ContractDataSource<MarketData>, Closea
 	/**
 	 * Returns a current snapshot of market data from the specified contract.
 	 */
-	public MarketData getMktDataSnapshot(Contract contract) throws IOException, InvalidContractException;
+	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract);
 
 	/**
 	 * Begin receiving callbacks to a MarketDataListener with market data updates for the given contract

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,19 +103,24 @@ public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvancea
 		}
 	}
 
-	public MarketData getDataSnapshot(Contract contract) throws IOException, InvalidContractException, DataUnavailableException {
-		return getMktDataSnapshot(contract);
+	public MarketData getDataSnapshot(Contract contract) throws IOException, InvalidContractException {
+		return getMktDataSnapshot(contract).join();
 	}
 
-	public final MarketData getMktDataSnapshot(Contract contract) throws IOException, InvalidContractException {
+	public final CompletableFuture<MarketData> getMktDataSnapshot(Contract contract) {
 		SimulatedMarketDataFeed dataFeed = getDataFeed(contract);
 		if (dataFeed == null)
-			throw new SimulatedDataNotAvailableException(contract);
+			return CompletableFuture.failedFuture(new SimulatedDataNotAvailableException(contract));
 		else {
 			synchronized (this) {
-				if (!listenerMap.containsKey(contract))
-					dataFeed.advanceTo(getStartTimestamp());
-				return dataFeed.getLastTick();
+				if (!listenerMap.containsKey(contract)) {
+					try {
+						dataFeed.advanceTo(getStartTimestamp());
+					} catch (IOException | InvalidContractException ex) {
+						return CompletableFuture.failedFuture(ex);
+					}
+				}
+				return CompletableFuture.completedFuture(dataFeed.getLastTick());
 			}
 		}
 	}

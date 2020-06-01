@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 	private MarketOrderExecutor baseExecutor;
 	private double trailPercent;
 
-	public final boolean handleProcessing(TradeSignal trade, MarketData marketData) throws OrderException, IOException {
+	public final boolean handleProcessing(TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, IOException {
 		Order baseOrder = new Order();
 		try {
 			baseExecutor.prepareOrder(baseOrder, trade, marketData);
@@ -56,11 +57,11 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 		return false;
 	}
 
-	protected Order createAttachedOrder(TradeSignal trade, MarketData marketData, Order baseOrder) throws OrderException, IOException
+	protected Order createAttachedOrder(TradeSignal trade, Supplier<MarketData> marketData, Order baseOrder) throws OrderException, IOException
 	{
 		double price = baseOrder.getLimitPrice();
 		if (price <= 0)
-			price = marketData.getLast();
+			price = marketData.get().getLast();
 
 		double trailAmt = price * trailPercent + .01;
 		return Order.trailingStopOrder(-baseOrder.getQuantity(),

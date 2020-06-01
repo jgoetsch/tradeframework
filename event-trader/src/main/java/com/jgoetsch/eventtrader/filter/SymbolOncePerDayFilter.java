@@ -18,10 +18,10 @@ package com.jgoetsch.eventtrader.filter;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.Contract;
 
 public class SymbolOncePerDayFilter extends FilterProcessor<TradeSignal> {
@@ -32,7 +32,7 @@ public class SymbolOncePerDayFilter extends FilterProcessor<TradeSignal> {
 	private LocalDate curDate;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		LocalDate date = LocalDate.ofInstant(trade.getDate(), timeZone);
 		if (!date.equals(curDate)) {
 			used.clear();

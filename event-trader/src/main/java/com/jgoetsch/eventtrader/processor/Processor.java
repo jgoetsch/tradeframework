@@ -15,8 +15,6 @@
  */
 package com.jgoetsch.eventtrader.processor;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.Msg;
 
 public interface Processor<M extends Msg> {
@@ -35,6 +33,6 @@ public interface Processor<M extends Msg> {
 	 *            redundant requests.
 	 * @throws Exception
 	 */
-	public void process(M msg, Map<Object,Object> context) throws Exception;
+	public void process(M msg, ProcessorContext context) throws Exception;
 
 }

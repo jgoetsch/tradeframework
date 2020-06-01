@@ -16,13 +16,13 @@
 package com.jgoetsch.eventtrader.order;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.order.OrderException;
@@ -40,7 +40,7 @@ public class BasicOrderExecutor implements Processor<TradeSignal> {
 		this.tradingService = tradingService;
 	}
 
-	public void process(TradeSignal trade, Map<Object,Object> context) throws OrderException, IOException {
+	public void process(TradeSignal trade, ProcessorContext context) throws OrderException, IOException {
 		Order order = createOrder(trade);
 		if (getTradingService() != null) {
 			if (order.getQuantity() == 0)

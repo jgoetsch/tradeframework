@@ -9,9 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +19,7 @@ import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.filter.PusherPresenceFilter;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.eventtrader.processor.PusherForwardingProcessor;
 import com.jgoetsch.eventtrader.source.PusherMsgSource;
 import com.jgoetsch.eventtrader.source.PusherSecretAuthorizer;
@@ -65,7 +64,7 @@ public class PusherForwardingTest {
 
 		final List<Msg> received = Collections.synchronizedList(new ArrayList<Msg>());
 		listener.setProcessors(Collections.singleton(new Processor<Msg>() {
-			public void process(Msg msg, Map<Object, Object> context) throws Exception {
+			public void process(Msg msg, ProcessorContext context) throws Exception {
 				received.add(msg);
 			}
 		}));
@@ -80,7 +79,7 @@ public class PusherForwardingTest {
 		processor.setChannels(Collections.singletonList(channel));
 
 		for (Msg msg : messages) {
-			processor.process(msg, new HashMap<Object,Object>());
+			processor.process(msg, new ProcessorContext());
 			Thread.sleep(100);
 		}
 		th.join(10000L);

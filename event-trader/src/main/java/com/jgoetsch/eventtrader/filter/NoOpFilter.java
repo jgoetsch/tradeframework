@@ -15,9 +15,8 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.Msg;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Skips processing of TradeSignals marked as being a partial entry or exit.
@@ -29,7 +28,7 @@ import com.jgoetsch.eventtrader.Msg;
 public class NoOpFilter<M extends Msg> extends FilterProcessor<M> {
 
 	@Override
-	protected boolean handleProcessing(M msg, Map<Object,Object> context) {
+	protected boolean handleProcessing(M msg, ProcessorContext context) {
 		return true;
 	}
 

@@ -18,6 +18,7 @@ package com.jgoetsch.eventtrader.order.price;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +35,13 @@ public class HistoricalAveragePrice extends OffsetOrderPrice {
 	private int durationMinutes;
 
 	@Override
-	protected BigDecimal getBaseValue(TradeSignal trade, MarketData marketData) {
+	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) {
 		try {
 			OHLC data[] = historicalDataSource.getHistoricalData(trade.getContract(), new Date(), durationMinutes * 4, HistoricalDataSource.PERIOD_15_SECONDS);
 			return fromDouble(Arrays.asList(data).stream().mapToDouble(ohlc -> (ohlc.getHigh() + ohlc.getLow()) / 2).average().getAsDouble());
 		} catch (Exception e) {
 			log.warn("Could not get historical data for average trade limit price, using Last price", e);
-			return fromDouble(marketData.getLast());
+			return fromDouble(marketData.get().getLast());
 		}
 	}
 

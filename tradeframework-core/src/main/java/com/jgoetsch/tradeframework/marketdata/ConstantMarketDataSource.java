@@ -1,6 +1,7 @@
 package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.tradeframework.Contract;
 
@@ -23,11 +24,11 @@ public class ConstantMarketDataSource implements MarketDataSource {
 	}
 
 	public MarketData getDataSnapshot(Contract contract) {
-		return getMktDataSnapshot(contract);
+		return getMktDataSnapshot(contract).join();
 	}
 
-	public MarketData getMktDataSnapshot(Contract contract) {
-		return marketData;
+	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract) {
+		return CompletableFuture.completedFuture(marketData);
 	}
 
 	public void subscribeMarketData(Contract contract, MarketDataListener marketDataListener) {

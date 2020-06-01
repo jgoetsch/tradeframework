@@ -17,10 +17,10 @@ package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Filters TradeSignal messages the given contract types.
@@ -33,7 +33,7 @@ public class ContractTypeFilter extends FilterProcessor<TradeSignal> {
 	private Set<String> contractTypes;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		return trade.getContract() != null && contractTypes.contains(trade.getContract().getType());
 	}
 

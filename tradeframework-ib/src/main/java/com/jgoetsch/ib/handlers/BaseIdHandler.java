@@ -44,6 +44,14 @@ public class BaseIdHandler extends BaseHandler {
 	}
 
 	@Override
+	public void error(int id, int errorCode, String errorMsg) {
+		if (this.id == id) {
+			super.error(id, errorCode, errorMsg);
+			onError(errorCode, errorMsg);
+		}
+	}
+
+	@Override
 	public final void bondContractDetails(int reqId, ContractDetails contractDetails) {
 		if (id == reqId)
 			onBondContractDetails(contractDetails);
@@ -192,6 +200,8 @@ public class BaseIdHandler extends BaseHandler {
 			onUpdateMktDepthL2(position, marketMaker, operation, side, price, size);
 	}
 
+	protected void onError(int errorCode, String errorMsg) {
+	}
 
 	/**
 	 * Override to implement bondContractDetails event for this request id.

@@ -19,7 +19,6 @@ import java.applet.Applet;
 import java.applet.AudioClip;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.Msg;
 
@@ -33,7 +32,7 @@ public class SoundNotification<M extends Msg> implements Processor<M> {
 
 	private URL url;
 
-	public void process(M msg, Map<Object,Object> context) {
+	public void process(M msg, ProcessorContext context) {
 		AudioClip clip = Applet.newAudioClip(url);
 		clip.play();
 	}

@@ -10,6 +10,7 @@ public abstract class TickRounding implements UnaryOperator<BigDecimal> {
 
 	public static UnaryOperator<BigDecimal> DEFAULT_STOCK_BUY = defaultStockTickSize(RoundingMode.HALF_DOWN);
 	public static UnaryOperator<BigDecimal> DEFAULT_STOCK_SELL = defaultStockTickSize(RoundingMode.HALF_UP);
+	public static UnaryOperator<BigDecimal> ROUND_TO_ONE = new PriceMappedTickRounding(BigDecimal.ONE, RoundingMode.HALF_DOWN);
 
 	private static UnaryOperator<BigDecimal> defaultStockTickSize(RoundingMode roundingMode) {
 		Map<BigDecimal, BigDecimal> priceFloors = new TreeMap<BigDecimal, BigDecimal>();

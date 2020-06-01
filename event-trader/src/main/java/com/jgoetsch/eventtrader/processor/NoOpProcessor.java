@@ -15,13 +15,11 @@
  */
 package com.jgoetsch.eventtrader.processor;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.Msg;
 
 public class NoOpProcessor<M extends Msg> implements Processor<M> {
 
-	public void process(M msg, Map<Object, Object> context) throws Exception {
+	public void process(M msg, ProcessorContext context) throws Exception {
 		// Do nothing
 	}
 

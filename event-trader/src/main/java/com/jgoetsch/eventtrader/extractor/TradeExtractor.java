@@ -17,7 +17,6 @@ package com.jgoetsch.eventtrader.extractor;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.eventtrader.processor.PropagatingProcessor;
 
 public class TradeExtractor extends PropagatingProcessor<Msg, TradeSignal> {
@@ -32,7 +32,7 @@ public class TradeExtractor extends PropagatingProcessor<Msg, TradeSignal> {
 	Logger log = LoggerFactory.getLogger(TradeExtractor.class);
 	private Collection<Processor<Msg>> nonTradeProcessors;
 
-	public void process(Msg msg, Map<Object, Object> context) throws Exception {
+	public void process(Msg msg, ProcessorContext context) throws Exception {
 		Collection<TradeSignal> trades = parseTrades(msg);
 		if (trades != null && !trades.isEmpty()) {
 			log.debug("{}", msg);

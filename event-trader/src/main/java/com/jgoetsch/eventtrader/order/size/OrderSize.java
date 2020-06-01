@@ -15,12 +15,11 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public interface OrderSize {
 
-	public int getValue(TradeSignal trade, double price, Map<Object, Object> context);
+	public int getValue(TradeSignal trade, double price, ProcessorContext context);
 
 }

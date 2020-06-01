@@ -2,9 +2,11 @@ package com.jgoetsch.ib;
 
 import spock.lang.Specification
 import java.time.ZonedDateTime
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 import com.ib.client.EClientSocket
 import com.ib.client.TickType
@@ -31,31 +33,37 @@ class TWSServiceSpec extends Specification {
 
 	def "Returns market data snapshot"() {
 		when:
-		def data = twsService.getMktDataSnapshot(Contract.stock("ABCD"))
+		def data = twsService.getMktDataSnapshot(Contract.stock("ABCD")).get()
 
 		then:
 		1 * clientSocket.reqMktData(_, *_) >> {arg -> scheduler.schedule({
 			wrapper.tickPrice(arg[0], TickType.BID.index(), 1.50, null)
+			wrapper.tickSize(arg[0], TickType.BID_SIZE.index(), 10)
 			wrapper.tickPrice(arg[0], TickType.ASK.index(), 1.60, null)
+			wrapper.tickSize(arg[0], TickType.ASK_SIZE.index(), 20)
 			wrapper.tickPrice(arg[0], TickType.LAST.index(), 1.55, null)
+			wrapper.tickSnapshotEnd(arg[0])
 		}, 500, TimeUnit.MILLISECONDS) }
 		data.bid == 1.50
 		data.ask == 1.60
 		data.last == 1.55
+		data.bidSize == 10
+		data.askSize == 20
 	}
 
 	def "Market data snapshot times out"() {
 		when:
-		def data = twsService.getMktDataSnapshot(Contract.stock("ABCD"))
+		def data = twsService.getMktDataSnapshot(Contract.stock("ABCD")).get()
 
 		then:
 		1 * clientSocket.reqMktData(_, *_) >> {arg -> scheduler.schedule({
 			wrapper.tickPrice(arg[0], TickType.BID.index(), 1.50, null)
 			wrapper.tickPrice(arg[0], TickType.ASK.index(), 1.60, null)
 			wrapper.tickPrice(arg[0], TickType.LAST.index(), 1.55, null)
+			wrapper.tickSnapshotEnd(arg[0])
 		}, BaseHandler.WAIT_TIME + 500, TimeUnit.MILLISECONDS) }
-		data.bid == 0
-		data.ask == 0
-		data.last == 0
+
+		ExecutionException e = thrown()
+		e.cause.getClass() == TimeoutException
 	}
 }

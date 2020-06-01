@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,8 +122,8 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 		return sb.toString();
 	}
 
-	public AccountData getAccountDataSnapshot() {
-		return this;
+	public CompletableFuture<AccountData> getAccountDataSnapshot() {
+		return CompletableFuture.completedFuture(this);
 	}
 
 	public void subscribeAccountData(AccountDataListener listener) {
@@ -133,8 +134,8 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 		listeners.remove(listener);
 	}
 
-	public double getAccountValue(String valueType) {
-		return getValue(valueType);
+	public CompletableFuture<Double> getAccountValue(String valueType) {
+		return CompletableFuture.completedFuture(getValue(valueType));
 	}
 
 	protected void update() {

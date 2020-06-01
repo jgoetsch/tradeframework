@@ -17,20 +17,20 @@ package com.jgoetsch.eventtrader.order.size;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public abstract class MultipliedOrderSize implements OrderSize {
 
 	private BigDecimal multiplier = BigDecimal.ONE;
 
-	public int getValue(TradeSignal trade, double price, Map<Object, Object> context) {
+	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
 		return multiplier.multiply(BigDecimal.valueOf(getBaseValue(trade, price, context)))
 				.setScale(0, RoundingMode.HALF_DOWN).intValue();
 	}
 
-	protected abstract int getBaseValue(TradeSignal trade, double price, Map<Object, Object> context);
+	protected abstract int getBaseValue(TradeSignal trade, double price, ProcessorContext context);
 
 	@Override
 	public String toString() {

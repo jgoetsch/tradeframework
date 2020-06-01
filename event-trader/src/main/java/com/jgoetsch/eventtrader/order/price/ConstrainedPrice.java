@@ -17,6 +17,7 @@ package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.PropertyNotSetException;
@@ -37,7 +38,7 @@ public class ConstrainedPrice implements OrderPrice {
 		this.prices = prices;
 	}
 
-	public BigDecimal getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
+	public BigDecimal getValue(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
 		return prices.stream().map(p -> p.getValue(trade, marketData))
 				.reduce(trade.isSell() == aggressive ? BigDecimal::min : BigDecimal::max).get();
 	}

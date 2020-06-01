@@ -71,7 +71,7 @@ class OrderPriceSpec extends Specification {
 		def orderPrice = new ConstrainedPrice(Arrays.asList(p1, p2));
 
 		expect:
-		price.equals(orderPrice.getValue(new TradeSignal(type, Contract.stock("TEST"), new Msg()), new SimpleMarketData(bid, ask, 40.8)))
+		price.equals(orderPrice.getValue(new TradeSignal(type, Contract.stock("TEST"), new Msg()), { new SimpleMarketData(bid, ask, 40.8) }))
 
 		where:
 		bid   | ask   | type           | price
@@ -85,8 +85,8 @@ class OrderPriceSpec extends Specification {
 		(-5..5).each {
 			def offs = increment.multiply(it).stripTrailingZeros();
 			orderPrice.setOffset(offs);
-			assert expectForBuy.add(offs).equals(orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), marketData));
-			assert expectForSell.subtract(offs).equals(orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), marketData));
+			assert expectForBuy.add(offs).equals(orderPrice.getValue(new TradeSignal(TradeType.BUY, Contract.stock("TEST"), new Msg()), { marketData }));
+			assert expectForSell.subtract(offs).equals(orderPrice.getValue(new TradeSignal(TradeType.SELL, Contract.stock("TEST"), new Msg()), { marketData }));
 		}
 	}
 

@@ -16,9 +16,9 @@
 package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
-import java.util.Map;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Prevents processing of the given list of contracts. Setting the {@link FilterProcessor inverse}
@@ -33,7 +33,7 @@ public class SymbolBlacklistFilter extends FilterProcessor<TradeSignal> {
 	private Collection<String> symbols;
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		return !symbols.contains(trade.getContract().getSymbol());
 	}
 

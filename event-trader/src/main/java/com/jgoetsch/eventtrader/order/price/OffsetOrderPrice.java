@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	private UnaryOperator<BigDecimal> sellTickRounding = TickRounding.DEFAULT_STOCK_SELL;
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public final BigDecimal getValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
+	public final BigDecimal getValue(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
 		BigDecimal base = getBaseValue(trade, marketData);
 		if (base != null) {
 			BigDecimal calculated =
@@ -59,7 +60,7 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * @param marketData
 	 * @return base price extracted from the marketData
 	 */
-	protected abstract BigDecimal getBaseValue(TradeSignal trade, MarketData marketData);
+	protected abstract BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData);
 
 	protected final BigDecimal fromDouble(double value) throws DataUnavailableException {
 		return value != 0 ? BigDecimal.valueOf(value) : null;

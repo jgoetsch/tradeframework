@@ -15,13 +15,12 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.eventtrader.processor.PropagatingProcessor;
 
 /**
@@ -39,7 +38,7 @@ public abstract class FilterProcessor<M extends Msg> extends PropagatingProcesso
 	private boolean disabled = false;
 	private boolean inverse = false;
 
-	public final void process(M msg, Map<Object,Object> context) throws Exception {
+	public final void process(M msg, ProcessorContext context) throws Exception {
 		if (disabled || handleProcessing(msg, context) != inverse) {
 			doProcess(msg, context);
 		}
@@ -48,9 +47,9 @@ public abstract class FilterProcessor<M extends Msg> extends PropagatingProcesso
 		}
 	}
 
-	protected abstract boolean handleProcessing(M msg, Map<Object,Object> context) throws Exception;
+	protected abstract boolean handleProcessing(M msg, ProcessorContext context) throws Exception;
 
-	protected void doProcess(M msg, Map<Object,Object> context) throws Exception {
+	protected void doProcess(M msg, ProcessorContext context) throws Exception {
 		if (getProcessors() != null) {
 			for (Processor<M> p : getProcessors())
 				p.process(msg, context);

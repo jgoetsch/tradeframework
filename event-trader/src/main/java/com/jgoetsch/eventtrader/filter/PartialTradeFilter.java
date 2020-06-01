@@ -15,9 +15,8 @@
  */
 package com.jgoetsch.eventtrader.filter;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 /**
  * Skips processing of TradeSignals marked as being a partial entry or exit.
@@ -29,7 +28,7 @@ import com.jgoetsch.eventtrader.TradeSignal;
 public class PartialTradeFilter extends FilterProcessor<TradeSignal> {
 
 	@Override
-	protected boolean handleProcessing(TradeSignal trade, Map<Object,Object> context) {
+	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
 		return !trade.isPartial();
 	}
 

@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
+import java.util.function.Supplier;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
@@ -30,8 +31,8 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
 public class LastPrice extends OffsetOrderPrice {
 
 	@Override
-	protected BigDecimal getBaseValue(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
-		return fromDouble(marketData.getLast());
+	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
+		return fromDouble(marketData.get().getLast());
 	}
 
 }

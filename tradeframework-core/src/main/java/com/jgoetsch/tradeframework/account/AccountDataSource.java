@@ -15,12 +15,13 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.util.concurrent.CompletableFuture;
 
 public interface AccountDataSource {
 
-	public double getAccountValue(String valueType);
+	public CompletableFuture<Double> getAccountValue(String valueType);
 
-	public AccountData getAccountDataSnapshot();
+	public CompletableFuture<AccountData> getAccountDataSnapshot();
 
 	public void subscribeAccountData(AccountDataListener listener);
 

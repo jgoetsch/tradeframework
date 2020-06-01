@@ -15,30 +15,33 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.function.UnaryOperator;
 
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.order.price.TickRounding;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public class RoundedOrderSize implements OrderSize {
 
 	private OrderSize size;
-	private int roundToSize = 1;
+	private UnaryOperator<BigDecimal> tickRounding = TickRounding.ROUND_TO_ONE;
 
 	public RoundedOrderSize() {
 	}
 
-	public RoundedOrderSize(OrderSize size, int roundToSize) {
+	public RoundedOrderSize(OrderSize size, UnaryOperator<BigDecimal> tickRounding) {
 		this.size = size;
-		this.roundToSize = roundToSize;
+		this.tickRounding = tickRounding;
 	}
 
-	public int getValue(TradeSignal trade, double price, Map<Object, Object> context) {
-		return (size.getValue(trade, price, context) / roundToSize) * roundToSize;
+	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
+		return tickRounding.apply(BigDecimal.valueOf(size.getValue(trade, price, context))).intValue();
 	}
 
 	@Override
 	public String toString() {
-		return "[" + size + " round to " + roundToSize + "]";
+		return size.toString() + " (" + tickRounding + ")";
 	}
 
 	public void setSize(OrderSize size) {
@@ -49,12 +52,12 @@ public class RoundedOrderSize implements OrderSize {
 		return size;
 	}
 
-	public void setRoundToSize(int roundToSize) {
-		this.roundToSize = roundToSize;
+	public void setTickRounding(UnaryOperator<BigDecimal> tickRounding) {
+		this.tickRounding = tickRounding;
 	}
 
-	public int getRoundToSize() {
-		return roundToSize;
+	public UnaryOperator<BigDecimal> getTickRounding() {
+		return tickRounding;
 	}
 
 }

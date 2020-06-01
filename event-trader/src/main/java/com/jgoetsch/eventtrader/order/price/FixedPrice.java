@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order.price;
 
 import java.math.BigDecimal;
+import java.util.function.Supplier;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
@@ -31,7 +32,7 @@ public class FixedPrice implements OrderPrice {
 		this.price = price;
 	}
 
-	public BigDecimal getValue(TradeSignal trade, MarketData marketData) {
+	public BigDecimal getValue(TradeSignal trade, Supplier<MarketData> marketData) {
 		return price;
 	}
 

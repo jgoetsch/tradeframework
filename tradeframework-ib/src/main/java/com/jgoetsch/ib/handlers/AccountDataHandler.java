@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.ib.TWSUtils;
 import com.jgoetsch.tradeframework.Contract;
@@ -43,7 +44,8 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	private Map<Contract, Position> positions;
 	private String updatedTimestampValue;
 	private long timestamp;
-	private boolean isDone = false;
+
+	private final CompletableFuture<AccountData> future = new CompletableFuture<AccountData>();
 
 	public AccountDataHandler() {
 		this.accountValues = new TreeMap<String, Object>();
@@ -53,6 +55,10 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	public AccountDataHandler(String accountCode) {
 		this();
 		this.accountCode = accountCode;
+	}
+
+	public CompletableFuture<AccountData> getCompletableFuture() {
+		return future;
 	}
 
 	@Override
@@ -85,17 +91,8 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	@Override
 	public synchronized void accountDownloadEnd(String accountName) {
 		if (accountCode == null || accountCode.equals(accountName)) {
-			isDone = true;
-			this.notifyAll();
+			future.complete(this);
 		}
-	}
-
-	@Override
-	public int getStatus() {
-		if (isDone)
-			return STATUS_SUCCESS;
-		else
-			return super.getStatus();
 	}
 
 	public double getCashBalance() {

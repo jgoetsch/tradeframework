@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public abstract class MsgSource implements Runnable, MsgHandler {
 
@@ -47,7 +48,7 @@ public abstract class MsgSource implements Runnable, MsgHandler {
 
 					log.info("{}", msg);
 					if (getProcessors() != null) {
-						Map<Object, Object> context = new HashMap<Object, Object>();
+						ProcessorContext context = new ProcessorContext();
 						for (Processor<Msg> p : getProcessors()) {
 							try {
 								p.process(msg, context);

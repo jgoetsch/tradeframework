@@ -15,9 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
-import java.util.Map;
-
 import com.jgoetsch.eventtrader.TradeSignal;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.PropertyNotSetException;
 
 public class FixedSize implements OrderSize {
@@ -31,7 +30,7 @@ public class FixedSize implements OrderSize {
 		this.size = size;
 	}
 
-	public int getValue(TradeSignal trade, double price, Map<Object, Object> context) {
+	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
 		return getSize();
 	}
 

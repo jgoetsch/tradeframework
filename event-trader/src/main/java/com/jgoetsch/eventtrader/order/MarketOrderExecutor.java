@@ -16,7 +16,7 @@
 package com.jgoetsch.eventtrader.order;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.eventtrader.order.size.OrderSize;
-import com.jgoetsch.eventtrader.processor.ContextCacheUtil;
 import com.jgoetsch.eventtrader.processor.Processor;
+import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
@@ -42,31 +42,22 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	private TradingService tradingService;
 	private OrderSize orderSize;
 	private Contract contract;
-	private int roundOrderQty = 1;
 	private String account;
 
-	public final void process(TradeSignal trade, Map<Object, Object> context) throws OrderException, IOException
+	public final void process(TradeSignal trade, ProcessorContext context) throws OrderException, IOException
 	{
 		Order order = new Order();
 		order.setAccount(account);
 		try {
-			MarketData marketData = ContextCacheUtil.getMarketData(marketDataSource, trade.getContract(), context);
-			if (marketData == null || marketData.getBid() <= 0 || marketData.getAsk() <= 0) {
-				log.warn("Market data not available for contract " + trade.getContract());
-				return;
-			}
-			log.debug("Market data for " + trade.getContract() + ": " + marketData);
-			
-			int numShares = (orderSize.getValue(trade, getIntendedPrice(trade, marketData), context) / roundOrderQty) * roundOrderQty;
+			Supplier<MarketData> marketData = () -> context.getMarketData(marketDataSource, trade.getContract());
+
+			int numShares = orderSize.getValue(trade, getIntendedPrice(trade, marketData), context);
 			if (trade.getType() == null)
 				trade.setType(numShares > 0 ? TradeType.BUY : TradeType.SELL);
 			order.setQuantity(trade.getType().isSell() ? -Math.abs(numShares) : Math.abs(numShares));
 			prepareOrder(order, trade, marketData);
 		} catch (DataUnavailableException e) {
 			log.warn("Could not processs order because: " + e.getMessage());
-			return;
-		} catch (InvalidContractException e) {
-			log.warn(e.getMessage());
 			return;
 		}
 
@@ -84,7 +75,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 			log.info("No trading service connected, order to " + order + " not placed");
 	}
 
-	protected void prepareOrder(Order order, TradeSignal trade, MarketData marketData) throws OrderException, DataUnavailableException {
+	protected void prepareOrder(Order order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException {
 		order.setType(Order.TYPE_MARKET);
 	}
 
@@ -96,11 +87,8 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	 * @param marketData
 	 * @return
 	 */
-	protected double getIntendedPrice(TradeSignal trade, MarketData marketData) throws DataUnavailableException {
-		if (marketData.getLast() == 0)
-			throw new DataUnavailableException("Last trade price not available");
-		else
-			return marketData.getLast();
+	protected double getIntendedPrice(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
+		return marketData.get().getLast();
 	}
 
 	public void setTradingService(TradingService tradingService) {
@@ -125,14 +113,6 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 
 	public Contract getContract() {
 		return contract;
-	}
-
-	public void setRoundOrderQty(int roundOrderQty) {
-		this.roundOrderQty = roundOrderQty;
-	}
-
-	public int getRoundOrderQty() {
-		return roundOrderQty;
 	}
 
 	public void setMarketDataSource(MarketDataSource marketDataSource) {
