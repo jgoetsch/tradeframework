@@ -16,8 +16,8 @@
 package com.jgoetsch.ib.handlers;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.ib.client.EWrapper;
 
@@ -34,26 +34,26 @@ public class SimpleHandlerDelegatingWrapper extends HandlerDelegatingWrapper imp
 	private Set<EWrapper> handlers;
 	
 	public SimpleHandlerDelegatingWrapper() {
-		handlers = new HashSet<EWrapper>();
+		handlers = new CopyOnWriteArraySet<EWrapper>();
 	}
 	
 	@Override
-	public synchronized void addHandler(EWrapper handler) {
+	public void addHandler(EWrapper handler) {
 		handlers.add(handler);
 	}
 	
 	@Override
-	public synchronized void removeHandler(EWrapper handler) {
+	public void removeHandler(EWrapper handler) {
 		handlers.remove(handler);
 	}
 
 	@Override
-	public synchronized void removeAllHandlers() {
+	public void removeAllHandlers() {
 		handlers.clear();
 	}
 
 	@Override
-	protected synchronized void callHandlers(String eventName, int objId, HandlerCallback callback) {
+	protected void callHandlers(String eventName, int objId, HandlerCallback callback) {
 		for (EWrapper handler : handlers) {
 			//System.out.println("event = " + eventName + ", calling handler:" + handler);
 			callback.callHandler(handler);
@@ -81,17 +81,17 @@ public class SimpleHandlerDelegatingWrapper extends HandlerDelegatingWrapper imp
 	}
 
 	@Override
-	public synchronized Collection<EWrapper> getHandlers(String eventName, int objectId) {
-		return new HashSet<EWrapper>(handlers);
+	public Collection<EWrapper> getHandlers(String eventName, int objectId) {
+		return handlers;
 	}
 
 	@Override
-	public synchronized Collection<EWrapper> getHandlers(String eventName) {
-		return new HashSet<EWrapper>(handlers);
+	public Collection<EWrapper> getHandlers(String eventName) {
+		return handlers;
 	}
 
 	@Override
-	public synchronized Collection<EWrapper> getHandlers() {
-		return new HashSet<EWrapper>(handlers);
+	public Collection<EWrapper> getHandlers() {
+		return handlers;
 	}
 }

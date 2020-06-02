@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -251,13 +250,13 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		handlerManager.addHandler(mkd);
 		eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true, false, Collections.emptyList());
 		return mkd.getCompletableFuture()
-				.whenComplete((m, e) -> handlerManager.removeHandler(mkd))
 				.orTimeout(2500, TimeUnit.MILLISECONDS)
 				.whenComplete((m, e) -> {
+					handlerManager.removeHandler(mkd);
 					if (e == null)
-						log.debug("Received contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime);
+						log.debug("Received market data for {} in {} ms", contract, System.currentTimeMillis() - startTime);
 					else
-						log.warn("Error receiving contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime, e);
+						log.warn("Error receiving market data for {} in {} ms", contract, System.currentTimeMillis() - startTime, e);
 				});
 	}
 
@@ -304,9 +303,10 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		long startTime = System.currentTimeMillis();
 		handlerManager.addHandler(mkd);
 		eClientSocket.reqContractDetails(tickerId, TWSUtils.toTWSContract(contract));
-		return mkd.getCompletableFuture().whenComplete((m, e) -> handlerManager.removeHandler(mkd))
+		return mkd.getCompletableFuture()
 				.orTimeout(2500, TimeUnit.MILLISECONDS)
 				.whenComplete((m, e) -> {
+					handlerManager.removeHandler(mkd);
 					if (e == null)
 						log.debug("Received contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime);
 					else
