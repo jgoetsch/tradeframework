@@ -15,20 +15,20 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
-import java.util.Date;
+import java.math.BigDecimal;
 
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class MarketOrderProcessor extends OrderProcessor {
 
-	public MarketOrderProcessor(int quantity) {
+	public MarketOrderProcessor(BigDecimal quantity) {
 		super(quantity);
 	}
 
 	@Override
 	protected Execution handleProcessing(MarketData marketData) {
-		return new Execution(getQuantityRemaining(), isBuying() ? marketData.getAsk() : marketData.getBid(), new Date(marketData.getTimestamp()));
+		return new Execution(getQuantityRemaining(), isBuying() ? marketData.getAsk() : marketData.getBid(), marketData.getTimestamp());
 	}
 
 }

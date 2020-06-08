@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -46,7 +47,7 @@ public class SingleAccountDataSourceProxy implements AccountDataSource {
 		return accountDataSource.getAccountDataSnapshot(accountCode);
 	}
 
-	public CompletableFuture<Double> getAccountValue(String valueType) {
+	public CompletableFuture<BigDecimal> getAccountValue(String valueType) {
 		return accountDataSource.getAccountValue(valueType, accountCode);
 	}
 

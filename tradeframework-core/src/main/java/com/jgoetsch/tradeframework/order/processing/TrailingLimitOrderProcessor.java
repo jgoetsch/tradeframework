@@ -15,32 +15,34 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class TrailingLimitOrderProcessor extends TrailingStopOrderProcessor {
 
-	private double limitOffset;
+	private BigDecimal limitOffset;
 
-	public TrailingLimitOrderProcessor(int quantity, double stopPrice, double trailingAmount, double limitPrice) {
+	public TrailingLimitOrderProcessor(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailingAmount, BigDecimal limitPrice) {
 		super(quantity, stopPrice, trailingAmount);
-		this.limitOffset = stopPrice - limitPrice;
+		this.limitOffset = stopPrice.subtract(limitPrice);
 	}
 
-	public TrailingLimitOrderProcessor(int quantity, double stopPrice, double trailingAmount, double limitPrice, TriggerMethod triggerMethod) {
+	public TrailingLimitOrderProcessor(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailingAmount, BigDecimal limitPrice, TriggerMethod triggerMethod) {
 		super(quantity, stopPrice, trailingAmount, triggerMethod);
-		this.limitOffset = stopPrice - limitPrice;
+		this.limitOffset = stopPrice.subtract(limitPrice);
 	}
 
 	@Override
 	protected OrderProcessor onTriggered(MarketData marketData) {
-		return new LimitOrderProcessor(getQuantityRemaining(), getStopPrice() - getLimitOffset());
+		return new LimitOrderProcessor(getQuantityRemaining(), getStopPrice().subtract(getLimitOffset()));
 	}
 
-	protected void setLimitOffset(double limitOffset) {
+	protected void setLimitOffset(BigDecimal limitOffset) {
 		this.limitOffset = limitOffset;
 	}
 
-	protected double getLimitOffset() {
+	protected BigDecimal getLimitOffset() {
 		return limitOffset;
 	}
 	

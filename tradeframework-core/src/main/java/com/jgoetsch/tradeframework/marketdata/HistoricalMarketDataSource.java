@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.tradeframework.marketdata;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,21 +29,21 @@ public class HistoricalMarketDataSource extends SimulatedMarketDataSource {
 	private final int dataPeriod;
 	private final int bufferLength;
 
-	public HistoricalMarketDataSource(Map<Contract, ? extends SimulatedMarketDataFeed> marketDataFeedMap, HistoricalDataSource historicalDataSource, long startTimestamp) {
+	public HistoricalMarketDataSource(Map<Contract, ? extends SimulatedMarketDataFeed> marketDataFeedMap, HistoricalDataSource historicalDataSource, Instant startTimestamp) {
 		super(marketDataFeedMap, startTimestamp);
 		this.historicalDataSource = historicalDataSource;
 		this.dataPeriod = HistoricalDataSource.PERIOD_15_SECONDS;
 		this.bufferLength = 1680;
 	}
 
-	public HistoricalMarketDataSource(HistoricalDataSource historicalDataSource, long startTimestamp) {
+	public HistoricalMarketDataSource(HistoricalDataSource historicalDataSource, Instant startTimestamp) {
 		super((Map<Contract, SimulatedMarketDataFeed>)null, startTimestamp);
 		this.historicalDataSource = historicalDataSource;
 		this.dataPeriod = HistoricalDataSource.PERIOD_15_SECONDS;
 		this.bufferLength = 1680;
 	}
 
-	public HistoricalMarketDataSource(HistoricalDataSource historicalDataSource, long startTimestamp, int dataPeriod, int bufferLength) {
+	public HistoricalMarketDataSource(HistoricalDataSource historicalDataSource, Instant startTimestamp, int dataPeriod, int bufferLength) {
 		super((Map<Contract, SimulatedMarketDataFeed>)null, startTimestamp);
 		this.historicalDataSource = historicalDataSource;
 		this.dataPeriod = dataPeriod;

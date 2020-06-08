@@ -19,15 +19,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 public class RecordedMarketDataFeed extends SimulatedMarketDataFeed {
 
 	private BufferedReader input;
-	private double defaultIncrement;
+	private BigDecimal defaultIncrement;
 
 	public RecordedMarketDataFeed(InputStream inputStream) {
 		this.input = new BufferedReader(new InputStreamReader(inputStream));
-		this.defaultIncrement = 0.1;
+		this.defaultIncrement = new BigDecimal("0.1");
 	}
 
 	@Override
@@ -41,12 +43,12 @@ public class RecordedMarketDataFeed extends SimulatedMarketDataFeed {
 			String part[] = line.split("[\\s,]");
 			try {
 				SimpleMarketData mkd = new SimpleMarketData();
-				mkd.setLastTimestamp(Long.parseLong(part[0]));
-				mkd.setLast(Double.parseDouble(part[1]));
+				mkd.setLastTimestamp(Instant.ofEpochMilli(Long.parseLong(part[0])));
+				mkd.setLast(new BigDecimal(part[1]));
 				mkd.setLastSize(Integer.parseInt(part[2]));
-				mkd.setBid(part.length >= 4 ? Double.parseDouble(part[3]) : mkd.getLast() - defaultIncrement);
+				mkd.setBid(part.length >= 4 ? new BigDecimal(part[3]) : mkd.getLast().subtract(defaultIncrement));
 				mkd.setBidSize(part.length >= 5 ? Integer.parseInt(part[4]) : 10);
-				mkd.setAsk(part.length >= 5 ? Double.parseDouble(part[5]) : mkd.getLast() + defaultIncrement);
+				mkd.setAsk(part.length >= 5 ? new BigDecimal(part[5]) : mkd.getLast().add(defaultIncrement));
 				mkd.setAskSize(part.length >= 6 ? Integer.parseInt(part[6]) : 10);
 				return mkd;
 			} catch (Exception e) {

@@ -15,10 +15,10 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import java.text.DateFormat;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,7 +43,7 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	private Map<String, Object> accountValues;
 	private Map<Contract, Position> positions;
 	private String updatedTimestampValue;
-	private long timestamp;
+	private Instant timestamp;
 
 	private final CompletableFuture<AccountData> future = new CompletableFuture<AccountData>();
 
@@ -65,7 +65,7 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	public synchronized void updateAccountValue(String key, String value, String currency, String accountName) {
 		if (accountCode == null || accountCode.equals(accountName)) {
 			try {
-				accountValues.put(key, Double.valueOf(value));
+				accountValues.put(key, new BigDecimal(value));
 			} catch (NumberFormatException ex) {
 				accountValues.put(key, value);
 			}
@@ -78,14 +78,17 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
 		if (accountCode == null || accountCode.equals(accountName)) {
-			positions.put(TWSUtils.fromTWSContract(contract), new PresetPosition(Double.valueOf(position).intValue(), marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL));
+			positions.put(TWSUtils.fromTWSContract(contract),
+					new PresetPosition(BigDecimal.valueOf(position), BigDecimal.valueOf(marketPrice),
+							BigDecimal.valueOf(marketValue), BigDecimal.valueOf(averageCost),
+							BigDecimal.valueOf(unrealizedPNL), BigDecimal.valueOf(realizedPNL)));
 		}
 	}
 
 	@Override
 	public synchronized void updateAccountTime(String timeStamp) {
 		updatedTimestampValue = timeStamp;
-		timestamp = System.currentTimeMillis();
+		timestamp = Instant.now();
 	}
 
 	@Override
@@ -95,25 +98,20 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 		}
 	}
 
-	public double getCashBalance() {
-		Double value = (Double)accountValues.get("CashBalance");
-		return value == null ? 0 : value.doubleValue();
+	public BigDecimal getCashBalance() {
+		return (BigDecimal)accountValues.get("CashBalance");
 	}
 
-	public double getNetLiquidationValue() {
-		Double value = (Double)accountValues.get("NetLiquidation");
-		return value == null ? 0 : value.doubleValue();
+	public BigDecimal getNetLiquidationValue() {
+		return (BigDecimal)accountValues.get("NetLiquidation");
 	}
 
 	public Map<Contract, Position> getPositions() {
 		return positions;
 	}
 
-	public double getValue(String valueType) {
-		if (accountValues.containsKey(valueType))
-			return (Double)accountValues.get(valueType);
-		else
-			return 0;
+	public BigDecimal getValue(String valueType) {
+		return (BigDecimal)accountValues.get(valueType);
 	}
 
 	@Override
@@ -136,7 +134,7 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 		}
 
 		sb.append("\n\nNet Liquidation Value\t\t").append(df.format(getNetLiquidationValue()));
-		sb.append("\nLast Updated Time\t\t").append(updatedTimestampValue).append("\t").append(DateFormat.getDateTimeInstance().format(new Date(timestamp)));
+		sb.append("\nLast Updated Time\t\t").append(updatedTimestampValue).append("\t").append(timestamp);
 		sb.append("\nOpen Positions:");
 		for (Map.Entry<Contract, ? extends Position> posEntry : positions.entrySet()) {
 			String contractTitle = posEntry.getKey().toString();
@@ -152,7 +150,7 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 		return sb.toString();
 	}
 
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 }

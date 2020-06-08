@@ -16,6 +16,7 @@
 package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,25 +26,27 @@ public class SimpleMarketData implements MarketData, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private double bid;
-	private int bidSize;
-	private double ask;
-	private int askSize;
-	private double last;
-	private int lastSize;
-	private double high;
-	private double low;
-	private double close;
-	private int volume;
-	private long lastTimestamp;
-	private long timestamp;
+	private BigDecimal bid;
+	private Integer bidSize;
+	private BigDecimal ask;
+	private Integer askSize;
+	private BigDecimal last;
+	private Integer lastSize;
+	private BigDecimal high;
+	private BigDecimal low;
+	private BigDecimal close;
+	private Integer volume;
+	private Instant lastTimestamp;
+	private Instant timestamp;
 
 	public SimpleMarketData() {
 	}
-	public SimpleMarketData(double bid, double ask, double last) {
+
+	public SimpleMarketData(BigDecimal bid, BigDecimal ask, BigDecimal last) {
 		this(bid, 0, ask, 0, last, 0);
 	}
-	public SimpleMarketData(double bid, int bidSize, double ask, int askSize, double last, int lastSize) {
+
+	public SimpleMarketData(BigDecimal bid, Integer bidSize, BigDecimal ask, int askSize, BigDecimal last, Integer lastSize) {
 		this.bid = bid;
 		this.bidSize = bidSize;
 		this.ask = ask;
@@ -57,7 +60,7 @@ public class SimpleMarketData implements MarketData, Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(dateFormat.format(Instant.ofEpochMilli(getTimestamp())));
+		sb.append(dateFormat.format(getTimestamp()));
 		DecimalFormat df = new DecimalFormat("0.#####");
 		sb.append(": Last=").append(df.format(getLast()));
 		sb.append(", Bid=").append(df.format(getBid()));
@@ -65,99 +68,99 @@ public class SimpleMarketData implements MarketData, Serializable {
 		return sb.toString();
 	}
 
-	public void setBid(double bid) {
+	public void setBid(BigDecimal bid) {
 		this.bid = bid;
 	}
 
-	public double getBid() {
+	public BigDecimal getBid() {
 		return bid;
 	}
 
-	public void setBidSize(int bidSize) {
+	public void setBidSize(Integer bidSize) {
 		this.bidSize = bidSize;
 	}
 
-	public int getBidSize() {
+	public Integer getBidSize() {
 		return bidSize;
 	}
 
-	public void setAsk(double ask) {
+	public void setAsk(BigDecimal ask) {
 		this.ask = ask;
 	}
 
-	public double getAsk() {
+	public BigDecimal getAsk() {
 		return ask;
 	}
 
-	public void setAskSize(int askSize) {
+	public void setAskSize(Integer askSize) {
 		this.askSize = askSize;
 	}
 
-	public int getAskSize() {
+	public Integer getAskSize() {
 		return askSize;
 	}
 
-	public void setLast(double last) {
+	public void setLast(BigDecimal last) {
 		this.last = last;
 	}
 
-	public double getLast() {
+	public BigDecimal getLast() {
 		return last;
 	}
 
-	public void setLastSize(int lastSize) {
+	public void setLastSize(Integer lastSize) {
 		this.lastSize = lastSize;
 	}
 
-	public int getLastSize() {
+	public Integer getLastSize() {
 		return lastSize;
 	}
 
-	public void setHigh(double high) {
+	public void setHigh(BigDecimal high) {
 		this.high = high;
 	}
 
-	public double getHigh() {
+	public BigDecimal getHigh() {
 		return high;
 	}
 
-	public void setLow(double low) {
+	public void setLow(BigDecimal low) {
 		this.low = low;
 	}
 
-	public double getLow() {
+	public BigDecimal getLow() {
 		return low;
 	}
 
-	public void setClose(double close) {
+	public void setClose(BigDecimal close) {
 		this.close = close;
 	}
 
-	public double getClose() {
+	public BigDecimal getClose() {
 		return close;
 	}
 
-	public void setVolume(int volume) {
+	public void setVolume(Integer volume) {
 		this.volume = volume;
 	}
 
-	public int getVolume() {
+	public Integer getVolume() {
 		return volume;
 	}
 
-	public void setLastTimestamp(long lastTimestamp) {
+	public void setLastTimestamp(Instant lastTimestamp) {
 		this.lastTimestamp = lastTimestamp;
 	}
 
-	public long getLastTimestamp() {
+	public Instant getLastTimestamp() {
 		return lastTimestamp;
 	}
 
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
 	}
 
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 

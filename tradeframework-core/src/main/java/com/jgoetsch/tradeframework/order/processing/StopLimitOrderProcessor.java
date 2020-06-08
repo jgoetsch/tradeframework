@@ -15,13 +15,15 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class StopLimitOrderProcessor extends StopOrderProcessor {
 
-	private double limitPrice;
+	private BigDecimal limitPrice;
 	
-	public StopLimitOrderProcessor(int quantity, double stopPrice, double limitPrice) {
+	public StopLimitOrderProcessor(BigDecimal quantity, BigDecimal stopPrice, BigDecimal limitPrice) {
 		super(quantity, stopPrice);
 		this.limitPrice = limitPrice;
 	}

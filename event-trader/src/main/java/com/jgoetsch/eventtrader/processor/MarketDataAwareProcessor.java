@@ -49,7 +49,7 @@ public abstract class MarketDataAwareProcessor implements Processor<TradeSignal>
 	public final void process(TradeSignal trade, ProcessorContext context) throws Exception {
 		try {
 			MarketData contractData = context.getMarketData(marketDataSource, trade.getContract());
-			if (contractData != null && contractData.getBid() > 0 && contractData.getAsk() > 0) {
+			if (contractData != null) {
 				log.debug("Market data for " + trade.getContract() + ": " + contractData);
 				process(trade, contractData, context);
 			}

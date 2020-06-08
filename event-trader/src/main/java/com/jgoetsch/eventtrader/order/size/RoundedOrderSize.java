@@ -19,8 +19,8 @@ import java.math.BigDecimal;
 import java.util.function.UnaryOperator;
 
 import com.jgoetsch.eventtrader.TradeSignal;
-import com.jgoetsch.eventtrader.order.price.TickRounding;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
+import com.jgoetsch.tradeframework.rounding.TickRounding;
 
 public class RoundedOrderSize implements OrderSize {
 
@@ -35,7 +35,7 @@ public class RoundedOrderSize implements OrderSize {
 		this.tickRounding = tickRounding;
 	}
 
-	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
+	public int getValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		return tickRounding.apply(BigDecimal.valueOf(size.getValue(trade, price, context))).intValue();
 	}
 

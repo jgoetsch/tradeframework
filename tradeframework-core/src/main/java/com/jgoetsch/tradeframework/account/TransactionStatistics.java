@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 public final class TransactionStatistics {
@@ -29,31 +30,31 @@ public final class TransactionStatistics {
 	double maxPl;
 	double maxGain;
 	double maxDrawdown;
-	double totalPlAmount;
-	double commissions;
+	BigDecimal totalPlAmount;
+	BigDecimal commissions;
 
 	public TransactionStatistics(Collection<ClosedPosition> transactions) {
 		nTransactions = transactions.size();
 		for (ClosedPosition tr : transactions) {
-			if (tr.getTransactionQuantity() > 0)
+			if (tr.getTransactionQuantity().signum() > 0)
 				nLong++;
-			else if (tr.getTransactionQuantity() < 0)
+			else if (tr.getTransactionQuantity().signum() < 0)
 				nShort++;
-			if (tr.getRealizedProfitLoss() > 0) {
+			if (tr.getRealizedProfitLoss().signum() > 0) {
 				nWins++;
-				winPercent += tr.getPercentGain();
+				winPercent += tr.getPercentGain().doubleValue();
 			}
-			else if (tr.getRealizedProfitLoss() < 0) {
+			else if (tr.getRealizedProfitLoss().signum() < 0) {
 				nLosses++;
-				lossPercent += tr.getPercentGain();
+				lossPercent += tr.getPercentGain().doubleValue();
 			}
 			maxPl = Math.max(maxPl, getTotalPlPercent());
 			minPl = Math.min(minPl, getTotalPlPercent());
 			maxGain = Math.max(maxGain, getTotalPlPercent() - minPl);
 			maxDrawdown = Math.max(maxDrawdown, maxPl - getTotalPlPercent());
-			totalShares += Math.abs(tr.getTransactionQuantity());
-			totalPlAmount += tr.getRealizedProfitLoss();
-			commissions += tr.getCommisions();
+			totalShares += tr.getTransactionQuantity().abs().intValue();
+			totalPlAmount = totalPlAmount.add(tr.getRealizedProfitLoss());
+			commissions = commissions.add(tr.getCommisions());
 		}
 	}
 
@@ -93,11 +94,11 @@ public final class TransactionStatistics {
 		return totalShares / nTransactions;
 	}
 
-	public double getProfitBeforeCommissions() {
+	public BigDecimal getProfitBeforeCommissions() {
 		return totalPlAmount;
 	}
 
-	public double getCommssions() {
+	public BigDecimal getCommssions() {
 		return commissions;
 	}
 }

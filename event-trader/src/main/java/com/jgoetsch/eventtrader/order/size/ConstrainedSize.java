@@ -15,6 +15,7 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import com.jgoetsch.eventtrader.TradeSignal;
@@ -33,7 +34,7 @@ public class ConstrainedSize implements OrderSize {
 		this.sizes = sizes;
 	}
 
-	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
+	public int getValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		int size = -1;
 		for (OrderSize calc : getSizes()) {
 			int calcSize = calc.getValue(trade, price, context);

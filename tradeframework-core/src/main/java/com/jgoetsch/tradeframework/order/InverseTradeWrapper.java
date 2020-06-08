@@ -18,7 +18,7 @@ package com.jgoetsch.tradeframework.order;
 import java.io.IOException;
 
 import com.jgoetsch.tradeframework.Contract;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.InvalidContractException;
 
 /**
@@ -36,9 +36,9 @@ public final class InverseTradeWrapper implements TradingService {
 		this.tradingService = tradingService;
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException {
-		Order inverseOrder = new Order(order);
-		inverseOrder.setQuantity(-inverseOrder.getQuantity());
+	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException, IOException {
+		StandardOrder inverseOrder = new StandardOrder(order);
+		inverseOrder.setQuantity(inverseOrder.getQuantity().negate());
 		tradingService.placeOrder(contract, order);
 	}
 

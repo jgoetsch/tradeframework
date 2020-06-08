@@ -1,4 +1,4 @@
-package com.jgoetsch.eventtrader.order.price;
+package com.jgoetsch.tradeframework.rounding;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

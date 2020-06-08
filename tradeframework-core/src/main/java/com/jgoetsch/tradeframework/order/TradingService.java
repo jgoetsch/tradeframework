@@ -19,12 +19,12 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.jgoetsch.tradeframework.Contract;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.InvalidContractException;
 
 public interface TradingService extends Closeable {
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException;
+	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException, IOException;
 
 	public void subscribeExecutions(ExecutionListener listener);
 

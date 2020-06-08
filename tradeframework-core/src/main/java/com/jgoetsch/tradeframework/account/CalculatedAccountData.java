@@ -15,9 +15,11 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -27,37 +29,33 @@ import com.jgoetsch.tradeframework.Contract;
 public class CalculatedAccountData implements AccountData {
 
 	private Map<Contract, Position> positions;
-	private double cashBalance;
-	private long timestamp;
+	private BigDecimal cashBalance;
+	private Instant timestamp;
 
-	public CalculatedAccountData(Map<Contract, ? extends Position> positions, double cashBalance, long timestamp) {
+	public CalculatedAccountData(Map<Contract, ? extends Position> positions, BigDecimal cashBalance, Instant timestamp) {
 		this.positions = Collections.unmodifiableMap(positions);
 		this.cashBalance = cashBalance;
 		this.timestamp = timestamp;
 	}
 	
-	public double getCashBalance() {
+	public BigDecimal getCashBalance() {
 		return cashBalance;
 	}
 
-	public double getNetLiquidationValue() {
-		double netLiq = cashBalance;
-		for (Position pos : positions.values()) {
-			netLiq += pos.getValue();
-		}
-		return netLiq;
+	public BigDecimal getNetLiquidationValue() {
+		return positions.values().stream().map(Position::getValue).reduce(cashBalance, BigDecimal::add);
 	}
 
-	public double getValue(String valueType) {
+	public BigDecimal getValue(String valueType) {
 		if("NetLiquidation".equalsIgnoreCase(valueType))
 			return getNetLiquidationValue();
 		else if ("CashBalance".equalsIgnoreCase(valueType))
 			return getCashBalance();
 		else
-			return 0;
+			return BigDecimal.ZERO;
 	}
 
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 
@@ -71,7 +69,7 @@ public class CalculatedAccountData implements AccountData {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("\n\nNet Liquidation Value\t\t").append(df.format(getNetLiquidationValue()));
-		sb.append("\nLast Updated Time\t\t").append(DateFormat.getDateTimeInstance().format(new Date(timestamp)));
+		sb.append("\nLast Updated Time\t\t").append(timestamp);
 		sb.append("\nOpen Positions:");
 		for (Map.Entry<Contract, ? extends Position> posEntry : positions.entrySet()) {
 			String contractTitle = posEntry.getKey().toString();

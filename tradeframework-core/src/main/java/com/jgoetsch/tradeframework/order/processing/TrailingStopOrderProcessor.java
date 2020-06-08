@@ -15,26 +15,28 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class TrailingStopOrderProcessor extends StopOrderProcessor {
 
-	private double trailingAmount;
+	private BigDecimal trailingAmount;
 
-	public TrailingStopOrderProcessor(int quantity, double stopPrice, double trailingAmount) {
+	public TrailingStopOrderProcessor(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailingAmount) {
 		super(quantity, stopPrice);
 		this.trailingAmount = trailingAmount;
 	}
 
-	public TrailingStopOrderProcessor(int quantity, double stopPrice, double trailingAmount, TriggerMethod triggerMethod) {
+	public TrailingStopOrderProcessor(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailingAmount, TriggerMethod triggerMethod) {
 		super(quantity, stopPrice, triggerMethod);
 		this.trailingAmount = trailingAmount;
 	}
 
 	@Override
 	protected void onNotTriggered(MarketData marketData) {
-		setStopPrice(isSelling() ? Math.max(getStopPrice(), marketData.getLast() - trailingAmount)
-				: Math.min(getStopPrice(), marketData.getLast() + trailingAmount));
+		setStopPrice(isSelling() ? getStopPrice().max(marketData.getLast().subtract(trailingAmount))
+				: getStopPrice().min(marketData.getLast().add(trailingAmount)));
 	}
 
 }

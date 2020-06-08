@@ -15,7 +15,8 @@
  */
 package com.jgoetsch.tradeframework.account;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 import com.jgoetsch.tradeframework.Contract;
 
@@ -36,7 +37,7 @@ public interface ClosedPosition {
 	 * 
 	 * @return Entry price of the trade.
 	 */
-	public double getEntryPrice();
+	public BigDecimal getEntryPrice();
 
 	/**
 	 * Returns the aggregate (generally volume weighted average) exit price of
@@ -45,7 +46,7 @@ public interface ClosedPosition {
 	 * 
 	 * @return Exit price of the trade.
 	 */
-	public double getExitPrice();
+	public BigDecimal getExitPrice();
 
 	/**
 	 * Returns the price that the contract reached at which the unrealized gain
@@ -54,21 +55,21 @@ public interface ClosedPosition {
 	 * 
 	 * @return
 	 */
-	public double getExtentPrice();
+	public BigDecimal getExtentPrice();
 
 	/**
 	 * Returns the date of the first entry trade in this transaction.
 	 * 
 	 * @return Entry date of this transaction
 	 */
-	public Date getEntryDate();
+	public Instant getEntryDate();
 
 	/**
 	 * Returns the date of the last exit trade in this transaction.
 	 * 
 	 * @return Exit date of this transaction
 	 */
-	public Date getExitDate();
+	public Instant getExitDate();
 
 	/**
 	 * Returns the largest position size that was accumulated as part of this
@@ -77,7 +78,7 @@ public interface ClosedPosition {
 	 * @return The maximum absolute value of the position size of the contract
 	 *         during this transaction.
 	 */
-	public int getTransactionQuantity();
+	public BigDecimal getTransactionQuantity();
 
 	/**
 	 * Returns the total realized profit or loss amount of this transaction. If
@@ -86,9 +87,9 @@ public interface ClosedPosition {
 	 * 
 	 * @return Realized profit or loss amount of this transaction.
 	 */
-	public double getRealizedProfitLoss();
+	public BigDecimal getRealizedProfitLoss();
 
-	public double getCommisions();
+	public BigDecimal getCommisions();
 
-	public double getPercentGain();
+	public BigDecimal getPercentGain();
 }

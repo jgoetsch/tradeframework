@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
@@ -22,6 +24,6 @@ public interface MutablePosition extends Position {
 
 	public abstract void setMarketPrice(MarketData marketData);
 
-	public abstract double trade(Execution exec);
+	public abstract BigDecimal trade(Execution exec);
 
 }

@@ -15,22 +15,24 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Map;
 
 import com.jgoetsch.tradeframework.Contract;
 
 public interface AccountData {
 	
-	public double getNetLiquidationValue();
+	public BigDecimal getNetLiquidationValue();
 	
-	public double getCashBalance();
+	public BigDecimal getCashBalance();
 
-	public double getValue(String valueType);
+	public BigDecimal getValue(String valueType);
 
 	public Map<Contract, ? extends Position> getPositions();
 
 	public String getSummaryText();
 	
-	public long getTimestamp();
+	public Instant getTimestamp();
 
 }

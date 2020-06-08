@@ -15,9 +15,11 @@
  */
 package com.jgoetsch.ib;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.ContractDetails;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.Execution;
 
 /**
@@ -100,16 +102,16 @@ public class TWSUtils {
 	 * @param order <code>com.jgoetsch.tradeframework.Order</code> object
 	 * @return equivilent object of type <code>com.ib.client.Order</code>
 	 */
-	public static com.ib.client.Order toTWSOrder(Order order) {
+	public static com.ib.client.Order toTWSOrder(StandardOrder order) {
 		com.ib.client.Order twsOrder = new com.ib.client.Order();
-		twsOrder.action(order.getQuantity() > 0 ? "BUY" : "SELL");
-		twsOrder.totalQuantity(Math.abs(order.getQuantity()));
+		twsOrder.action(order.getQuantity().signum() > 0 ? "BUY" : "SELL");
+		twsOrder.totalQuantity(order.getQuantity().abs().doubleValue());
 		twsOrder.orderType(order.getType());
 		twsOrder.tif(order.getTimeInForce());
 		twsOrder.outsideRth(order.getAllowOutsideRth());
-		twsOrder.lmtPrice(order.getLimitPrice());
-		twsOrder.auxPrice(order.getAuxPrice());
-		twsOrder.trailStopPrice(order.getTrailStopPrice());
+		twsOrder.lmtPrice(order.getLimitPrice().doubleValue());
+		twsOrder.auxPrice(order.getAuxPrice().doubleValue());
+		twsOrder.trailStopPrice(order.getTrailStopPrice().doubleValue());
 		twsOrder.transmit(order.isTransmit());
 		twsOrder.account(order.getAccount());
 		return twsOrder;
@@ -120,14 +122,14 @@ public class TWSUtils {
 	 * @param twsOrder <code>com.ib.client.Order</code> object
 	 * @return equivalent object of type <code>com.jgoetsch.tradeframework.Order</code>
 	 */
-	public static Order fromTWSOrder(com.ib.client.Order twsOrder) {
-		Order order = new Order();
+	public static StandardOrder fromTWSOrder(com.ib.client.Order twsOrder) {
+		StandardOrder order = new StandardOrder();
 		order.setType(twsOrder.getOrderType());
-		order.setQuantity(Double.valueOf("SELL".equalsIgnoreCase(twsOrder.getAction()) ? -twsOrder.totalQuantity() : twsOrder.totalQuantity()).intValue());
+		order.setQuantity(quantityToDecimal("SELL".equalsIgnoreCase(twsOrder.getAction()), twsOrder.totalQuantity()));
 		order.setTimeInForce(twsOrder.getTif());
-		order.setLimitPrice(twsOrder.lmtPrice());
-		order.setAuxPrice(twsOrder.auxPrice());
-		order.setTrailStopPrice(twsOrder.trailStopPrice());
+		order.setLimitPrice(priceToDecimal(twsOrder.lmtPrice()));
+		order.setAuxPrice(priceToDecimal(twsOrder.auxPrice()));
+		order.setTrailStopPrice(priceToDecimal(twsOrder.trailStopPrice()));
 		order.setAccount(twsOrder.account());
 		order.setTransmit(twsOrder.transmit());
 		return order;
@@ -140,9 +142,17 @@ public class TWSUtils {
 	 */
 	public static Execution fromTWSExecution(com.ib.client.Execution twsExecution) {
 		Execution execution = new Execution();
-		execution.setQuantity(Double.valueOf("SLD".equalsIgnoreCase(twsExecution.side()) ? -twsExecution.shares() : twsExecution.shares()).intValue());
-		execution.setPrice(twsExecution.price());
+		execution.setQuantity(quantityToDecimal("SLD".equalsIgnoreCase(twsExecution.side()), twsExecution.shares()));
+		execution.setPrice(priceToDecimal(twsExecution.price()));
 		return execution;
 	}
 
+	private static BigDecimal priceToDecimal(double value) {
+		return BigDecimal.valueOf(value);
+	}
+
+	private static BigDecimal quantityToDecimal(boolean isSell, double value) {
+		BigDecimal qty = BigDecimal.valueOf(value);
+		return isSell ? qty.negate() : qty;
+	}
 }

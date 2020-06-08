@@ -15,9 +15,11 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.time.Instant;
 
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.Execution;
@@ -32,141 +34,149 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
 public class DefaultCalculatedPosition implements MutablePosition, ClosedPosition {
 
 	private Contract contract;
-	private int curQuantity;
-	private int totalQuantity;
-	private long multiplier;
-	private double marketPrice;
-	private double avgEntryPrice = 0;
-	private double avgExitPrice = 0;
-	private double extPrice = 0;
-	private Date entryDate;
-	private Date exitDate;
-	private double realizedPL = 0;
-	private double commissions = 0;
+	private BigDecimal curQuantity;
+	private BigDecimal totalQuantity;
+	private BigDecimal multiplier;
+	private BigDecimal marketPrice;
+	private BigDecimal avgEntryPrice = BigDecimal.ZERO;
+	private BigDecimal avgExitPrice = BigDecimal.ZERO;
+	private BigDecimal extPrice;
+	private Instant entryDate;
+	private Instant exitDate;
+	private BigDecimal realizedPL = BigDecimal.ZERO;
+	private BigDecimal commissions = BigDecimal.ZERO;
 
 	public DefaultCalculatedPosition(Contract contract) {
 		this.contract = contract;
-		this.multiplier = contract.getMultiplier();
+		this.multiplier = BigDecimal.valueOf(contract.getMultiplier());
 	}
 
 	public Contract getContract() {
 		return contract;
 	}
 
-	public final int getQuantity() {
+	public final BigDecimal getQuantity() {
 		return curQuantity;
 	}
 	
-	public final double getMarketPrice() {
+	public final BigDecimal getMarketPrice() {
 		return marketPrice;
 	}
 	
-	public final long getMultiplier() {
+	public final BigDecimal getMultiplier() {
 		return multiplier;
 	}
 
-	public final double getAvgPrice() {
+	public final BigDecimal getAvgPrice() {
 		return avgEntryPrice;
 	}
 
-	public final double getRealizedProfitLoss() {
+	public final BigDecimal getRealizedProfitLoss() {
 		return realizedPL;
 	}
 
-	public final double getUnrealizedProfitLoss() {
+	public final BigDecimal getUnrealizedProfitLoss() {
 		return getPotentialProfitLoss(getMarketPrice(), getQuantity());
 	}
 
-	public final double getValue() {
-		return getMarketPrice() * getQuantity() * getMultiplier();
+	public final BigDecimal getValue() {
+		return getMarketPrice().multiply(getQuantity()).multiply(getMultiplier());
 	}
 
-	public double trade(Execution exec) {
+	public boolean exists() {
+		return getQuantity().signum() != 0;
+	}
+
+	public BigDecimal trade(Execution exec) {
 		marketPrice = exec.getPrice();
-		if (exec.getQuantity() == 0)
+		if (exec.getQuantity().signum() == 0)
 			throw new IllegalArgumentException("Execution cannot have quantity of 0");
 
-		if (curQuantity == 0 || (exec.getQuantity() > 0) == (curQuantity > 0)) {
-			avgEntryPrice = ((getAvgPrice() * curQuantity) + (exec.getPrice() * exec.getQuantity())) / (curQuantity + exec.getQuantity());
+		if (curQuantity.signum() == 0 || exec.getQuantity().signum() == curQuantity.signum()) {
+			avgEntryPrice = avgEntryPrice.multiply(curQuantity).add(exec.getPrice().multiply(exec.getQuantity())).divide(curQuantity.add(exec.getQuantity()), RoundingMode.HALF_UP);
 			if (entryDate == null)
 				entryDate = exec.getDate();
 		}
 		else {
-			if (Math.abs(exec.getQuantity()) > Math.abs(curQuantity))
+			if (exec.getQuantity().abs().compareTo(curQuantity.abs()) > 0)
 				throw new UnsupportedOperationException("Liquidating more shares than current position size not supported: " + contract + " " + exec + ", position @" + curQuantity);
-			realizedPL += getPotentialProfitLoss(exec.getPrice(), -exec.getQuantity()) - exec.getCommission();
-			avgExitPrice = ((getExitPrice() * Math.abs(totalQuantity - curQuantity)) + (exec.getPrice() * Math.abs(exec.getQuantity()))) / (Math.abs(totalQuantity - curQuantity) + Math.abs(exec.getQuantity()));
+			realizedPL = realizedPL.add(getPotentialProfitLoss(exec.getPrice(), exec.getQuantity().negate()).subtract(exec.getCommission()));
+			BigDecimal exitQty = totalQuantity.subtract(curQuantity);
+			avgExitPrice = avgExitPrice.multiply(exitQty).add(exec.getPrice().multiply(exec.getQuantity()))
+					.divide(exitQty.add(exec.getQuantity()));
 			exitDate = exec.getDate();
-			if (entryDate != null && exitDate != null && exitDate.before(entryDate))
+			if (entryDate != null && exitDate != null && exitDate.isBefore(entryDate))
 				throw new IllegalStateException("Date of position exit trade cannot be before entry date.");
 		}
 
-		curQuantity += exec.getQuantity();
-		if (Math.abs(curQuantity) > Math.abs(totalQuantity))
+		curQuantity = curQuantity.add(exec.getQuantity());
+		if (curQuantity.abs().compareTo(totalQuantity.abs()) > 0)
 			totalQuantity = curQuantity;
-		commissions += exec.getCommission();
-		return exec.getPrice() * -exec.getQuantity() * multiplier - exec.getCommission();
+		commissions = commissions.add(exec.getCommission());
+		return exec.getPrice().multiply(exec.getQuantity().negate()).multiply(multiplier).subtract(exec.getCommission());
 	}
 
-	protected double getPotentialProfitLoss(double price, int quantity) {
-		return (price - getAvgPrice()) * quantity * getMultiplier();
+	protected BigDecimal getPotentialProfitLoss(BigDecimal price, BigDecimal quantity) {
+		return price.subtract(getAvgPrice()).multiply(quantity).multiply(getMultiplier());
 	}
 
 	public void setMarketPrice(MarketData marketData) {
 		setMarketPrice(marketData.getLast());
 	}
 	
-	protected final void setMarketPrice(double marketPrice) {
+	protected final void setMarketPrice(BigDecimal marketPrice) {
 		this.marketPrice = marketPrice;
-		if (getQuantity() != 0)
-			extPrice = extPrice == 0 ? marketPrice : (getQuantity() > 0 ? Math.max(extPrice, marketPrice) : Math.min(extPrice, marketPrice));
+		if (exists())
+			extPrice = extPrice == null ? marketPrice : (getQuantity().signum() > 0 ? extPrice.max(marketPrice) : extPrice.min(marketPrice));
 	}
 	
 	@Override
 	public String toString() {
 		NumberFormat pf = NumberFormat.getNumberInstance();
-		if (getQuantity() != 0)
+		if (getQuantity().signum() != 0)
 			return getContract() + " " + getQuantity() + " shrs @" + avgEntryPrice + " avg, mkt @" + getMarketPrice() + ", mkt val = " + getValue();
 		else
-			return (getTransactionQuantity() > 0 ? "long " : "short ") + getTransactionQuantity()
+			return (getTransactionQuantity().signum() > 0 ? "long " : "short ") + getTransactionQuantity()
 				+ " shrs, entry @" + pf.format(getEntryPrice()) + ", exit @" + pf.format(getExitPrice())
 				+ ", reached " + pf.format(getExtentPrice())
 				+ ", " + new DecimalFormat("+0.00%;-0.00%").format(getPercentGain());
 	}
 
-	public double getEntryPrice() {
+	public BigDecimal getEntryPrice() {
 		return getAvgPrice();
 	}
 
-	public double getExitPrice() {
+	public BigDecimal getExitPrice() {
 		return avgExitPrice;
 	}
 
-	public double getExtentPrice() {
+	public BigDecimal getExtentPrice() {
 		return extPrice;
 	}
 
-	public int getTransactionQuantity() {
+	public BigDecimal getTransactionQuantity() {
 		return totalQuantity;
 	}
 
-	public double getPercentGain() {
-		return (getExitPrice() - getEntryPrice()) / getEntryPrice() * getTransactionQuantity() / Math.abs(getTransactionQuantity());
+	public BigDecimal getPercentGain() {
+		BigDecimal pct = getExitPrice().subtract(getEntryPrice()).divide(getEntryPrice(), 3, RoundingMode.HALF_UP);
+		return pct.multiply(BigDecimal.valueOf(totalQuantity.signum()));
 	}
 
-	public double getMaxUnrealizedPercent() {
-		return (getExtentPrice() - getEntryPrice()) / getEntryPrice() * getTransactionQuantity() / Math.abs(getTransactionQuantity());
+	public BigDecimal getMaxUnrealizedPercent() {
+		BigDecimal pct = getExtentPrice().subtract(getEntryPrice()).divide(getEntryPrice(), 3, RoundingMode.HALF_UP);
+		return pct.multiply(BigDecimal.valueOf(totalQuantity.signum()));
 	}
 
-	public Date getEntryDate() {
+	public Instant getEntryDate() {
 		return entryDate;
 	}
 
-	public Date getExitDate() {
+	public Instant getExitDate() {
 		return exitDate;
 	}
 
-	public double getCommisions() {
+	public BigDecimal getCommisions() {
 		return commissions;
 	}
 

@@ -15,29 +15,32 @@
  */
 package com.jgoetsch.tradeframework.marketdata;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
 public interface MarketData {
 
-	public double getBid();
+	public BigDecimal getBid();
 
-	public int getBidSize();
+	public Integer getBidSize();
 
-	public double getAsk();
+	public BigDecimal getAsk();
 
-	public int getAskSize();
+	public Integer getAskSize();
 
-	public double getLast();
+	public BigDecimal getLast();
 
-	public int getLastSize();
+	public Integer getLastSize();
 
-	public double getHigh();
+	public BigDecimal getHigh();
 
-	public double getLow();
+	public BigDecimal getLow();
 
-	public int getVolume();
+	public Integer getVolume();
 
-	public double getClose();
+	public BigDecimal getClose();
 	
-	public long getLastTimestamp();
+	public Instant getLastTimestamp();
 
-	public long getTimestamp();
+	public Instant getTimestamp();
 }

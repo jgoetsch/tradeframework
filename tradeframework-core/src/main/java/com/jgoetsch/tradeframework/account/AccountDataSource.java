@@ -15,11 +15,12 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 
 public interface AccountDataSource {
 
-	public CompletableFuture<Double> getAccountValue(String valueType);
+	public CompletableFuture<BigDecimal> getAccountValue(String valueType);
 
 	public CompletableFuture<AccountData> getAccountDataSnapshot();
 

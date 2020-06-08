@@ -40,8 +40,8 @@ public class FixedAmount implements OrderSize {
 		this.amount = amount;
 	}
 
-	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
-		return getAmount().divide(BigDecimal.valueOf(price), 0, RoundingMode.HALF_DOWN).intValue();
+	public int getValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
+		return getAmount().divide(price, 0, RoundingMode.HALF_DOWN).intValue();
 	}
 
 	public void initialize() {

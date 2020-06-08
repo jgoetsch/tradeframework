@@ -50,18 +50,19 @@ public abstract class IntervalTradingSystem extends AbstractTradingSystem {
 	}
 	
 	public synchronized void tick(Contract contract, MarketData data) {
+		long ts = data.getTimestamp().toEpochMilli();
 		if (lastTimestamp == 0)
-			lastTimestamp = (data.getTimestamp() / intervalLength) * intervalLength;
-		while (data.getTimestamp() - lastTimestamp > intervalLength) {
+			lastTimestamp = (ts / intervalLength) * intervalLength;
+		while (ts - lastTimestamp > intervalLength) {
 			if (isWithinTradingHours(lastTimestamp)) {
 				if (ohlc.getClose() == -1)
-					ohlc.addSample(data.getLast());
+					ohlc.addSample(data.getLast().doubleValue());
 				intervalTick(data, ohlc, lastTimestamp, intervalLength);
 			}
 			ohlc.clear();
 			lastTimestamp += intervalLength;
 		}
-		ohlc.addSample(data.getLast());
+		ohlc.addSample(data.getLast().doubleValue());
 	}
 
 	public void onStop() {

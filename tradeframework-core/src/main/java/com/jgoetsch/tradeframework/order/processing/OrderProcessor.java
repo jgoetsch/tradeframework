@@ -15,31 +15,33 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public abstract class OrderProcessor {
-	private final int totalQuantity;
-	private int quantityRemaining;
+	private final BigDecimal totalQuantity;
+	private BigDecimal quantityRemaining;
 
-	public OrderProcessor(int quantity) {
+	public OrderProcessor(BigDecimal quantity) {
 		this.totalQuantity = quantity;
 		this.quantityRemaining = quantity;
 	}
 
 	public boolean isBuying() {
-		return totalQuantity > 0;
+		return totalQuantity.signum() > 0;
 	}
 
 	public boolean isSelling() {
-		return totalQuantity < 0;
+		return totalQuantity.signum() < 0;
 	}
 
 	/**
 	 * Returns the number of shares in the order that have not yet been filled.
 	 * @return number of shares remaining to be filled
 	 */
-	public final int getQuantityRemaining() {
+	public final BigDecimal getQuantityRemaining() {
 		return quantityRemaining;
 	}
 
@@ -56,7 +58,7 @@ public abstract class OrderProcessor {
 	public final Execution process(MarketData marketData) {
 		Execution exec = handleProcessing(marketData);
 		if (exec != null)
-			quantityRemaining -= exec.getQuantity();
+			quantityRemaining = quantityRemaining.subtract(exec.getQuantity());
 		return exec;
 	}
 

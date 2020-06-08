@@ -31,7 +31,7 @@ public class ClosePrice extends OffsetOrderPrice {
 
 	@Override
 	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) {
-		return fromDouble(marketData.get().getClose());
+		return marketData.get().getClose();
 	}
 
 }

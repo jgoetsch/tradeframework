@@ -20,6 +20,9 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.account.AccountData;
@@ -28,21 +31,21 @@ import com.jgoetsch.tradeframework.account.AccountDataSource;
 public class AvailableMarginSize extends MultipliedOrderSize {
 
 	private AccountDataSource accountDataSource;
-	private double marginFactor = 1.0;
+	private BigDecimal marginFactor = BigDecimal.ONE;
 
 	@Override
-	protected int getBaseValue(TradeSignal trade, double price, ProcessorContext context) {
+	protected int getBaseValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		AccountData accountData = context.getAccountData(accountDataSource);
-		double available = accountData.getValue("AvailableFunds");
+		BigDecimal available = accountData.getValue("AvailableFunds");
 
 		if (trade.getType().isBuy()) {
-			return (int)(available / (marginFactor * price));
+			return available.divide(marginFactor.multiply(price), 0, RoundingMode.HALF_DOWN).intValue();
 		}
-		else if (price > 5.0) {
-			return (int)(available / Math.max(marginFactor * price, 5.0));
+		else if (price.compareTo(BigDecimal.valueOf(5)) > 0) {
+			return available.divide(marginFactor.multiply(price).max(BigDecimal.valueOf(5)), 0, RoundingMode.HALF_DOWN).intValue();
 		}
 		else {
-			return (int)(available / Math.max(price, 2.5));
+			return available.divide(price.max(new BigDecimal("2.5")), 0, RoundingMode.HALF_DOWN).intValue();
 		}
 	}
 
@@ -54,11 +57,11 @@ public class AvailableMarginSize extends MultipliedOrderSize {
 		return accountDataSource;
 	}
 
-	public void setMarginFactor(double marginFactor) {
+	public void setMarginFactor(BigDecimal marginFactor) {
 		this.marginFactor = marginFactor;
 	}
 
-	public double getMarginFactor() {
+	public BigDecimal getMarginFactor() {
 		return marginFactor;
 	}
 

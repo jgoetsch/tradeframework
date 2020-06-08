@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.marketdata.MarketDataSource;
@@ -46,7 +47,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 
 	public final void process(TradeSignal trade, ProcessorContext context) throws OrderException, IOException
 	{
-		Order order = new Order();
+		StandardOrder order = new StandardOrder();
 		order.setAccount(account);
 		try {
 			Supplier<MarketData> marketData = () -> context.getMarketData(marketDataSource, trade.getContract());
@@ -54,7 +55,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 			int numShares = orderSize.getValue(trade, getIntendedPrice(trade, marketData), context);
 			if (trade.getType() == null)
 				trade.setType(numShares > 0 ? TradeType.BUY : TradeType.SELL);
-			order.setQuantity(trade.getType().isSell() ? -Math.abs(numShares) : Math.abs(numShares));
+			order.setQuantity(BigDecimal.valueOf(trade.getType().isSell() ? -Math.abs(numShares) : Math.abs(numShares)));
 			prepareOrder(order, trade, marketData);
 		} catch (DataUnavailableException e) {
 			log.warn("Could not processs order because: " + e.getMessage());
@@ -75,8 +76,8 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 			log.info("No trading service connected, order to " + order + " not placed");
 	}
 
-	protected void prepareOrder(Order order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException {
-		order.setType(Order.TYPE_MARKET);
+	protected void prepareOrder(StandardOrder order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException {
+		order.setType(StandardOrder.TYPE_MARKET);
 	}
 
 	/**
@@ -87,7 +88,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	 * @param marketData
 	 * @return
 	 */
-	protected double getIntendedPrice(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
+	protected BigDecimal getIntendedPrice(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
 		return marketData.get().getLast();
 	}
 

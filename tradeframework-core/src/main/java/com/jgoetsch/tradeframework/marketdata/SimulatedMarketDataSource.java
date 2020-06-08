@@ -16,6 +16,7 @@
 package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
-import com.jgoetsch.tradeframework.data.DataUnavailableException;
 
 public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvanceable {
 
@@ -39,21 +39,21 @@ public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvancea
 
 	private SimulatedMarketDataFeed singleMarketDataFeed;
 	private Map<Contract, SimulatedMarketDataFeed> marketDataFeedMap;
-	private long curTimestamp;
+	private Instant curTimestamp;
 
 	private Map<Contract, Set<MarketDataListener>> listenerMap = new HashMap<Contract, Set<MarketDataListener>>();
 
 	public SimulatedMarketDataSource() {
-		curTimestamp = System.currentTimeMillis();
+		curTimestamp = Instant.now();
 	}
 	
-	public SimulatedMarketDataSource(Map<Contract, ? extends SimulatedMarketDataFeed> marketDataFeedMap, long startTimestamp) {
+	public SimulatedMarketDataSource(Map<Contract, ? extends SimulatedMarketDataFeed> marketDataFeedMap, Instant startTimestamp) {
 		if (marketDataFeedMap != null)
 			this.setMarketDataFeedMap(Collections.unmodifiableMap(marketDataFeedMap));
 		this.setStartTimestamp(startTimestamp);
 	}
 
-	public SimulatedMarketDataSource(SimulatedMarketDataFeed marketDataFeed, long startTimestamp) {
+	public SimulatedMarketDataSource(SimulatedMarketDataFeed marketDataFeed, Instant startTimestamp) {
 		this.setMarketDataFeed(marketDataFeed);
 		this.setStartTimestamp(startTimestamp);
 	}
@@ -71,7 +71,7 @@ public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvancea
 		return getMarketDataFeedMap() != null ? getMarketDataFeedMap().get(contract) : getMarketDataFeed();
 	}
 
-	protected final long getCurTimestamp() {
+	protected final Instant getCurTimestamp() {
 		return getStartTimestamp();
 	}
 
@@ -128,16 +128,16 @@ public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvancea
 	public synchronized final boolean receiveDataAndWait(long millis) throws IOException {
 		long chunkLength = 15000;
 		TreeMap<MarketData, Contract> chunkTicks = new TreeMap<MarketData, Contract>(new MarketDataTimestampComparator());
-		setStartTimestamp(getStartTimestamp() + millis);
+		setStartTimestamp(getStartTimestamp().plusMillis(millis));
 
-		for (long newTimestamp = getStartTimestamp() - millis + chunkLength; newTimestamp <= getStartTimestamp(); newTimestamp += chunkLength) {
+		for (Instant newTimestamp = getStartTimestamp().plusMillis(chunkLength - millis); !newTimestamp.isAfter(getStartTimestamp()); newTimestamp.plusMillis(chunkLength)) {
 			chunkTicks.clear();
 			boolean hasMoreData = false;
 			for (Contract contract : listenerMap.keySet()) {
 				SimulatedMarketDataFeed dataFeed = getDataFeed(contract);
 				List<MarketData> ticks;
 				try {
-					ticks = dataFeed.getTicksUpTo(Math.min(newTimestamp, getStartTimestamp()));
+					ticks = dataFeed.getTicksUpTo(newTimestamp.isBefore(getStartTimestamp()) ? newTimestamp : getStartTimestamp());
 					if (ticks != null) {
 						hasMoreData = true;
 						for (MarketData tick : ticks)
@@ -187,11 +187,11 @@ public class SimulatedMarketDataSource implements MarketDataSource, TimeAdvancea
 		return marketDataFeedMap;
 	}
 
-	public void setStartTimestamp(long startTimestamp) {
+	public void setStartTimestamp(Instant startTimestamp) {
 		this.curTimestamp = startTimestamp;
 	}
 
-	public long getStartTimestamp() {
+	public Instant getStartTimestamp() {
 		return curTimestamp;
 	}
 }

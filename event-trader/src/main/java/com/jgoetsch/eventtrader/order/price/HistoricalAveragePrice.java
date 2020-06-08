@@ -41,7 +41,7 @@ public class HistoricalAveragePrice extends OffsetOrderPrice {
 			return fromDouble(Arrays.asList(data).stream().mapToDouble(ohlc -> (ohlc.getHigh() + ohlc.getLow()) / 2).average().getAsDouble());
 		} catch (Exception e) {
 			log.warn("Could not get historical data for average trade limit price, using Last price", e);
-			return fromDouble(marketData.get().getLast());
+			return marketData.get().getLast();
 		}
 	}
 

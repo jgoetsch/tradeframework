@@ -1,11 +1,12 @@
 package com.jgoetsch.eventtrader
 
-import com.jgoetsch.eventtrader.order.price.PriceMappedTickRounding
-import com.jgoetsch.eventtrader.order.price.TickRounding
 import spock.lang.Specification
 import spock.lang.Unroll
 import java.math.RoundingMode
 import java.util.Map
+
+import com.jgoetsch.tradeframework.rounding.PriceMappedTickRounding
+import com.jgoetsch.tradeframework.rounding.TickRounding
 
 class TickRoundingSpec extends Specification {
 

@@ -18,7 +18,7 @@ package com.jgoetsch.tradeframework.order;
 import java.io.IOException;
 
 import com.jgoetsch.tradeframework.Contract;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.InvalidContractException;
 
 /**
@@ -59,7 +59,7 @@ public final class ReadOnlyTradeWrapper implements TradingService {
 		this.bPlaceUntransmittedOrder = bPlaceUntransmittedOrder;
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException {
+	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException, IOException {
 		if (bPlaceUntransmittedOrder) {
 			order.setTransmit(false);
 			tradingService.placeOrder(contract, order);

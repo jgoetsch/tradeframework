@@ -16,6 +16,7 @@
 package com.jgoetsch.ib;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -49,7 +50,7 @@ import com.jgoetsch.tradeframework.ContractDetails;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.NotConnectedException;
 import com.jgoetsch.tradeframework.OHLC;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.account.AccountData;
 import com.jgoetsch.tradeframework.account.AccountDataListener;
 import com.jgoetsch.tradeframework.account.AccountDataSource;
@@ -164,7 +165,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		return curRequestId++;
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException {
+	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException {
 		com.ib.client.Contract twsContract = TWSUtils.toTWSContract(contract);
 		com.ib.client.Order twsOrder = TWSUtils.toTWSOrder(order);
 		eClientSocket.placeOrder(getNextId(), twsContract, twsOrder);
@@ -173,12 +174,12 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	/*
 	 * Account data
 	 */
-	public CompletableFuture<Double> getAccountValue(String valueType) {
+	public CompletableFuture<BigDecimal> getAccountValue(String valueType) {
 		return getAccountValue(valueType, "");
 	}
 
-	public CompletableFuture<Double> getAccountValue(String valueType, String acctCode) {
-		return getAccountDataSnapshot(acctCode).thenApply(data -> data != null ? data.getValue(valueType) : 0);
+	public CompletableFuture<BigDecimal> getAccountValue(String valueType, String acctCode) {
+		return getAccountDataSnapshot(acctCode).thenApply(data -> data != null ? data.getValue(valueType) : null);
 	}
 
 	public CompletableFuture<AccountData> getAccountDataSnapshot() {

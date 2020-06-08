@@ -15,21 +15,23 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
+
 public class PresetPosition implements Position {
 
-	private double avgPrice;
-	private double marketPrice;
-	private int quantity;
-	private double value;
-	private double unrealizedPNL;
-	private double realizedPNL;
+	private BigDecimal avgPrice;
+	private BigDecimal marketPrice;
+	private BigDecimal quantity;
+	private BigDecimal value;
+	private BigDecimal unrealizedPNL;
+	private BigDecimal realizedPNL;
 
-	public PresetPosition(int position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL)
+	public PresetPosition(BigDecimal position, BigDecimal marketPrice, BigDecimal marketValue, BigDecimal averageCost, BigDecimal unrealizedPNL, BigDecimal realizedPNL)
 	{
 		this.update(position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL);
 	}
 	
-	public void update(int position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL)
+	public void update(BigDecimal position, BigDecimal marketPrice, BigDecimal marketValue, BigDecimal averageCost, BigDecimal unrealizedPNL, BigDecimal realizedPNL)
 	{
 		this.quantity = position;
 		this.marketPrice = marketPrice;
@@ -39,28 +41,31 @@ public class PresetPosition implements Position {
 		this.realizedPNL = realizedPNL;
 	}
 	
-	public double getAvgPrice() {
+	public BigDecimal getAvgPrice() {
 		return avgPrice;
 	}
 
-	public double getMarketPrice() {
+	public BigDecimal getMarketPrice() {
 		return marketPrice;
 	}
 
-	public int getQuantity() {
+	public BigDecimal getQuantity() {
 		return quantity;
 	}
 
-	public double getRealizedProfitLoss() {
+	public BigDecimal getRealizedProfitLoss() {
 		return realizedPNL;
 	}
 
-	public double getUnrealizedProfitLoss() {
+	public BigDecimal getUnrealizedProfitLoss() {
 		return unrealizedPNL;
 	}
 
-	public double getValue() {
+	public BigDecimal getValue() {
 		return value;
 	}
 
+	public boolean exists() {
+		return quantity.signum() != 0;
+	}
 }

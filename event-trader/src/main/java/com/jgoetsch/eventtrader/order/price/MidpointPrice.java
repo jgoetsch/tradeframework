@@ -32,7 +32,7 @@ public class MidpointPrice extends OffsetOrderPrice {
 
 	@Override
 	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) {
-		return fromDouble(marketData.get().getBid()).add(fromDouble(marketData.get().getAsk())).divide(BigDecimal.valueOf(2));
+		return marketData.get().getBid().add(marketData.get().getAsk()).divide(BigDecimal.valueOf(2));
 	}
 
 }

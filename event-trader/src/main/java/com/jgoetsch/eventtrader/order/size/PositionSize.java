@@ -20,6 +20,8 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.account.AccountData;
@@ -38,11 +40,11 @@ public class PositionSize extends MultipliedOrderSize {
 	private AccountDataSource accountDataSource;
 
 	@Override
-	protected int getBaseValue(TradeSignal trade, double price, ProcessorContext context) {
+	protected int getBaseValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		AccountData accountData = context.getAccountData(accountDataSource);
 
 		Position pos = accountData.getPositions().get(trade.getContract());
-		return pos != null ? pos.getQuantity() : 0;
+		return pos != null ? pos.getQuantity().intValue() : 0;
 	}
 
 	public void setAccountDataSource(AccountDataSource accountDataSource) {

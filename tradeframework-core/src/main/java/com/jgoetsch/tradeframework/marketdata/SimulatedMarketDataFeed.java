@@ -17,6 +17,7 @@ package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,14 +41,14 @@ public abstract class SimulatedMarketDataFeed implements Closeable {
 		this.nextTick = null;
 	}
 
-	public final List<MarketData> getTicksUpTo(long timestamp) throws IOException, InvalidContractException {
+	public final List<MarketData> getTicksUpTo(Instant timestamp) throws IOException, InvalidContractException {
 		List<MarketData> ticks = new LinkedList<MarketData>();
 		if (nextTick == null)
 			nextTick = retrieveNextTick();
 		while (true) {
 			if (nextTick == null)
 				return null;
-			else if (nextTick.getTimestamp() > timestamp)
+			else if (nextTick.getTimestamp().isAfter(timestamp))
 				return ticks;
 			else {
 				lastTick = nextTick;
@@ -67,10 +68,10 @@ public abstract class SimulatedMarketDataFeed implements Closeable {
 		return lastTick;
 	}
 
-	public void advanceTo(long timestamp) throws IOException, InvalidContractException {
+	public void advanceTo(Instant timestamp) throws IOException, InvalidContractException {
 		if (nextTick == null)
 			nextTick = retrieveNextTick();
-		while (nextTick != null && nextTick.getTimestamp() >= timestamp) {
+		while (nextTick != null && !nextTick.getTimestamp().isBefore(timestamp)) {
 			lastTick = nextTick;
 			nextTick = retrieveNextTick();
 		}

@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 import com.ib.client.TickAttrib;
@@ -24,18 +26,18 @@ import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class MarketDataHandler extends BaseIdHandler implements MarketData {
 
-	private double bid;
-	private int bidSize;
-	private double ask;
-	private int askSize;
-	private double last;
-	private int lastSize;
-	private double high;
-	private double low;
-	private double close;
-	private int volume;
-	private long lastTimestamp;
-	private long timestamp;
+	private BigDecimal bid;
+	private Integer bidSize;
+	private BigDecimal ask;
+	private Integer askSize;
+	private BigDecimal last;
+	private Integer lastSize;
+	private BigDecimal high;
+	private BigDecimal low;
+	private BigDecimal close;
+	private Integer volume;
+	private Instant lastTimestamp;
+	private Instant timestamp;
 
 	private final CompletableFuture<MarketData> future = new CompletableFuture<MarketData>();
 
@@ -49,23 +51,24 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 
 	@Override
 	protected synchronized void onTickPrice(int field, double price, TickAttrib attrib) {
+		BigDecimal decimal = BigDecimal.valueOf(price);
 		switch (TickType.get(field)) {
 			case BID:
-				setBid(price); break;
+				setBid(decimal); break;
 			case ASK:
-				setAsk(price); break;
+				setAsk(decimal); break;
 			case LAST:
-				setLast(price); break;
+				setLast(decimal); break;
 			case HIGH:
-				setHigh(price); break;
+				setHigh(decimal); break;
 			case LOW:
-				setLow(price); break;
+				setLow(decimal); break;
 			case CLOSE:
-				setClose(price); break;
+				setClose(decimal); break;
 			default:
 				break;
 		}
-		timestamp = System.currentTimeMillis();
+		timestamp = Instant.now();
 	}
 
 	@Override
@@ -82,18 +85,18 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 			default:
 				break;
 		}
-		timestamp = System.currentTimeMillis();
+		timestamp = Instant.now();
 	}
 
 	@Override
 	protected synchronized void onTickString(int tickType, String value) {
 		switch (TickType.get(tickType)) {
 			case LAST_TIMESTAMP:
-				setLastTimestamp(Long.parseLong(value)); break;
+				setLastTimestamp(Instant.ofEpochMilli(Long.parseLong(value))); break;
 			default:
 				break;
 		}
-		timestamp = System.currentTimeMillis();
+		timestamp = Instant.now();
 	}
 
 	@Override
@@ -115,74 +118,74 @@ public class MarketDataHandler extends BaseIdHandler implements MarketData {
 		return sb.toString();
 	}
 
-	private void setBid(double bid) {
+	private void setBid(BigDecimal bid) {
 		this.bid = bid;
 	}
-	public double getBid() {
+	public BigDecimal getBid() {
 		return bid;
 	}
-	private void setBidSize(int bidSize) {
+	private void setBidSize(Integer bidSize) {
 		this.bidSize = bidSize;
 	}
-	public int getBidSize() {
+	public Integer getBidSize() {
 		return bidSize;
 	}
-	private void setAsk(double ask) {
+	private void setAsk(BigDecimal ask) {
 		this.ask = ask;
 	}
-	public double getAsk() {
+	public BigDecimal getAsk() {
 		return ask;
 	}
-	private void setAskSize(int askSize) {
+	private void setAskSize(Integer askSize) {
 		this.askSize = askSize;
 	}
-	public int getAskSize() {
+	public Integer getAskSize() {
 		return askSize;
 	}
-	private void setLast(double last) {
+	private void setLast(BigDecimal last) {
 		this.last = last;
 	}
-	public double getLast() {
+	public BigDecimal getLast() {
 		return last;
 	}
-	private void setLastSize(int lastSize) {
+	private void setLastSize(Integer lastSize) {
 		this.lastSize = lastSize;
 	}
-	public int getLastSize() {
+	public Integer getLastSize() {
 		return lastSize;
 	}
-	private void setHigh(double high) {
+	private void setHigh(BigDecimal high) {
 		this.high = high;
 	}
-	public double getHigh() {
+	public BigDecimal getHigh() {
 		return high;
 	}
-	private void setLow(double low) {
+	private void setLow(BigDecimal low) {
 		this.low = low;
 	}
-	public double getLow() {
+	public BigDecimal getLow() {
 		return low;
 	}
-	private void setVolume(int volume) {
+	private void setVolume(Integer volume) {
 		this.volume = volume;
 	}
-	public int getVolume() {
+	public Integer getVolume() {
 		return volume;
 	}
-	private void setClose(double close) {
+	private void setClose(BigDecimal close) {
 		this.close = close;
 	}
-	public double getClose() {
+	public BigDecimal getClose() {
 		return close;
 	}
-	private void setLastTimestamp(long lastTimestamp) {
+	private void setLastTimestamp(Instant lastTimestamp) {
 		this.lastTimestamp = lastTimestamp;
 	}
-	public long getLastTimestamp() {
+	public Instant getLastTimestamp() {
 		return lastTimestamp;
 	}
 
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 }

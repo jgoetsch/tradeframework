@@ -15,14 +15,13 @@
  */
 package com.jgoetsch.tradeframework.account;
 
-import java.text.DateFormat;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -49,48 +48,44 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 
 	private final Map<Contract, MutablePosition> positions = new HashMap<Contract, MutablePosition>();
 	private List<ClosedPosition> completedTransactions = new LinkedList<ClosedPosition>();
-	private double cashBalance;
-	private long timestamp;
+	private BigDecimal cashBalance;
+	private Instant timestamp;
 
 	private Logger transactionLog = LoggerFactory.getLogger(ClosedPosition.class);
 	private Logger executionLog = LoggerFactory.getLogger(Execution.class);
 
-	public SimulatedAccount(double initialBalance, TradingService orderExecutionSource) {
+	public SimulatedAccount(BigDecimal initialBalance, TradingService orderExecutionSource) {
 		this.cashBalance = initialBalance;
 		this.marketDataSource = null;
 		if (orderExecutionSource != null)
 			orderExecutionSource.subscribeExecutions(this);
 	}
 
-	public SimulatedAccount(double initialBalance, TradingService orderExecutionSource, MarketDataSource marketDataSource) {
+	public SimulatedAccount(BigDecimal initialBalance, TradingService orderExecutionSource, MarketDataSource marketDataSource) {
 		this.cashBalance = initialBalance;
 		this.marketDataSource = marketDataSource;
 		if (orderExecutionSource != null)
 			orderExecutionSource.subscribeExecutions(this);
 	}
 
-	public double getCashBalance() {
+	public BigDecimal getCashBalance() {
 		return cashBalance;
 	}
 
-	public double getNetLiquidationValue() {
-		double netLiq = cashBalance;
-		for (Position pos : positions.values()) {
-			netLiq += pos.getValue();
-		}
-		return netLiq;
+	public BigDecimal getNetLiquidationValue() {
+		return positions.values().stream().map(Position::getValue).reduce(cashBalance, BigDecimal::add);
 	}
 
-	public double getValue(String valueType) {
+	public BigDecimal getValue(String valueType) {
 		if("NetLiquidation".equalsIgnoreCase(valueType))
 			return getNetLiquidationValue();
 		else if ("CashBalance".equalsIgnoreCase(valueType))
 			return getCashBalance();
 		else
-			return 0;
+			return BigDecimal.ZERO;
 	}
 
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 
@@ -101,11 +96,10 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 	public String getSummaryText() {
 		NumberFormat df = new DecimalFormat("$#,###,##0;($#,###,##0)");
 		NumberFormat price = new DecimalFormat("0.###");
-		DateFormat dateFormat = new SimpleDateFormat("M/d/yyyy HH:mm:ss z");
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("\n\nNet Liquidation Value\t\t").append(df.format(getNetLiquidationValue()));
-		sb.append("\nLast Updated Time\t\t").append(dateFormat.format(new Date(timestamp)));
+		sb.append("\nLast Updated Time\t\t").append(timestamp);
 		if (!positions.isEmpty()) {
 			sb.append("\nOpen Positions:");
 			for (Map.Entry<Contract, ? extends Position> posEntry : positions.entrySet()) {
@@ -134,7 +128,7 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 		listeners.remove(listener);
 	}
 
-	public CompletableFuture<Double> getAccountValue(String valueType) {
+	public CompletableFuture<BigDecimal> getAccountValue(String valueType) {
 		return CompletableFuture.completedFuture(getValue(valueType));
 	}
 
@@ -158,14 +152,14 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 
 	public synchronized void handleExecution(Contract contract, Execution execution) {
 		MutablePosition position = positions.get(contract);
-		if (position != null && position.getQuantity() != 0 && position.getQuantity() != -execution.getQuantity()
-				&& Math.signum(position.getQuantity() + execution.getQuantity()) != Math.signum(position.getQuantity()))
+		if (position != null && position.exists() && position.getQuantity().compareTo(execution.getQuantity().negate()) != 0
+				&& position.getQuantity().add(execution.getQuantity()).signum() != position.getQuantity().signum())
 		{
 			Execution remainExec = new Execution(execution);
-			remainExec.setQuantity(-position.getQuantity());
+			remainExec.setQuantity(position.getQuantity().negate());
 			handleSplitExecution(contract, remainExec);
 			Execution newExec = new Execution(execution);
-			newExec.setQuantity(execution.getQuantity() - remainExec.getQuantity());
+			newExec.setQuantity(execution.getQuantity().subtract(remainExec.getQuantity()));
 			handleSplitExecution(contract, newExec);
 		}
 		else
@@ -180,19 +174,19 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 			position = createPosition(contract);
 			positions.put(contract, position);
 		}
-		cashBalance += position.trade(execution);
+		cashBalance = cashBalance.add(position.trade(execution));
 		update();
 		if (executionLog.isInfoEnabled())
-			executionLog.info(dateFormat.format(execution.getDate().toInstant()) + ": " + contract + " " + execution + ", @" + position.getQuantity());
+			executionLog.info(dateFormat.format(execution.getDate()) + ": " + contract + " " + execution + ", @" + position.getQuantity());
 
-		if (position.getQuantity() == 0) {
+		if (position.getQuantity().signum() == 0) {
 			onPositionClosed(contract, (ClosedPosition) position);
 			positions.remove(contract);
 		}
 
 		if (marketDataSource != null) {
 			try {
-				if (position.getQuantity() != 0)
+				if (position.getQuantity().signum() != 0)
 					marketDataSource.subscribeMarketData(contract, this);
 				else
 					marketDataSource.cancelMarketData(contract, this);
@@ -205,9 +199,9 @@ public class SimulatedAccount implements AccountDataSource, AccountData, Executi
 	protected void onPositionClosed(Contract contract, ClosedPosition pos) {
 		if (transactionLog.isInfoEnabled()) {
 			transactionLog.info(String.format("%s\t%s\t%-5s\t%5d\t%8.5f\t%8.5f\t%5.2f\t%+6.2f%%\t%8.2f\t%7.2f\t%10.2f",
-					dateFormat.format(pos.getEntryDate().toInstant()), dateFormat.format(pos.getExitDate().toInstant()),
+					dateFormat.format(pos.getEntryDate()), dateFormat.format(pos.getExitDate()),
 					contract, pos.getTransactionQuantity(), pos.getEntryPrice(), pos.getExitPrice(), pos.getExtentPrice(),
-					pos.getPercentGain()*100, pos.getRealizedProfitLoss(), -pos.getCommisions(), getNetLiquidationValue()));
+					pos.getPercentGain().movePointRight(2), pos.getRealizedProfitLoss(), pos.getCommisions().negate(), getNetLiquidationValue()));
 		}
 		completedTransactions.add((ClosedPosition) pos);
 	}

@@ -15,17 +15,21 @@
  */
 package com.jgoetsch.tradeframework.account;
 
+import java.math.BigDecimal;
+
 public interface Position {
 
-	public int getQuantity();
+	public BigDecimal getQuantity();
 	
-	public double getValue();
+	public BigDecimal getValue();
 	
-	public double getMarketPrice();
+	public BigDecimal getMarketPrice();
 	
-	public double getUnrealizedProfitLoss();
+	public BigDecimal getUnrealizedProfitLoss();
 
-	public double getRealizedProfitLoss();
+	public BigDecimal getRealizedProfitLoss();
 
-	public double getAvgPrice();
+	public BigDecimal getAvgPrice();
+
+	public boolean exists();
 }

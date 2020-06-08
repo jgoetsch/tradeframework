@@ -17,10 +17,9 @@ package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 import com.jgoetsch.tradeframework.Contract;
 
@@ -28,7 +27,7 @@ public class MarketDataRecorder implements MarketDataListener {
 
 	private PrintWriter out;
 	private NumberFormat priceFormat;
-	private DateFormat dateFormat;
+	private DateTimeFormatter dateFormat;
 	private String delimiter = "\t";
 	private String lastLine;
 
@@ -37,13 +36,13 @@ public class MarketDataRecorder implements MarketDataListener {
 		this.priceFormat = new DecimalFormat("0.00");
 	}
 
-	public MarketDataRecorder(OutputStream output, DateFormat dateFormat) {
+	public MarketDataRecorder(OutputStream output, DateTimeFormatter dateFormat) {
 		this.out = new PrintWriter(output);
 		this.priceFormat = new DecimalFormat("0.00");
 		this.dateFormat = dateFormat;
 	}
 
-	public MarketDataRecorder(OutputStream output, DateFormat dateFormat, NumberFormat priceFormat, String delimiter) {
+	public MarketDataRecorder(OutputStream output, DateTimeFormatter dateFormat, NumberFormat priceFormat, String delimiter) {
 		this.out = new PrintWriter(output);
 		this.priceFormat = priceFormat;
 		this.dateFormat = dateFormat;
@@ -65,7 +64,7 @@ public class MarketDataRecorder implements MarketDataListener {
 		sb.append(data.getAskSize());
 		String line = sb.toString();
 		if (!line.equals(lastLine)) {
-			String ts = dateFormat != null ? dateFormat.format(new Date(data.getTimestamp())) : ""+data.getTimestamp();
+			String ts = dateFormat != null ? dateFormat.format(data.getTimestamp()) : ""+data.getTimestamp();
 			out.println(ts + delimiter + line);
 			out.flush();
 			lastLine = line;

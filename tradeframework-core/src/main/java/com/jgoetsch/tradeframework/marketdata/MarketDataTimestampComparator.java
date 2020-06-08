@@ -20,10 +20,10 @@ import java.util.Comparator;
 public class MarketDataTimestampComparator implements Comparator<MarketData> {
 
 	public int compare(MarketData o1, MarketData o2) {
-		if (o1.getTimestamp() == o2.getTimestamp())
+		if (o1.getTimestamp().equals(o2.getTimestamp()))
 			return o1.hashCode() - o2.hashCode();
 		else
-			return (int)(o1.getTimestamp() - o2.getTimestamp());
+			return o1.getTimestamp().compareTo(o2.getTimestamp());
 	}
 
 }

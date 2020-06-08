@@ -32,7 +32,7 @@ public class LastPrice extends OffsetOrderPrice {
 
 	@Override
 	protected BigDecimal getBaseValue(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
-		return fromDouble(marketData.get().getLast());
+		return marketData.get().getLast();
 	}
 
 }

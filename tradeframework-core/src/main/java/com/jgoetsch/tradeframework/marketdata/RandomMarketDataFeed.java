@@ -15,6 +15,11 @@
  */
 package com.jgoetsch.tradeframework.marketdata;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.function.UnaryOperator;
+
+import com.jgoetsch.tradeframework.rounding.TickRounding;
 
 /**
  * Simulates market data for a security with randomly moving price
@@ -24,9 +29,9 @@ package com.jgoetsch.tradeframework.marketdata;
  */
 public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 
-	private double incrementUnit = 0.01;
 	private double volatility = 0.05;
 	private double trend = 0;
+	private UnaryOperator<BigDecimal> rounding = TickRounding.DEFAULT_STOCK_BUY;
 	private long interval = 1000;
 
 	public RandomMarketDataFeed() {
@@ -40,12 +45,11 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 	 * @param volatility	the maximum change in price between ticks
 	 * @param length		number of ticks to generate
 	 */
-	public RandomMarketDataFeed(double startPrice, double incrementUnit, double volatility, long interval) {
+	public RandomMarketDataFeed(BigDecimal startPrice, double volatility, long interval) {
 		super();
 		this.setStartPrice(startPrice);
-		this.setIncrementUnit(incrementUnit);
 		this.setVolatility(volatility);
-		this.setTrend(0);
+		this.setInterval(interval);
 	}
 
 	public void initialize() {
@@ -53,15 +57,13 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 			throw new IllegalStateException("Required property startPrice is not set");
 	}
 
-	private double randomIncrement() {
+	private BigDecimal randomIncrement() {
 		setTrend((getTrend() + Math.random() * Math.signum(Math.random() - 0.5 + getTrend())) / 2);
-		double inc = Math.pow(Math.random(), 2) * Math.signum(Math.random() - 0.5 + trend) * volatility;
-		double norm = incrementUnit <= 1.0 ? (1 / incrementUnit) : incrementUnit;
-		return Math.round(inc * norm) / norm;
+		return BigDecimal.valueOf(Math.pow(Math.random(), 2) * Math.signum(Math.random() - 0.5 + trend) * volatility);
 	}
 
 	@Override
-	public void advanceTo(long timestamp) {
+	public void advanceTo(Instant timestamp) {
 		((SimpleMarketData)getLastTick()).setTimestamp(timestamp);
 		setLastTick(retrieveNextTick());
 	}
@@ -69,20 +71,20 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 	@Override
 	protected MarketData retrieveNextTick() {
 		MarketData last = getLastTick();
-		if (last == null || last.getTimestamp() == 0)
+		if (last == null || last.getTimestamp() == null)
 			throw new IllegalStateException(getClass().getSimpleName() + " does not know what time it is");
 
 		SimpleMarketData mkd = new SimpleMarketData();
-		mkd.setLast(last.getLast() + randomIncrement());
-		mkd.setTimestamp(last.getTimestamp() + interval);
+		mkd.setLast(rounding.apply(last.getLast().add(randomIncrement())));
+		mkd.setTimestamp(last.getTimestamp().plusMillis(interval));
 		mkd.setLastTimestamp(mkd.getTimestamp());
-		mkd.setAsk(mkd.getLast() + Math.abs(randomIncrement()));
+		mkd.setAsk(rounding.apply(mkd.getLast().add(randomIncrement().abs())));
 		mkd.setAskSize(10);
-		mkd.setBid(mkd.getLast() - Math.abs(randomIncrement()));
+		mkd.setBid(rounding.apply(mkd.getLast().subtract(randomIncrement().abs())));
 		mkd.setBidSize(10);
 		mkd.setClose(mkd.getLast());
-		mkd.setHigh(Math.max(last.getHigh(), mkd.getLast()));
-		mkd.setLow(Math.min(last.getLow(), mkd.getLast()));
+		mkd.setHigh(mkd.getLast().max(last.getHigh()));
+		mkd.setLow(mkd.getLast().min(last.getLow()));
 		return mkd;
 	}
 
@@ -90,7 +92,7 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 	public void close() {
 	}
 
-	public void setStartPrice(double startPrice) {
+	public void setStartPrice(BigDecimal startPrice) {
 		SimpleMarketData mkd = new SimpleMarketData();
 		mkd.setLast(startPrice);
 		mkd.setHigh(startPrice);
@@ -98,16 +100,8 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 		setLastTick(mkd);
 	}
 
-	public double getStartPrice() {
-		return getLastTick() != null ? getLastTick().getLast() : 0.0;
-	}
-
-	public void setIncrementUnit(double incrementUnit) {
-		this.incrementUnit = incrementUnit;
-	}
-
-	public double getIncrementUnit() {
-		return incrementUnit;
+	public BigDecimal getStartPrice() {
+		return getLastTick().getLast();
 	}
 
 	public void setVolatility(double volatility) {
@@ -132,6 +126,14 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 
 	public long getInterval() {
 		return interval;
+	}
+
+	public UnaryOperator<BigDecimal> getRounding() {
+		return rounding;
+	}
+
+	public void setRounding(UnaryOperator<BigDecimal> rounding) {
+		this.rounding = rounding;
 	}
 
 }

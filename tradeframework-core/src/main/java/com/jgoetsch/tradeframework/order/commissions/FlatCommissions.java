@@ -15,21 +15,23 @@
  */
 package com.jgoetsch.tradeframework.order.commissions;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.Execution;
 
 public class FlatCommissions implements CommissionStructure {
 
-	private double commission;
+	private BigDecimal commission;
 
 	/**
 	 * @param commission
 	 */
-	public FlatCommissions(double commission) {
+	public FlatCommissions(BigDecimal commission) {
 		this.commission = commission;
 	}
 
-	public double getCommissions(Contract contract, Execution exec) {
+	public BigDecimal getCommissions(Contract contract, Execution exec) {
 		return commission;
 	}
 

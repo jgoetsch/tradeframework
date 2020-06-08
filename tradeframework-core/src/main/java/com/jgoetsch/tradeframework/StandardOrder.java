@@ -15,18 +15,19 @@
  */
 package com.jgoetsch.tradeframework;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Order {
+public class StandardOrder {
 
 	private String type;
-	private int quantity;
+	private BigDecimal quantity;
 	private String timeInForce;
 	private boolean allowOutsideRth;
-	private double limitPrice;
-	private double auxPrice;
-	private double trailStopPrice;
+	private BigDecimal limitPrice;
+	private BigDecimal auxPrice;
+	private BigDecimal trailStopPrice;
 
 	private String account;
 	private boolean bTransmit;
@@ -43,13 +44,13 @@ public class Order {
 	public static final String TIF_DAY = "DAY";
 	public static final String TIF_GTC = "GTC";
 
-	public Order() {
+	public StandardOrder() {
 		this.setTimeInForce(TIF_DAY);
-		this.setQuantity(0);
+		this.setQuantity(BigDecimal.ZERO);
 		this.setTransmit(true);
 	}
 
-	public Order(Order other) {
+	public StandardOrder(StandardOrder other) {
 		this.type = other.type;
 		this.quantity = other.quantity;
 		this.timeInForce = other.timeInForce;
@@ -61,22 +62,22 @@ public class Order {
 		this.bTransmit = other.bTransmit;
 	}
 
-	public static Order marketOrder(int quantity) {
-		Order order = new Order();
+	public static StandardOrder marketOrder(BigDecimal quantity) {
+		StandardOrder order = new StandardOrder();
 		order.setType(TYPE_MARKET);
 		order.setQuantity(quantity);
 		return order;
 	}
 
-	public static Order limitOrder(int quantity, double limitPrice) {
-		Order order = marketOrder(quantity);
+	public static StandardOrder limitOrder(BigDecimal quantity, BigDecimal limitPrice) {
+		StandardOrder order = marketOrder(quantity);
 		order.setType(TYPE_LIMIT);
 		order.setLimitPrice(limitPrice);
 		return order;
 	}
 
-	public static Order trailingStopOrder(int quantity, double stopPrice, double trailAmount) {
-		Order order = marketOrder(quantity);
+	public static StandardOrder trailingStopOrder(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailAmount) {
+		StandardOrder order = marketOrder(quantity);
 		order.setType(TYPE_TRAIL);
 		order.setTrailStopPrice(stopPrice);
 		order.setAuxPrice(trailAmount);
@@ -86,23 +87,15 @@ public class Order {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getQuantity() > 0 ? "BUY " : "SELL ").append(Math.abs(getQuantity())).append(" ");
+		sb.append(getQuantity().signum() > 0 ? "BUY " : "SELL ").append(getQuantity().abs()).append(" ");
 		sb.append(getType());
-		if (getLimitPrice() > 0)
+		if (getLimitPrice() != null)
 			sb.append(" @ ").append(getLimitPrice());
 		if (!TIF_DAY.equals(getTimeInForce()))
 			sb.append(" ").append(getTimeInForce());
 		if (!isTransmit())
 			sb.append(" NO TRANSMIT");
 		return sb.toString();
-	}
-
-	/**
-	 * Assure that an incoming double value is rounded to an allowable number of
-	 * decimal places.
-	 */
-	protected static double normalizeDouble(double value) {
-		return Math.rint(value * 10000) / 10000;
 	}
 
 	public void setType(String type) {
@@ -113,35 +106,35 @@ public class Order {
 		return type;
 	}
 
-	public void setQuantity(int quantity) {
+	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
 	}
 
-	public int getQuantity() {
+	public BigDecimal getQuantity() {
 		return quantity;
 	}
 
-	public void setLimitPrice(double limitPrice) {
-		this.limitPrice = normalizeDouble(limitPrice);
+	public void setLimitPrice(BigDecimal limitPrice) {
+		this.limitPrice = limitPrice;
 	}
 
-	public double getLimitPrice() {
+	public BigDecimal getLimitPrice() {
 		return limitPrice;
 	}
 
-	public void setAuxPrice(double auxPrice) {
-		this.auxPrice = normalizeDouble(auxPrice);
+	public void setAuxPrice(BigDecimal auxPrice) {
+		this.auxPrice = auxPrice;
 	}
 
-	public double getAuxPrice() {
+	public BigDecimal getAuxPrice() {
 		return auxPrice;
 	}
 
-	public void setTrailStopPrice(double trailStopPrice) {
-		this.trailStopPrice = normalizeDouble(trailStopPrice);
+	public void setTrailStopPrice(BigDecimal trailStopPrice) {
+		this.trailStopPrice = trailStopPrice;
 	}
 
-	public double getTrailStopPrice() {
+	public BigDecimal getTrailStopPrice() {
 		return trailStopPrice;
 	}
 

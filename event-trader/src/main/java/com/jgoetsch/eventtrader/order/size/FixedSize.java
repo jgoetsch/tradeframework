@@ -15,6 +15,8 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.PropertyNotSetException;
@@ -30,7 +32,7 @@ public class FixedSize implements OrderSize {
 		this.size = size;
 	}
 
-	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
+	public int getValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		return getSize();
 	}
 

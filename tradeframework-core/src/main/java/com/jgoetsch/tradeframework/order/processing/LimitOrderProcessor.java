@@ -15,31 +15,33 @@
  */
 package com.jgoetsch.tradeframework.order.processing;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 
 public class LimitOrderProcessor extends MarketOrderProcessor {
 
-	protected double limitPrice;
+	protected BigDecimal limitPrice;
 
-	public LimitOrderProcessor(int quantity, double limitPrice) {
+	public LimitOrderProcessor(BigDecimal quantity, BigDecimal limitPrice) {
 		super(quantity);
 		this.limitPrice = limitPrice;
 	}
 
 	@Override
 	protected Execution handleProcessing(MarketData marketData) {
-		if ((isBuying() && marketData.getAsk() <= getLimitPrice()) || (isSelling() && marketData.getBid() >= getLimitPrice()))
+		if ((isBuying() && marketData.getAsk().compareTo(getLimitPrice()) <= 0) || (isSelling() && marketData.getBid().compareTo(getLimitPrice()) >= 0))
 			return super.handleProcessing(marketData);
 		else
 			return null;
 	}
 
-	protected void setLimitPrice(double limitPrice) {
+	protected void setLimitPrice(BigDecimal limitPrice) {
 		this.limitPrice = limitPrice;
 	}
 
-	protected double getLimitPrice() {
+	protected BigDecimal getLimitPrice() {
 		return limitPrice;
 	}
 

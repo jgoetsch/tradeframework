@@ -19,19 +19,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 
 public class TickWriterMarketDataFeed extends SimulatedMarketDataFeed {
 
 	private BufferedReader input;
-	private double defaultIncrement;
+	private BigDecimal defaultIncrement;
 	private DateFormat dateFormat;
-	private double lastPrice = -1;
-	private long lastTimestamp;
+	private BigDecimal lastPrice;
+	private Instant lastTimestamp;
 
-	public TickWriterMarketDataFeed(InputStream inputStream, double defaultIncrement, DateFormat dateFormat) {
+	public TickWriterMarketDataFeed(InputStream inputStream, BigDecimal defaultIncrement, DateFormat dateFormat) {
 		this.input = new BufferedReader(new InputStreamReader(inputStream));
 		this.defaultIncrement = defaultIncrement;
 		this.dateFormat = dateFormat;
@@ -60,8 +62,8 @@ public class TickWriterMarketDataFeed extends SimulatedMarketDataFeed {
 					ts = new Date(Long.parseLong(part[field]));
 
 				SimpleMarketData mkd = new SimpleMarketData();
-				mkd.setTimestamp(ts.getTime());
-				mkd.setLast(Double.parseDouble(part[++field]));
+				mkd.setTimestamp(ts.toInstant());
+				mkd.setLast(new BigDecimal(part[++field]));
 				mkd.setLastSize(part.length >= ++field ? Integer.parseInt(part[field]) : 0);
 				if (mkd.getLast() != lastPrice) {
 					lastTimestamp = mkd.getTimestamp();
@@ -69,9 +71,9 @@ public class TickWriterMarketDataFeed extends SimulatedMarketDataFeed {
 				}
 				mkd.setLastTimestamp(lastTimestamp);
 
-				mkd.setBid(part.length > ++field ? Double.parseDouble(part[field]) : mkd.getLast() - defaultIncrement);
+				mkd.setBid(part.length > ++field ? new BigDecimal(part[field]) : mkd.getLast().subtract(defaultIncrement));
 				mkd.setBidSize(part.length > ++field ? Integer.parseInt(part[field]) : 10);
-				mkd.setAsk(part.length > ++field ? Double.parseDouble(part[field]) : mkd.getLast() + defaultIncrement);
+				mkd.setAsk(part.length > ++field ? new BigDecimal(part[field]) : mkd.getLast().subtract(defaultIncrement));
 				mkd.setAskSize(part.length > ++field ? Integer.parseInt(part[field]) : 10);
 
 				return mkd;

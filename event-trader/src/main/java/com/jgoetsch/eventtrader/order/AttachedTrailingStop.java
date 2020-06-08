@@ -16,6 +16,7 @@
 package com.jgoetsch.eventtrader.order;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.InvalidContractException;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.order.OrderException;
@@ -33,10 +34,10 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 
 	private Logger log = LoggerFactory.getLogger(AttachedTrailingStop.class);
 	private MarketOrderExecutor baseExecutor;
-	private double trailPercent;
+	private BigDecimal trailPercent;
 
 	public final boolean handleProcessing(TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, IOException {
-		Order baseOrder = new Order();
+		StandardOrder baseOrder = new StandardOrder();
 		try {
 			baseExecutor.prepareOrder(baseOrder, trade, marketData);
 		} catch (DataUnavailableException du) {
@@ -45,7 +46,7 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 		}
 
 		if (baseOrder != null) {
-			Order order = createAttachedOrder(trade, marketData, baseOrder);
+			StandardOrder order = createAttachedOrder(trade, marketData, baseOrder);
 			try {
 				getTradingService().placeOrder(trade.getContract(), baseOrder);
 				getTradingService().placeOrder(trade.getContract(), order);
@@ -57,18 +58,18 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 		return false;
 	}
 
-	protected Order createAttachedOrder(TradeSignal trade, Supplier<MarketData> marketData, Order baseOrder) throws OrderException, IOException
+	protected StandardOrder createAttachedOrder(TradeSignal trade, Supplier<MarketData> marketData, StandardOrder baseOrder) throws OrderException, IOException
 	{
-		double price = baseOrder.getLimitPrice();
-		if (price <= 0)
+		BigDecimal price = baseOrder.getLimitPrice();
+		if (price == null)
 			price = marketData.get().getLast();
 
-		double trailAmt = price * trailPercent + .01;
-		return Order.trailingStopOrder(-baseOrder.getQuantity(),
-				trade.getType().isBuy() ? price - trailAmt : price + trailAmt, trailAmt);
+		BigDecimal trailAmt = price.multiply(trailPercent).add(new BigDecimal(".01"));
+		return StandardOrder.trailingStopOrder(baseOrder.getQuantity().negate(),
+				trade.getType().isBuy() ? price.subtract(trailAmt) : price.add(trailAmt), trailAmt);
 	}
 
-	protected final Order createOrder(TradeSignal trade, MarketData marketData) {
+	protected final StandardOrder createOrder(TradeSignal trade, MarketData marketData) {
 		throw new UnsupportedOperationException();
 	}
 

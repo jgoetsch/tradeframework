@@ -47,7 +47,7 @@ public class ExistingPositionFilter extends FilterProcessor<TradeSignal> {
 				return true;
 			else {
 				Position pos = account.getPositions().get(trade.getContract());
-				if (pos != null && pos.getQuantity() != 0) {
+				if (pos != null && pos.exists()) {
 					log.info("Already have position in " + trade.getContract());
 					return false;
 				}

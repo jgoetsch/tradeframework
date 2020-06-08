@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
+import com.jgoetsch.tradeframework.rounding.TickRounding;
 
 /**
  * Abstract PriceCalculation whose resulting price can be offset by a predetermined amount.

@@ -25,12 +25,12 @@ public abstract class MultipliedOrderSize implements OrderSize {
 
 	private BigDecimal multiplier = BigDecimal.ONE;
 
-	public int getValue(TradeSignal trade, double price, ProcessorContext context) {
+	public int getValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		return multiplier.multiply(BigDecimal.valueOf(getBaseValue(trade, price, context)))
 				.setScale(0, RoundingMode.HALF_DOWN).intValue();
 	}
 
-	protected abstract int getBaseValue(TradeSignal trade, double price, ProcessorContext context);
+	protected abstract int getBaseValue(TradeSignal trade, BigDecimal price, ProcessorContext context);
 
 	@Override
 	public String toString() {

@@ -9,11 +9,12 @@ import com.jgoetsch.eventtrader.order.price.ConstrainedPrice
 import com.jgoetsch.eventtrader.order.price.LastPrice
 import com.jgoetsch.eventtrader.order.price.MidpointPrice
 import com.jgoetsch.eventtrader.order.price.OffsetOrderPrice
-import com.jgoetsch.eventtrader.order.price.PriceMappedTickRounding
-import com.jgoetsch.eventtrader.order.price.TickRounding
 import com.jgoetsch.tradeframework.Contract
 import com.jgoetsch.tradeframework.marketdata.MarketData
 import com.jgoetsch.tradeframework.marketdata.SimpleMarketData
+import com.jgoetsch.tradeframework.rounding.PriceMappedTickRounding
+import com.jgoetsch.tradeframework.rounding.TickRounding
+
 import java.math.RoundingMode
 import spock.lang.Specification
 import spock.lang.Unroll

@@ -15,15 +15,16 @@
  */
 package com.jgoetsch.tradeframework;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.time.Instant;
 
 public class Execution {
 
-	private int quantity;
-	private double price;
-	private double commission;
-	private Date date;
+	private BigDecimal quantity;
+	private BigDecimal price;
+	private BigDecimal commission;
+	private Instant date;
 
 	public Execution() {	
 	}
@@ -40,7 +41,7 @@ public class Execution {
 	 * @param price
 	 * @param date
 	 */
-	public Execution(int quantity, double price, Date date) {
+	public Execution(BigDecimal quantity, BigDecimal price, Instant date) {
 		this.quantity = quantity;
 		this.price = price;
 		this.date = date;
@@ -48,33 +49,33 @@ public class Execution {
 
 	@Override
 	public String toString() {
-		return (getQuantity() > 0 ? "BOT " : "SLD ") + Math.abs(getQuantity()) + " @" + NumberFormat.getNumberInstance().format(getPrice());
+		return (getQuantity().signum() > 0 ? "BOT " : "SLD ") + getQuantity().abs() + " @" + NumberFormat.getNumberInstance().format(getPrice());
 	}
 
-	public int getQuantity() {
+	public BigDecimal getQuantity() {
 		return quantity;
 	}
-	public void setQuantity(int quantity) {
+	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
 	}
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-	public Date getDate() {
+	public Instant getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(Instant date) {
 		this.date = date;
 	}
 
-	public void setCommission(double commission) {
+	public void setCommission(BigDecimal commission) {
 		this.commission = commission;
 	}
 
-	public double getCommission() {
+	public BigDecimal getCommission() {
 		return commission;
 	}
 

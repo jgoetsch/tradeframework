@@ -15,11 +15,13 @@
  */
 package com.jgoetsch.tradeframework.order.commissions;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.Execution;
 
 public interface CommissionStructure {
 
-	public double getCommissions(Contract contract, Execution exec);
+	public BigDecimal getCommissions(Contract contract, Execution exec);
 
 }

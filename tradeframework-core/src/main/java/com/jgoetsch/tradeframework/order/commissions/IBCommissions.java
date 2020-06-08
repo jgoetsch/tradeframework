@@ -15,13 +15,18 @@
  */
 package com.jgoetsch.tradeframework.order.commissions;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.Execution;
 
 public class IBCommissions implements CommissionStructure {
 
-	public double getCommissions(Contract contract, Execution exec) {
-		return Math.max(Math.min(exec.getQuantity() * 0.005, exec.getQuantity() * exec.getPrice() * 0.005), 1);
+	private static final BigDecimal perShare = new BigDecimal("0.005");
+	private static final BigDecimal maxPercent = new BigDecimal("0.01");
+
+	public BigDecimal getCommissions(Contract contract, Execution exec) {
+		return exec.getQuantity().multiply(perShare).max(BigDecimal.ONE).min(exec.getPrice().multiply(exec.getQuantity()).multiply(maxPercent));
 	}
 
 }

@@ -16,6 +16,7 @@
 package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -89,15 +90,16 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 		}
 
 		MarketData mkd = marketDataFromBar(data[dataIndex++]);
-		curTimestamp = mkd.getTimestamp();
+		curTimestamp = mkd.getTimestamp().toEpochMilli();
 		return mkd;
 	}
 
 	@Override
-	public final void advanceTo(long timestamp) throws IOException, InvalidContractException {
-		if (timestamp > curTimestamp) {
+	public final void advanceTo(Instant timestamp) throws IOException, InvalidContractException {
+		long millis = timestamp.toEpochMilli();
+		if (millis > curTimestamp) {
 			data = null;
-			curTimestamp = timestamp;
+			curTimestamp = millis;
 			bufferEndTime = curTimestamp;
 			reset();
 			setLastTick(retrieveNextTick());
@@ -106,13 +108,13 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 
 	protected MarketData marketDataFromBar(OHLC ohlc) {
 		SimpleMarketData mkd = new SimpleMarketData();
-		mkd.setLast(ohlc.getOpen());
-		mkd.setBid(mkd.getLast() - 0.00);
-		mkd.setAsk(mkd.getLast() + 0.00);
+		mkd.setLast(BigDecimal.valueOf(ohlc.getOpen()));
+		mkd.setBid(mkd.getLast());
+		mkd.setAsk(mkd.getLast());
 		mkd.setBidSize(10000);
 		mkd.setAskSize(10000);
-		mkd.setTimestamp(ohlc.getDate().getTime());
-		mkd.setLastTimestamp(ohlc.getDate().getTime());
+		mkd.setTimestamp(ohlc.getDate().toInstant());
+		mkd.setLastTimestamp(ohlc.getDate().toInstant());
 		return mkd;
 	}
 

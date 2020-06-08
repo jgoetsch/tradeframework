@@ -15,12 +15,14 @@
  */
 package com.jgoetsch.eventtrader.order.size;
 
+import java.math.BigDecimal;
+
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 
 public class TradeSignalSize extends MultipliedOrderSize {
 
-	protected int getBaseValue(TradeSignal trade, double price, ProcessorContext context) {
+	protected int getBaseValue(TradeSignal trade, BigDecimal price, ProcessorContext context) {
 		return trade.getNumShares();
 	}
 
