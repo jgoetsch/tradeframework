@@ -20,6 +20,7 @@ import java.io.IOException;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.InvalidContractException;
+import com.jgoetsch.tradeframework.Order;
 
 /**
  * TradingService decorator that provides a read only view that will
@@ -59,9 +60,9 @@ public final class ReadOnlyTradeWrapper implements TradingService {
 		this.bPlaceUntransmittedOrder = bPlaceUntransmittedOrder;
 	}
 
-	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException, IOException {
-		if (bPlaceUntransmittedOrder) {
-			order.setTransmit(false);
+	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException {
+		if (order instanceof StandardOrder && bPlaceUntransmittedOrder) {
+			((StandardOrder)order).setTransmit(false);
 			tradingService.placeOrder(contract, order);
 		}
 	}

@@ -28,6 +28,7 @@ import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.InvalidContractException;
+import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.marketdata.MarketDataListener;
 import com.jgoetsch.tradeframework.marketdata.MarketDataSource;
@@ -91,31 +92,31 @@ public class SimulatedTradingService implements TradingService, MarketDataListen
 		}
 	}
 
-	protected OrderProcessor createOpenOrder(Contract contract, StandardOrder order) {
+	protected OrderProcessor createOpenOrder(Contract contract, Order order) {
 
-		if (StandardOrder.TYPE_MARKET.equalsIgnoreCase(order.getType()))
+		if (Order.TYPE_MARKET.equalsIgnoreCase(order.getType()))
 			return new MarketOrderProcessor(order.getQuantity());
 
-		else if (StandardOrder.TYPE_LIMIT.equalsIgnoreCase(order.getType()))
+		else if (Order.TYPE_LIMIT.equalsIgnoreCase(order.getType()))
 			return new LimitOrderProcessor(order.getQuantity(), order.getLimitPrice());
 
-		else if (StandardOrder.TYPE_STOP.equalsIgnoreCase(order.getType()))
+		else if (Order.TYPE_STOP.equalsIgnoreCase(order.getType()))
 			return new StopOrderProcessor(order.getQuantity(), order.getAuxPrice());
 
-		else if (StandardOrder.TYPE_STOPLIMIT.equalsIgnoreCase(order.getType()))
+		else if (Order.TYPE_STOPLIMIT.equalsIgnoreCase(order.getType()))
 			return new StopLimitOrderProcessor(order.getQuantity(), order.getAuxPrice(), order.getLimitPrice());
 
-		else if (StandardOrder.TYPE_TRAIL.equalsIgnoreCase(order.getType()))
+		else if (Order.TYPE_TRAIL.equalsIgnoreCase(order.getType()))
 			return new TrailingStopOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), new StopOrderProcessor.EODTriggerMethod());
 
-		else if (StandardOrder.TYPE_TRAILLIMIT.equalsIgnoreCase(order.getType()))
+		else if (Order.TYPE_TRAILLIMIT.equalsIgnoreCase(order.getType()))
 			return new TrailingLimitOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), order.getLimitPrice());
 
 		else
 			throw new UnsupportedOperationException("Unsupported order type: " + order.getType());
 	}
 
-	public void placeOrder(Contract contract, StandardOrder order) throws IOException, InvalidContractException, OrderException {
+	public void placeOrder(Contract contract, Order order) throws IOException, InvalidContractException, OrderException {
 		OrderProcessor openOrder = createOpenOrder(contract, order);
 		synchronized (this) {
 			Collection<OrderProcessor> contractOrders = openOrders.get(contract);

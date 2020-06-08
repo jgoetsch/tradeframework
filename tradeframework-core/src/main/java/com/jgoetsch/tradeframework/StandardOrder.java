@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StandardOrder {
+public class StandardOrder implements Order {
 
 	private String type;
 	private BigDecimal quantity;
@@ -34,54 +34,22 @@ public class StandardOrder {
 
 	private final Set<String> tags = new HashSet<String>();
 
-	public static final String TYPE_MARKET = "MKT";
-	public static final String TYPE_LIMIT = "LMT";
-	public static final String TYPE_STOP = "STP";
-	public static final String TYPE_STOPLIMIT = "STPLMT";
-	public static final String TYPE_TRAIL = "TRAIL";
-	public static final String TYPE_TRAILLIMIT = "TRAILLIMIT";
-
-	public static final String TIF_DAY = "DAY";
-	public static final String TIF_GTC = "GTC";
-
 	public StandardOrder() {
 		this.setTimeInForce(TIF_DAY);
 		this.setQuantity(BigDecimal.ZERO);
 		this.setTransmit(true);
 	}
 
-	public StandardOrder(StandardOrder other) {
-		this.type = other.type;
-		this.quantity = other.quantity;
-		this.timeInForce = other.timeInForce;
-		this.allowOutsideRth = other.allowOutsideRth;
-		this.limitPrice = other.limitPrice;
-		this.auxPrice = other.auxPrice;
-		this.trailStopPrice = other.trailStopPrice;
+	public StandardOrder(Order other) {
+		this.type = other.getType();
+		this.quantity = other.getQuantity();
+		this.timeInForce = other.getTimeInForce();
+		this.allowOutsideRth = other.getAllowOutsideRth();
+		this.limitPrice = other.getLimitPrice();
+		this.auxPrice = other.getAuxPrice();
+		this.trailStopPrice = other.getTrailStopPrice();
 		this.setAccount(other.getAccount());
-		this.bTransmit = other.bTransmit;
-	}
-
-	public static StandardOrder marketOrder(BigDecimal quantity) {
-		StandardOrder order = new StandardOrder();
-		order.setType(TYPE_MARKET);
-		order.setQuantity(quantity);
-		return order;
-	}
-
-	public static StandardOrder limitOrder(BigDecimal quantity, BigDecimal limitPrice) {
-		StandardOrder order = marketOrder(quantity);
-		order.setType(TYPE_LIMIT);
-		order.setLimitPrice(limitPrice);
-		return order;
-	}
-
-	public static StandardOrder trailingStopOrder(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailAmount) {
-		StandardOrder order = marketOrder(quantity);
-		order.setType(TYPE_TRAIL);
-		order.setTrailStopPrice(stopPrice);
-		order.setAuxPrice(trailAmount);
-		return order;
+		this.bTransmit = other.isTransmit();
 	}
 
 	@Override
@@ -102,6 +70,7 @@ public class StandardOrder {
 		this.type = type;
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -110,6 +79,7 @@ public class StandardOrder {
 		this.quantity = quantity;
 	}
 
+	@Override
 	public BigDecimal getQuantity() {
 		return quantity;
 	}
@@ -118,6 +88,7 @@ public class StandardOrder {
 		this.limitPrice = limitPrice;
 	}
 
+	@Override
 	public BigDecimal getLimitPrice() {
 		return limitPrice;
 	}
@@ -126,6 +97,7 @@ public class StandardOrder {
 		this.auxPrice = auxPrice;
 	}
 
+	@Override
 	public BigDecimal getAuxPrice() {
 		return auxPrice;
 	}
@@ -134,6 +106,7 @@ public class StandardOrder {
 		this.trailStopPrice = trailStopPrice;
 	}
 
+	@Override
 	public BigDecimal getTrailStopPrice() {
 		return trailStopPrice;
 	}
@@ -142,6 +115,7 @@ public class StandardOrder {
 		this.timeInForce = timeInForce;
 	}
 
+	@Override
 	public String getTimeInForce() {
 		return timeInForce;
 	}
@@ -150,6 +124,7 @@ public class StandardOrder {
 		this.allowOutsideRth = allowOutsideRth;
 	}
 
+	@Override
 	public boolean getAllowOutsideRth() {
 		return allowOutsideRth;
 	}
@@ -158,10 +133,12 @@ public class StandardOrder {
 		this.bTransmit = bTransmit;
 	}
 
+	@Override
 	public boolean isTransmit() {
 		return bTransmit;
 	}
 
+	@Override
 	public Set<String> getTags() {
 		return tags;
 	}
@@ -170,6 +147,7 @@ public class StandardOrder {
 		this.account = account;
 	}
 
+	@Override
 	public String getAccount() {
 		return account;
 	}

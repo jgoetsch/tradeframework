@@ -29,6 +29,7 @@ import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
+import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
@@ -77,7 +78,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	}
 
 	protected void prepareOrder(StandardOrder order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException {
-		order.setType(StandardOrder.TYPE_MARKET);
+		order.setType(Order.TYPE_MARKET);
 	}
 
 	/**

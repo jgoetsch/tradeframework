@@ -50,7 +50,7 @@ import com.jgoetsch.tradeframework.ContractDetails;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.NotConnectedException;
 import com.jgoetsch.tradeframework.OHLC;
-import com.jgoetsch.tradeframework.StandardOrder;
+import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.account.AccountData;
 import com.jgoetsch.tradeframework.account.AccountDataListener;
 import com.jgoetsch.tradeframework.account.AccountDataSource;
@@ -165,7 +165,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		return curRequestId++;
 	}
 
-	public void placeOrder(Contract contract, StandardOrder order) throws InvalidContractException, OrderException {
+	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException {
 		com.ib.client.Contract twsContract = TWSUtils.toTWSContract(contract);
 		com.ib.client.Order twsOrder = TWSUtils.toTWSOrder(order);
 		eClientSocket.placeOrder(getNextId(), twsContract, twsOrder);

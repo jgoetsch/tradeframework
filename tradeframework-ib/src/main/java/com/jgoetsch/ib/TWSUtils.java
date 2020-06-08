@@ -21,6 +21,7 @@ import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.ContractDetails;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.Execution;
+import com.jgoetsch.tradeframework.Order;
 
 /**
  * Provides static methods to convert Interactive Brokers TWS specific data
@@ -100,18 +101,18 @@ public class TWSUtils {
 	/**
 	 * Convert a TradeFramework order object into an IB order object.
 	 * @param order <code>com.jgoetsch.tradeframework.Order</code> object
-	 * @return equivilent object of type <code>com.ib.client.Order</code>
+	 * @return equivalent object of type <code>com.ib.client.Order</code>
 	 */
-	public static com.ib.client.Order toTWSOrder(StandardOrder order) {
+	public static com.ib.client.Order toTWSOrder(Order order) {
 		com.ib.client.Order twsOrder = new com.ib.client.Order();
 		twsOrder.action(order.getQuantity().signum() > 0 ? "BUY" : "SELL");
-		twsOrder.totalQuantity(order.getQuantity().abs().doubleValue());
+		twsOrder.totalQuantity(toDouble(order.getQuantity().abs()));
 		twsOrder.orderType(order.getType());
 		twsOrder.tif(order.getTimeInForce());
 		twsOrder.outsideRth(order.getAllowOutsideRth());
-		twsOrder.lmtPrice(order.getLimitPrice().doubleValue());
-		twsOrder.auxPrice(order.getAuxPrice().doubleValue());
-		twsOrder.trailStopPrice(order.getTrailStopPrice().doubleValue());
+		twsOrder.lmtPrice(toDouble(order.getLimitPrice()));
+		twsOrder.auxPrice(toDouble(order.getAuxPrice()));
+		twsOrder.trailStopPrice(toDouble(order.getTrailStopPrice()));
 		twsOrder.transmit(order.isTransmit());
 		twsOrder.account(order.getAccount());
 		return twsOrder;
@@ -122,7 +123,7 @@ public class TWSUtils {
 	 * @param twsOrder <code>com.ib.client.Order</code> object
 	 * @return equivalent object of type <code>com.jgoetsch.tradeframework.Order</code>
 	 */
-	public static StandardOrder fromTWSOrder(com.ib.client.Order twsOrder) {
+	public static Order fromTWSOrder(com.ib.client.Order twsOrder) {
 		StandardOrder order = new StandardOrder();
 		order.setType(twsOrder.getOrderType());
 		order.setQuantity(quantityToDecimal("SELL".equalsIgnoreCase(twsOrder.getAction()), twsOrder.totalQuantity()));
@@ -147,6 +148,10 @@ public class TWSUtils {
 		return execution;
 	}
 
+	private static double toDouble(BigDecimal value) {
+		return value == null ? 0 : value.doubleValue();
+	}
+	
 	private static BigDecimal priceToDecimal(double value) {
 		return BigDecimal.valueOf(value);
 	}

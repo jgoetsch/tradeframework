@@ -25,6 +25,7 @@ import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.InvalidContractException;
+import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.order.OrderException;
 import com.jgoetsch.tradeframework.order.TradingService;
@@ -59,7 +60,7 @@ public class BasicOrderExecutor implements Processor<TradeSignal> {
 	}
 
 	protected StandardOrder createOrder(TradeSignal trade) {
-		return StandardOrder.marketOrder(BigDecimal.valueOf(trade.getType().isBuy() ? trade.getNumShares() : -trade.getNumShares()));
+		return Order.marketOrder(BigDecimal.valueOf(trade.getType().isBuy() ? trade.getNumShares() : -trade.getNumShares()));
 	}
 
 	public TradingService getTradingService() {

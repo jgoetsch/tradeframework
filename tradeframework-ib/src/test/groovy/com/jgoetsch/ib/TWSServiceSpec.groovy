@@ -13,6 +13,7 @@ import com.ib.client.TickType
 import com.jgoetsch.ib.handlers.BaseHandler
 import com.jgoetsch.ib.handlers.SimpleHandlerDelegatingWrapper
 import com.jgoetsch.tradeframework.Contract
+import com.jgoetsch.tradeframework.Order
 import com.jgoetsch.tradeframework.marketdata.SimpleMarketData
 
 import java.time.ZoneId;
@@ -65,5 +66,13 @@ class TWSServiceSpec extends Specification {
 
 		ExecutionException e = thrown()
 		e.cause.getClass() == TimeoutException
+	}
+
+	def "Places order"() {
+		when:
+		twsService.placeOrder(Contract.stock("ABCD"), Order.limitOrder(2000, 1.55))
+
+		then:
+		1 * clientSocket.placeOrder(_, _, _)
 	}
 }
