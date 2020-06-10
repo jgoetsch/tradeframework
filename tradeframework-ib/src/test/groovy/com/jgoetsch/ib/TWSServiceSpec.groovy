@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException
 import com.ib.client.EClientSocket
 import com.ib.client.TickType
 import com.jgoetsch.ib.handlers.BaseHandler
+import com.jgoetsch.ib.handlers.MessageLogger
 import com.jgoetsch.ib.handlers.SimpleHandlerDelegatingWrapper
 import com.jgoetsch.tradeframework.Contract
 import com.jgoetsch.tradeframework.Order
@@ -28,6 +29,7 @@ class TWSServiceSpec extends Specification {
 	ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
 	def setup() {
+		wrapper.addHandler(MessageLogger.createLoggingHandler());
 		clientSocket.eConnect(*_) >> { scheduler.schedule({ wrapper.nextValidId(REQUEST_ID) }, 200, TimeUnit.MILLISECONDS) }
 		assert twsService.connect()
 	}
@@ -73,6 +75,15 @@ class TWSServiceSpec extends Specification {
 		twsService.placeOrder(Contract.stock("ABCD"), Order.limitOrder(2000, 1.55))
 
 		then:
-		1 * clientSocket.placeOrder(_, _, _)
+		1 * clientSocket.placeOrder(_,
+			{
+				it.m_symbol == "ABCD"
+			},
+			{
+				it.m_orderType == "LMT"
+				it.m_totalQuantity == 2000
+				it.m_lmtPrice == 1.55
+			}
+		)
 	}
 }

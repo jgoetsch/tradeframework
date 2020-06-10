@@ -124,9 +124,9 @@ public class BaseHandler implements EWrapper {
 	 * Handle error event. Record error and wake up threads waiting on this handler.
 	 */
 	@Override
-	public synchronized void error(int id, int errorCode, String errorMsg) {
-		this.errorCode = errorCode;
-		this.errorMsg = errorMsg;
+	public synchronized void error(int id, int code, String msg) {
+		this.errorCode = code;
+		this.errorMsg = msg;
 		this.notifyAll();
 	}
 

@@ -17,3 +17,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-engine:1.6.2'
     testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
 }
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs << '-parameters'
+}

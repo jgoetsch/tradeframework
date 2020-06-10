@@ -157,7 +157,9 @@ public class TWSUtils {
 	}
 
 	private static BigDecimal quantityToDecimal(boolean isSell, double value) {
-		BigDecimal qty = BigDecimal.valueOf(value);
+		BigDecimal qty = BigDecimal.valueOf(value).stripTrailingZeros();
+		if (qty.scale() < 0)
+			qty = qty.setScale(0);
 		return isSell ? qty.negate() : qty;
 	}
 }

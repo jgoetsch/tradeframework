@@ -82,7 +82,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 
 	public TWSService() {
 		handlerManager = new SimpleHandlerDelegatingWrapper();
-		handlerManager.addHandler(new MessageLogger());
+		handlerManager.addHandler(MessageLogger.createLoggingHandler());
 		readerSignal = new EJavaSignal();
 		eClientSocket = new EClientSocket((EWrapper)handlerManager, readerSignal);
 	}

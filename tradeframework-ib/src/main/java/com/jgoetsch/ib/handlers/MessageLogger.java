@@ -15,14 +15,23 @@
  */
 package com.jgoetsch.ib.handlers;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ib.client.Contract;
+import com.ib.client.EWrapper;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
-import com.ib.client.TickAttrib;
 import com.ib.client.TickType;
 import com.jgoetsch.ib.TWSUtils;
 
@@ -35,109 +44,72 @@ import com.jgoetsch.ib.TWSUtils;
  * @author jgoetsch
  *
  */
-public class MessageLogger extends BaseHandler {
+public class MessageLogger {
 
-	private Logger statusLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".status");
-	private Logger errorLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".error");
-	private Logger orderLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".order");
-	private Logger execLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".execDetails");
-	private Logger accountLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".account");
-	private Logger marketDataLog = LoggerFactory.getLogger(MessageLogger.class.getName() + ".marketData");
+	private static Logger log = LoggerFactory.getLogger(MessageLogger.class);
 
-	@Override
-	public int getStatus() {
-		return STATUS_WORKING;
+	private static final Class<EWrapper> wrapperInterface = EWrapper.class;
+
+	private static final String PARAM_SEPARATOR = ", ";
+	private static final String PARAM_VALUE_SEPARATOR = ":";
+	private static final Set<Object> SUPPRESSED_VALUES = Set.of(0, 0d, -1);
+
+	// EWrapper interface from tws api may not have been compiled with parameter name info,
+	// so get them from BaseHandler implementation class
+	private static String[] handlerArgumentNames(Method m) {
+		try {
+			return Arrays.stream(BaseHandler.class.getDeclaredMethod(m.getName(), m.getParameterTypes()).getParameters())
+					.map(Parameter::getName).toArray(String[]::new);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalArgumentException("Interface method not implemented in BaseHandler", e);
+		}
 	}
 
-	@Override
-	public void nextValidId(int orderId) {
-		statusLog.debug("Initial order id = " + orderId);
-	}
+	public static EWrapper createLoggingHandler() {
+		Map<Method, String[]> methodArgNames = Arrays.stream(wrapperInterface.getDeclaredMethods()).collect(
+				Collectors.toMap(Function.identity(), MessageLogger::handlerArgumentNames));
 
-	@Override
-	public void tickPrice(int tickerId, int field, double price, TickAttrib attrib) {
-		marketDataLog.debug("tickPrice: id=" + tickerId + ", " + TickType.getField(field) + "=" + price);
-	}
-
-	@Override
-	public void tickSize(int tickerId, int field, int size) {
-		marketDataLog.debug("tickPrice: id=" + tickerId + ", " + TickType.getField(field) + "=" + size);
-	}
-
-	@Override
-	public void tickSnapshotEnd(int reqId) {
-		marketDataLog.debug("tickSnapshotEnd: id=" + reqId);
-	}
-
-	@Override
-	public void tickString(int tickerId, int tickType, String value) {
-		marketDataLog.debug("tickString: id=" + tickerId + ", " + TickType.getField(tickType) + "=" + value);
-	}
-
-	/*
-	public void updateAccountValue(String key, String value, String currency, String accountName) {
-		System.out.println(accountName + ": " + key + " = " + value + " " + currency);
-	}
-	*/
-	public void execDetails(int orderId, Contract contract, Execution execution) {
-		execLog.debug(TWSUtils.fromTWSExecution(execution) + " " + TWSUtils.fromTWSContract(contract));
-	}
-
-	public void error(Exception e) {
-		errorLog.error("Exception occured", e);
-	}
-
-	public void error(String str) {
-		errorLog.info(str);
-	}
-
-	public void error(int id, int errorCode, String errorMsg) {
-		errorLog.debug("{id:" + id + ", code:" + errorCode + "} " + errorMsg);
-	}
-
-	public void connectionClosed() {
-		statusLog.warn("Connection to TWS was lost!");
+		return (EWrapper) Proxy.newProxyInstance(
+				wrapperInterface.getClassLoader(), new Class[] { wrapperInterface },
+			(proxy, method, args) -> {
+				if (log.isDebugEnabled()) {
+					try {
+						StringBuilder sb = new StringBuilder();
+						if (args != null) {
+							String[] argNames = methodArgNames.get(method);
+							for (int i = 0; i < args.length; i++) {
+								if (args[i] != null && !SUPPRESSED_VALUES.contains(args[i])) {
+									String argVal;
+									if (args[i] instanceof Contract)
+										argVal = TWSUtils.fromTWSContract((Contract)args[i]).toString();
+									else if (args[i] instanceof Order)
+										argVal = TWSUtils.fromTWSOrder((Order)args[i]).toString();
+									else if (args[i] instanceof Execution)
+										argVal = TWSUtils.fromTWSExecution((Execution)args[i]).toString();
+									else if (args[i] instanceof OrderState)
+										argVal = ((OrderState)args[i]).getStatus();
+									else if (args[i] instanceof Integer && argNames[i].equals("field"))
+										argVal = TickType.getField((Integer)args[i]);
+									else
+										argVal = args[i].toString();
 		
-	}
-
-	@Override
-	public void updateAccountValue(String key, String value, String currency,
-			String accountName) {
-		if (accountLog.isDebugEnabled())
-			accountLog.debug(key + " = " + value + " " + currency);
-	}
-
-	@Override
-	public void updatePortfolio(Contract contract, double position,
-			double marketPrice, double marketValue, double averageCost,
-			double unrealizedPNL, double realizedPNL, String accountName)
-	{
-		if (accountLog.isDebugEnabled())
-			accountLog.debug(position + " " + TWSUtils.fromTWSContract(contract) + " @ " + averageCost + " (" + unrealizedPNL + ")");
-	}
-
-	@Override
-	public void accountDownloadEnd(String accountName) {
-		accountLog.debug("accountDownloadEnd {}", accountName);
-	}
-
-	@Override
-	public void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
-	{
-		if (orderLog.isDebugEnabled())
-			orderLog.debug("openOrder: id=" + orderId + ", contract=" + TWSUtils.fromTWSContract(contract) + ", order=" + TWSUtils.fromTWSOrder(order)
-					+ ", orderState=" + orderState.status());
-	}
-
-	@Override
-	public void orderStatus(int orderId, String status, double filled,
-			double remaining, double avgFillPrice, int permId, int parentId,
-			double lastFillPrice, int clientId, String whyHeld, double mktCapPrice)
-	{
-		if (orderLog.isDebugEnabled())
-			orderLog.debug("orderStatus: id=" + orderId + ", status=" + status + ", filled=" + filled + ", remaining=" + remaining
-					+ ", avgFillPrice=" + avgFillPrice + ", permId=" + permId + ", parentId=" + parentId + ", lastFillPrice=" + lastFillPrice
-					+ ", clientId=" + clientId + ", whyHeld=" + whyHeld);
+									if (argVal != null && !argVal.isBlank()) {
+										if (sb.length() > 0)
+											sb.append(PARAM_SEPARATOR);
+										sb.append(argNames[i]).append(PARAM_VALUE_SEPARATOR);
+										sb.append(argVal);
+									}
+								}
+							}
+						}
+						log.debug("{} {}", method.getName(), sb.toString());
+					} catch (Exception e) {
+						log.error("Exception logging message", e);
+					}
+				}
+				return null;
+			}
+		);
 	}
 
 }
