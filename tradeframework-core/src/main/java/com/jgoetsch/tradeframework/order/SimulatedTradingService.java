@@ -23,9 +23,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.tradeframework.Contract;
-import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.Execution;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
@@ -92,32 +92,29 @@ public class SimulatedTradingService implements TradingService, MarketDataListen
 		}
 	}
 
-	protected OrderProcessor createOpenOrder(Contract contract, Order order) {
-
-		if (Order.TYPE_MARKET.equalsIgnoreCase(order.getType()))
-			return new MarketOrderProcessor(order.getQuantity());
-
-		else if (Order.TYPE_LIMIT.equalsIgnoreCase(order.getType()))
-			return new LimitOrderProcessor(order.getQuantity(), order.getLimitPrice());
-
-		else if (Order.TYPE_STOP.equalsIgnoreCase(order.getType()))
-			return new StopOrderProcessor(order.getQuantity(), order.getAuxPrice());
-
-		else if (Order.TYPE_STOPLIMIT.equalsIgnoreCase(order.getType()))
-			return new StopLimitOrderProcessor(order.getQuantity(), order.getAuxPrice(), order.getLimitPrice());
-
-		else if (Order.TYPE_TRAIL.equalsIgnoreCase(order.getType()))
-			return new TrailingStopOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), new StopOrderProcessor.EODTriggerMethod());
-
-		else if (Order.TYPE_TRAILLIMIT.equalsIgnoreCase(order.getType()))
-			return new TrailingLimitOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), order.getLimitPrice());
-
-		else
-			throw new UnsupportedOperationException("Unsupported order type: " + order.getType());
+	protected OrderProcessor createOpenOrder(Order order) {
+		switch (order.getType()) {
+			case MKT:
+				return new MarketOrderProcessor(order.getQuantity());
+			case LMT:
+				return new LimitOrderProcessor(order.getQuantity(), order.getLimitPrice());
+			case STP:
+				return new StopOrderProcessor(order.getQuantity(), order.getAuxPrice());
+			case STP_LMT:
+				return new StopLimitOrderProcessor(order.getQuantity(), order.getAuxPrice(), order.getLimitPrice());
+			case TRAIL:
+				return new TrailingStopOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), new StopOrderProcessor.EODTriggerMethod());
+			case TRAIL_LIMIT:
+				return new TrailingLimitOrderProcessor(order.getQuantity(), order.getTrailStopPrice(), order.getAuxPrice(), order.getLimitPrice());
+			default:
+				throw new UnsupportedOperationException("Unsupported order type: " + order.getType());
+		}
 	}
 
-	public void placeOrder(Contract contract, Order order) throws IOException, InvalidContractException, OrderException {
-		OrderProcessor openOrder = createOpenOrder(contract, order);
+	@Override
+	public CompletableFuture<Order> placeOrder(Order order) throws IOException, InvalidContractException, OrderException {
+		OrderProcessor openOrder = createOpenOrder(order);
+		Contract contract = order.getContract();
 		synchronized (this) {
 			Collection<OrderProcessor> contractOrders = openOrders.get(contract);
 			if (contractOrders == null) {
@@ -134,6 +131,12 @@ public class SimulatedTradingService implements TradingService, MarketDataListen
 			cancelOrders(contract);
 			throw e;
 		}
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public CompletableFuture<Order> previewOrder(Order order) throws InvalidContractException, OrderException, IOException {
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public synchronized void cancelOrders(Contract contract) {

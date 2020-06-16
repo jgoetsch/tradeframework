@@ -14,6 +14,7 @@ import com.jgoetsch.eventtrader.Msg;
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.TradeType;
 import com.jgoetsch.tradeframework.Contract;
+import com.jgoetsch.tradeframework.Contract.SecurityType;
 
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "command")
@@ -81,12 +82,12 @@ public abstract class PdMsgMapper<M extends PdMsgMapper.BaseMessage<?>> implemen
 			@NotNull BigDecimal entryPrice;
 
 			enum EntryType {
-				STOCK(Contract.STOCK),
-				OPTION(Contract.OPTIONS),
-				FUTURES(Contract.FUTURES);
+				STOCK(SecurityType.STOCK),
+				OPTION(SecurityType.OPTIONS),
+				FUTURES(SecurityType.FUTURES);
 
-				final String contractType;
-				EntryType(String contractType) {
+				final SecurityType contractType;
+				EntryType(SecurityType contractType) {
 					this.contractType = contractType;
 				}
 			};

@@ -23,30 +23,28 @@ import java.util.Date;
 import java.util.List;
 
 import com.ib.client.Bar;
+import com.jgoetsch.ib.TWSException;
 import com.jgoetsch.tradeframework.OHLC;
 import com.jgoetsch.tradeframework.SimpleOHLC;
 import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 
-public class HistoricalDataHandler extends BaseIdHandler {
+public class HistoricalDataHandler extends BaseIdHandler<OHLC[]> {
 
-	private List<OHLC> data;
-	private boolean finished;
+	private List<OHLC> data = new ArrayList<OHLC>();
 
 	public HistoricalDataHandler(int tickerId) {
 		super(tickerId);
-		this.data = new ArrayList<OHLC>();
-		this.finished = false;
+	}
+
+	public HistoricalDataHandler(int tickerId, HandlerManager manager) {
+		super(tickerId, manager);
 	}
 
 	@Override
-	public int getStatus() {
-		synchronized(this) {
-			if (finished)
-				return STATUS_SUCCESS;
-			else if (getErrorCode() == 162 || getErrorCode() == 200)
-				return STATUS_FAILED;
-		}
-		return super.getStatus();
+	protected void onError(int errorCode, String errorMsg) {
+		super.onError(errorCode, errorMsg);
+		if (errorCode == 162 || errorCode == 200)
+			getCompletableFuture().completeExceptionally(new TWSException(errorCode, errorMsg));
 	}
 
 	@Override
@@ -74,15 +72,12 @@ public class HistoricalDataHandler extends BaseIdHandler {
 			e.printStackTrace();
 		}
 
-		synchronized (this) {
-			data.add(ohlc);
-		}
+		data.add(ohlc);
 	}
 
 	@Override
-	protected synchronized void onHistoricalDataEnd(String startDateStr, String endDateStr) {
-		finished = true;
-		this.notifyAll();
+	protected void onHistoricalDataEnd(String startDateStr, String endDateStr) {
+		getCompletableFuture().complete(getData());
 	}
 
 	public OHLC[] getData() {

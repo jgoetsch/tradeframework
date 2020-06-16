@@ -39,6 +39,7 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 
 	public final boolean handleProcessing(TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, IOException {
 		StandardOrder baseOrder = new StandardOrder();
+		baseOrder.setContract(trade.getContract());
 		try {
 			baseExecutor.prepareOrder(baseOrder, trade, marketData);
 		} catch (DataUnavailableException du) {
@@ -49,8 +50,8 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 		if (baseOrder != null) {
 			StandardOrder order = createAttachedOrder(trade, marketData, baseOrder);
 			try {
-				getTradingService().placeOrder(trade.getContract(), baseOrder);
-				getTradingService().placeOrder(trade.getContract(), order);
+				getTradingService().placeOrder(baseOrder);
+				getTradingService().placeOrder(order);
 				return true;
 			} catch (InvalidContractException e) {
 				log.warn("Invalid contract", e);
@@ -66,7 +67,7 @@ public class AttachedTrailingStop extends MarketOrderExecutor {
 			price = marketData.get().getLast();
 
 		BigDecimal trailAmt = price.multiply(trailPercent).add(new BigDecimal(".01"));
-		return Order.trailingStopOrder(baseOrder.getQuantity().negate(),
+		return Order.trailingStopOrder(baseOrder.getContract(), baseOrder.getQuantity().negate(),
 				trade.getType().isBuy() ? price.subtract(trailAmt) : price.add(trailAmt), trailAmt);
 	}
 

@@ -16,11 +16,13 @@
 package com.jgoetsch.eventtrader.filter;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Set;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
+import com.jgoetsch.tradeframework.Contract.SecurityType;
 
 /**
  * Filters TradeSignal messages the given contract types.
@@ -30,7 +32,7 @@ import com.jgoetsch.eventtrader.processor.ProcessorContext;
  */
 public class ContractTypeFilter extends FilterProcessor<TradeSignal> {
 
-	private Set<String> contractTypes;
+	private Set<SecurityType> contractTypes;
 
 	@Override
 	protected boolean handleProcessing(TradeSignal trade, ProcessorContext context) {
@@ -44,10 +46,8 @@ public class ContractTypeFilter extends FilterProcessor<TradeSignal> {
 	 * @param contractTypes
 	 *            Collection of strings representing contract types to allow.
 	 */
-	public void setContractTypes(Collection<String> contractTypes) {
-		this.contractTypes = new HashSet<String>(contractTypes.size());
-		for (String type : contractTypes)
-			this.contractTypes.add(type.trim().toUpperCase());
+	public void setContractTypes(Collection<SecurityType> contractTypes) {
+		this.contractTypes = Collections.unmodifiableSet(EnumSet.copyOf(contractTypes));
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class ContractTypeFilter extends FilterProcessor<TradeSignal> {
 	 * 
 	 * @return Collection of strings representing contract types to allow.
 	 */
-	public Collection<String> getContractTypes() {
+	public Collection<SecurityType> getContractTypes() {
 		return contractTypes;
 	}
 

@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
+import com.ib.client.CommissionReport
 import com.ib.client.EClientSocket
 import com.ib.client.TickType
 import com.jgoetsch.ib.handlers.BaseHandler
@@ -72,18 +73,26 @@ class TWSServiceSpec extends Specification {
 
 	def "Places order"() {
 		when:
-		twsService.placeOrder(Contract.stock("ABCD"), Order.limitOrder(2000, 1.55))
+		twsService.placeOrder(Order.limitOrder(Contract.stock("ABCD"), 2000, 1.55))
 
 		then:
 		1 * clientSocket.placeOrder(_,
 			{
 				it.m_symbol == "ABCD"
+				it.m_secType == "STK"
 			},
 			{
 				it.m_orderType == "LMT"
 				it.m_totalQuantity == 2000
 				it.m_lmtPrice == 1.55
 			}
-		)
+		) >> { arg -> scheduler.schedule({
+			def comm = new CommissionReport();
+			comm.m_commission = 36.68564
+			comm.m_realizedPNL = Integer.MAX_VALUE
+			wrapper.commissionReport(comm);
+		}, 250, TimeUnit.MILLISECONDS)
+			
+		}
 	}
 }

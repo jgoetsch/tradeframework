@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,12 +68,14 @@ import com.jgoetsch.tradeframework.order.TradingService;
 
 public class TWSService implements TradingService, AccountDataSource, MultiAccountDataSource, MarketDataSource, HistoricalDataSource, ContractDetailsSource {
 
-	private Logger log = LoggerFactory.getLogger(TWSService.class);
+	private static final Logger log = LoggerFactory.getLogger(TWSService.class);
+	private static final TWSMapper mapper = TWSMapper.INSTANCE;
+
 	protected final HandlerManager handlerManager;
 	protected final EClientSocket eClientSocket;
 	protected final Map<Contract, MarketDataListenerHandler> marketDataSubscriptions = new HashMap<Contract, MarketDataListenerHandler>();
 	protected final Map<String, AccountDataListenerHandler> accountDataSubscriptions = new HashMap<String, AccountDataListenerHandler>();
-	private int curRequestId = -1;
+	private AtomicInteger curRequestId = new AtomicInteger(-1);
 
 	private String host = "localhost";
 	private int port = 7496;
@@ -106,8 +109,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	}
 
 	public boolean connect() {
-		NextValidIdHandler h = new NextValidIdHandler();
-		handlerManager.addHandler(h);
+		NextValidIdHandler h = new NextValidIdHandler(handlerManager);
 		eClientSocket.eConnect(host, port, clientId);
 
 		// start reader and processor threads
@@ -127,17 +129,15 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 			}, "tws-msg-proc").start();
 		}
 
-		boolean success;
-		synchronized (h) {
-			success = h.block();
-			curRequestId = h.getId();
-		}
-		handlerManager.removeHandler(h);
-		if (success)
-			log.info("Connected to TWS at {}:{} clientid:{}, initial order id is {}", host, port, clientId, curRequestId);
-		else
+		try {
+			curRequestId.set(h.getCompletableFuture().get());
+		} catch (InterruptedException | ExecutionException e) {
 			log.warn("Failed to connect to TWS at {}:{} clientid:{}", host, port, clientId);
-		return success;
+			return false;
+		}
+
+		log.info("Connected to TWS at {}:{} clientid:{}, initial order id is {}", host, port, clientId, curRequestId);
+		return true;
 	}
 
 	public boolean connect(String host, int port, int clientId) {
@@ -159,16 +159,27 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		return eClientSocket.isConnected();
 	}
 
-	protected synchronized int getNextId() {
-		if (curRequestId < 0)
+	protected int getNextId() {
+		if (curRequestId.get() < 0)
 			throw new IllegalStateException("NextValidId is not set, connect() failed or was not called");
-		return curRequestId++;
+		return curRequestId.incrementAndGet();
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException {
-		com.ib.client.Contract twsContract = TWSUtils.toTWSContract(contract);
-		com.ib.client.Order twsOrder = TWSUtils.toTWSOrder(order);
+	@Override
+	public CompletableFuture<Order> placeOrder(Order order) throws InvalidContractException, OrderException {
+		com.ib.client.Contract twsContract = mapper.toTWSContract(order.getContract());
+		com.ib.client.Order twsOrder = mapper.toTWSOrder(order);
 		eClientSocket.placeOrder(getNextId(), twsContract, twsOrder);
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public CompletableFuture<Order> previewOrder(Order order) throws InvalidContractException, OrderException, IOException {
+		com.ib.client.Contract twsContract = mapper.toTWSContract(order.getContract());
+		com.ib.client.Order twsOrder = mapper.toTWSOrder(order);
+		twsOrder.transmit(false);
+		eClientSocket.placeOrder(getNextId(), twsContract, twsOrder);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	/*
@@ -187,14 +198,12 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	}
 
 	public CompletableFuture<AccountData> getAccountDataSnapshot(String accountCode) {
-		AccountDataHandler v = new AccountDataHandler();
+		AccountDataHandler v = new AccountDataHandler(accountCode, handlerManager);
 		long startTime = System.currentTimeMillis();
-		handlerManager.addHandler(v);
 		eClientSocket.reqAccountUpdates(true, accountCode);
 		return v.getCompletableFuture()
 				.whenComplete((m, e) -> {
 					eClientSocket.reqAccountUpdates(false, accountCode);
-					handlerManager.removeHandler(v);
 				})
 				.orTimeout(3000, TimeUnit.MILLISECONDS)
 				.whenComplete((m, e) -> {
@@ -246,14 +255,12 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 
 	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract) {
 		int tickerId = getNextId();
-		MarketDataHandler mkd = new MarketDataHandler(tickerId);
+		MarketDataHandler mkd = new MarketDataHandler(tickerId, handlerManager);
 		long startTime = System.currentTimeMillis();
-		handlerManager.addHandler(mkd);
-		eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, true, false, Collections.emptyList());
+		eClientSocket.reqMktData(tickerId, mapper.toTWSContract(contract), null, true, false, Collections.emptyList());
 		return mkd.getCompletableFuture()
 				.orTimeout(2500, TimeUnit.MILLISECONDS)
 				.whenComplete((m, e) -> {
-					handlerManager.removeHandler(mkd);
 					if (e == null)
 						log.debug("Received market data for {} in {} ms", contract, System.currentTimeMillis() - startTime);
 					else
@@ -277,7 +284,7 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 				mkdlHandler = new MarketDataListenerHandler(tickerId, contract);
 				marketDataSubscriptions.put(contract, mkdlHandler);
 				handlerManager.addHandler(mkdlHandler);
-				eClientSocket.reqMktData(tickerId, TWSUtils.toTWSContract(contract), null, false, false, Collections.emptyList());
+				eClientSocket.reqMktData(tickerId, mapper.toTWSContract(contract), null, false, false, Collections.emptyList());
 			}
 			mkdlHandler.addListener(marketDataListener);
 		}
@@ -300,14 +307,12 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 
 	public CompletableFuture<ContractDetails> getContractDetails(Contract contract) {
 		int tickerId = getNextId();
-		ContractDetailsHandler mkd = new ContractDetailsHandler(tickerId);
+		ContractDetailsHandler mkd = new ContractDetailsHandler(tickerId, handlerManager);
 		long startTime = System.currentTimeMillis();
-		handlerManager.addHandler(mkd);
-		eClientSocket.reqContractDetails(tickerId, TWSUtils.toTWSContract(contract));
+		eClientSocket.reqContractDetails(tickerId, mapper.toTWSContract(contract));
 		return mkd.getCompletableFuture()
 				.orTimeout(2500, TimeUnit.MILLISECONDS)
 				.whenComplete((m, e) -> {
-					handlerManager.removeHandler(mkd);
 					if (e == null)
 						log.debug("Received contract details for {} in {} ms", contract, System.currentTimeMillis() - startTime);
 					else
@@ -336,32 +341,36 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 		df.setTimeZone(HistoricalDataSource.timeZone);
 		log.debug("getHistoricalData: " + contract + " " + duration + ", " + histPeriodUnit[periodUnit] + " ending " + df.format(new Date(endDate.getTime() - 1)));
 
-		boolean success, retry;
-		HistoricalDataHandler hdh;
+		int retryCount = 5, delay = 2000;
 		do {
 			int tickerId = getNextId();
-			hdh = new HistoricalDataHandler(tickerId);
-			handlerManager.addHandler(hdh);
-			eClientSocket.reqHistoricalData(tickerId, TWSUtils.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", onlyRTH ? 1 : 0, 2, false, Collections.emptyList());
-			synchronized (hdh) {
-				success = hdh.block();
+			HistoricalDataHandler hdh = new HistoricalDataHandler(tickerId, handlerManager);
+			eClientSocket.reqHistoricalData(tickerId, mapper.toTWSContract(contract), df.format(new Date(endDate.getTime() - 1)) + " EST", duration, histPeriodUnit[periodUnit], "TRADES", onlyRTH ? 1 : 0, 2, false, Collections.emptyList());
+
+			try {
+				return hdh.getCompletableFuture().get();
+			} catch (ExecutionException ex) {
+				String err = ex.getCause().getMessage();
+				if (err == null || err.indexOf("pacing violation") == -1) {
+					if (ex.getCause() instanceof DataUnavailableException)
+						throw (DataUnavailableException)ex.getCause();
+					else
+						return null;
+				}
+			} catch (InterruptedException e) {
+				return null;
 			}
 
-			retry = !success && hdh.getErrorMsg() != null && hdh.getErrorMsg().indexOf("pacing violation") != -1;
-			if (retry) {
-				log.info("Pacing violation, waiting to retry data request...");
-				try {
-					Thread.sleep(15000);
-				} catch (InterruptedException e) { }
+			log.info("Pacing violation, waiting to retry data request...");
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				return null;
 			}
-		} while (retry);
+			delay *= 2;
+		} while (retryCount-- > 0);
 
-		if (!success && (hdh.getErrorCode() == 200 || hdh.getErrorCode() == 203 || hdh.getErrorCode() == 162))
-			throw new InvalidContractException(contract, hdh.getErrorMsg());
-		else if (!success)
-			log.warn(hdh.getErrorCode() + ": " + hdh.getErrorMsg());
-
-		return success ? hdh.getData() : null;
+		return null;
 	}
 
 	@Override

@@ -5,16 +5,25 @@ import java.util.Set;
 
 public interface Order {
 
-	String TYPE_MARKET = "MKT";
-	String TYPE_LIMIT = "LMT";
-	String TYPE_STOP = "STP";
-	String TYPE_STOPLIMIT = "STPLMT";
-	String TYPE_TRAIL = "TRAIL";
-	String TYPE_TRAILLIMIT = "TRAILLIMIT";
-	String TIF_DAY = "DAY";
-	String TIF_GTC = "GTC";
+	public enum OrderType {
+		MKT,
+		LMT,
+		STP,
+		STP_LMT,
+		TRAIL,
+		TRAIL_LIMIT;
+	}
+	public enum TimeInForce {
+		DAY,
+		GTC,
+		GOOD_TILL_DATE,
+		IMMEDIATE_OR_CANCEL,
+		FILL_OR_KILL
+	}
 
-	String getType();
+	Contract getContract();
+
+	OrderType getType();
 
 	BigDecimal getQuantity();
 
@@ -24,34 +33,47 @@ public interface Order {
 
 	BigDecimal getTrailStopPrice();
 
-	String getTimeInForce();
+	TimeInForce getTimeInForce();
 
 	boolean getAllowOutsideRth();
 
-	boolean isTransmit();
+	/**
+	 * Return true if the order is to sell short or buy to cover. Necessary for brokers that require specification
+	 * between short/cover orders and long buy/sell orders, ignored otherwise.
+	 */
+	boolean isShort();
+
+	String getPreviewId();
 
 	Set<String> getTags();
 
 	String getAccount();
 
-	static StandardOrder trailingStopOrder(BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailAmount) {
-		StandardOrder order = marketOrder(quantity);
-		order.setType(TYPE_TRAIL);
+	static StandardOrder trailingStopOrder(Contract contract, BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailAmount) {
+		StandardOrder order = marketOrder(contract, quantity);
+		order.setType(OrderType.TRAIL);
 		order.setTrailStopPrice(stopPrice);
 		order.setAuxPrice(trailAmount);
 		return order;
 	}
 
-	static Order limitOrder(BigDecimal quantity, BigDecimal limitPrice) {
-		StandardOrder order = marketOrder(quantity);
-		order.setType(TYPE_LIMIT);
+	static StandardOrder limitOrder(Contract contract, BigDecimal quantity, BigDecimal limitPrice) {
+		StandardOrder order = marketOrder(contract, quantity);
+		order.setType(OrderType.LMT);
 		order.setLimitPrice(limitPrice);
 		return order;
 	}
 
-	static StandardOrder marketOrder(BigDecimal quantity) {
+	static StandardOrder limitOrder(Contract contract, BigDecimal quantity, BigDecimal limitPrice, String account) {
+		StandardOrder order = limitOrder(contract, quantity, limitPrice);
+		order.setAccount(account);
+		return order;
+	}
+
+	static StandardOrder marketOrder(Contract contract, BigDecimal quantity) {
 		StandardOrder order = new StandardOrder();
-		order.setType(TYPE_MARKET);
+		order.setContract(contract);
+		order.setType(OrderType.MKT);
 		order.setQuantity(quantity);
 		return order;
 	}

@@ -31,14 +31,19 @@ import com.ib.client.TickAttrib;
  * @author jgoetsch
  *
  */
-public class BaseIdHandler extends BaseHandler {
+public class BaseIdHandler<T> extends BaseHandler<T> {
 
 	private int id;
 	
 	public BaseIdHandler(int id) {
 		this.id = id;
 	}
-	
+
+	public BaseIdHandler(int id, HandlerManager manager) {
+		super(manager);
+		this.id = id;
+	}
+
 	public int getId() {
 		return id;
 	}

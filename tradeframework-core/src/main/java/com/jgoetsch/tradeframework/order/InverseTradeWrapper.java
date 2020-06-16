@@ -16,8 +16,8 @@
 package com.jgoetsch.tradeframework.order;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
-import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.StandardOrder;
@@ -37,20 +37,31 @@ public final class InverseTradeWrapper implements TradingService {
 		this.tradingService = tradingService;
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException {
+	@Override
+	public CompletableFuture<Order> previewOrder(Order order) throws InvalidContractException, OrderException, IOException {
 		StandardOrder inverseOrder = new StandardOrder(order);
 		inverseOrder.setQuantity(inverseOrder.getQuantity().negate());
-		tradingService.placeOrder(contract, order);
+		return tradingService.previewOrder(order);
 	}
 
+	@Override
+	public CompletableFuture<Order> placeOrder(Order order) throws InvalidContractException, OrderException, IOException {
+		StandardOrder inverseOrder = new StandardOrder(order);
+		inverseOrder.setQuantity(inverseOrder.getQuantity().negate());
+		return tradingService.placeOrder(order);
+	}
+
+	@Override
 	public void subscribeExecutions(ExecutionListener listener) {
 		tradingService.subscribeExecutions(listener);
 	}
 
+	@Override
 	public void cancelExecutionSubscription(ExecutionListener listener) {
 		tradingService.cancelExecutionSubscription(listener);
 	}
 
+	@Override
 	public void close() throws IOException {
 		tradingService.close();
 	}

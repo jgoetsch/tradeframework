@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
 
 import com.jgoetsch.ib.TWSUtils;
 import com.jgoetsch.tradeframework.Contract;
@@ -37,32 +36,25 @@ import com.jgoetsch.tradeframework.account.PresetPosition;
  * @author jgoetsch
  *
  */
-public class AccountDataHandler extends BaseHandler implements AccountData {
+public class AccountDataHandler extends BaseHandler<AccountData> implements AccountData {
 
 	private String accountCode;
-	private Map<String, Object> accountValues;
-	private Map<Contract, Position> positions;
+	private Map<String, Object> accountValues = new TreeMap<String, Object>();
+	private Map<Contract, Position> positions = new HashMap<Contract, Position>();
 	private String updatedTimestampValue;
 	private Instant timestamp;
 
-	private final CompletableFuture<AccountData> future = new CompletableFuture<AccountData>();
-
-	public AccountDataHandler() {
-		this.accountValues = new TreeMap<String, Object>();
-		this.positions = new HashMap<Contract, Position>();
-	}
-
 	public AccountDataHandler(String accountCode) {
-		this();
 		this.accountCode = accountCode;
 	}
 
-	public CompletableFuture<AccountData> getCompletableFuture() {
-		return future;
+	public AccountDataHandler(String accountCode, HandlerManager manager) {
+		super(manager);
+		this.accountCode = accountCode;
 	}
 
 	@Override
-	public synchronized void updateAccountValue(String key, String value, String currency, String accountName) {
+	public void updateAccountValue(String key, String value, String currency, String accountName) {
 		if (accountCode == null || accountCode.equals(accountName)) {
 			try {
 				accountValues.put(key, new BigDecimal(value));
@@ -73,7 +65,7 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	}
 
 	@Override
-	public synchronized void updatePortfolio(com.ib.client.Contract contract, double position,
+	public void updatePortfolio(com.ib.client.Contract contract, double position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
@@ -86,15 +78,15 @@ public class AccountDataHandler extends BaseHandler implements AccountData {
 	}
 
 	@Override
-	public synchronized void updateAccountTime(String timeStamp) {
+	public void updateAccountTime(String timeStamp) {
 		updatedTimestampValue = timeStamp;
 		timestamp = Instant.now();
 	}
 
 	@Override
-	public synchronized void accountDownloadEnd(String accountName) {
+	public void accountDownloadEnd(String accountName) {
 		if (accountCode == null || accountCode.equals(accountName)) {
-			future.complete(this);
+			getCompletableFuture().complete(this);
 		}
 	}
 

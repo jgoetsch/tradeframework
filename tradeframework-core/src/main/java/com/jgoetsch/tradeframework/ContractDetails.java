@@ -29,7 +29,7 @@ public class ContractDetails extends Contract {
 	public int priceMagnifier;
 	public String orderTypes;
 	public String validExchanges;
-	public int underConId;
+	public int underConid;
 	public String longName;
 	public String industry;
 	public String category;
@@ -83,12 +83,12 @@ public class ContractDetails extends Contract {
 		this.validExchanges = validExchanges;
 	}
 
-	public int getUnderConId() {
-		return underConId;
+	public int getUnderConid() {
+		return underConid;
 	}
 
-	public void setUnderConId(int underConId) {
-		this.underConId = underConId;
+	public void setUnderConid(int underConId) {
+		this.underConid = underConId;
 	}
 
 	public String getLongName() {

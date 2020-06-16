@@ -27,8 +27,9 @@ public interface MarketDataSource extends ContractDataSource<MarketData>, Closea
 
 	/**
 	 * Returns a current snapshot of market data from the specified contract.
+	 * @throws IOException 
 	 */
-	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract);
+	public CompletableFuture<MarketData> getMktDataSnapshot(Contract contract) throws IOException;
 
 	/**
 	 * Begin receiving callbacks to a MarketDataListener with market data updates for the given contract

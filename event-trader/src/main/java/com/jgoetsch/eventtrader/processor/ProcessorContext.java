@@ -20,6 +20,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 */
 package com.jgoetsch.eventtrader.processor;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -41,7 +42,13 @@ public class ProcessorContext {
 
 	public MarketData getMarketData(MarketDataSource marketDataSource, Contract contract) throws DataUnavailableException {
 		try {
-			return marketDataCache.computeIfAbsent(contract, c -> marketDataSource.getMktDataSnapshot(contract).join());
+			return marketDataCache.computeIfAbsent(contract, c -> {
+				try {
+					return marketDataSource.getMktDataSnapshot(contract).join();
+				} catch (IOException ex) {
+					throw new DataUnavailableException(ex);
+				}
+			});
 		} catch (CompletionException ex) {
 			throw new DataUnavailableException(ex.getCause());
 		}

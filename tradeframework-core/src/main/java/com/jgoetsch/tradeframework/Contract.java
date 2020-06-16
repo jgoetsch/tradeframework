@@ -21,25 +21,24 @@ import java.util.Date;
 
 public class Contract {
 
-	private String type;
+	private SecurityType type;
 	private String symbol;
 	private String expiry;
 	private String exchange;
-	private long multiplier;
+	private Long multiplier;
 
 	private String currency;
 
-	public static final String STOCK = "STK";
-	public static final String FUTURES = "FUT";
-	public static final String OPTIONS = "OPT";
+	public enum SecurityType {
+		STOCK, FUTURES, OPTIONS
+	}
 	public static final String SMART = "SMART";
 	public static final String USD = "USD";
 
 	public Contract() {
-		this.type = STOCK;
+		this.type = SecurityType.STOCK;
 		this.exchange = SMART;
 		this.currency = USD;
-		this.multiplier = 1;
 	}
 
 	private Contract(String symbol) {
@@ -66,7 +65,7 @@ public class Contract {
 
 	public static Contract futures(String symbol, String expiry, String exchange, long multiplier) {
 		Contract contract = new Contract(symbol);
-		contract.type = FUTURES;
+		contract.type = SecurityType.FUTURES;
 		contract.expiry = expiry;
 		contract.exchange = exchange;
 		contract.multiplier = multiplier;
@@ -128,11 +127,11 @@ public class Contract {
 		return true;
 	}
 
-	public String getType() {
+	public SecurityType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(SecurityType type) {
 		this.type = type;
 	}
 
@@ -160,11 +159,11 @@ public class Contract {
 		this.exchange = exchange;
 	}
 
-	public long getMultiplier() {
+	public Long getMultiplier() {
 		return multiplier;
 	}
 
-	public void setMultiplier(long multiplier) {
+	public void setMultiplier(Long multiplier) {
 		this.multiplier = multiplier;
 	}
 

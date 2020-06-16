@@ -17,14 +17,16 @@ package com.jgoetsch.tradeframework.order;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
-import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
 
 public interface TradingService extends Closeable {
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException;
+	public CompletableFuture<Order> previewOrder(Order order) throws InvalidContractException, OrderException, IOException;
+
+	public CompletableFuture<Order> placeOrder(Order order) throws InvalidContractException, OrderException, IOException;
 
 	public void subscribeExecutions(ExecutionListener listener);
 

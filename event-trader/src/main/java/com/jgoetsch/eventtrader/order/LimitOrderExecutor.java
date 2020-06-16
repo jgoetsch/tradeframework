@@ -20,9 +20,9 @@ import java.util.function.Supplier;
 
 import com.jgoetsch.eventtrader.TradeSignal;
 import com.jgoetsch.eventtrader.order.price.OrderPrice;
-import com.jgoetsch.tradeframework.StandardOrder;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.Order.OrderType;
 import com.jgoetsch.tradeframework.PropertyNotSetException;
+import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.order.OrderException;
@@ -42,7 +42,7 @@ public class LimitOrderExecutor extends MarketOrderExecutor {
 	@Override
 	protected void prepareOrder(StandardOrder order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException
 	{
-		order.setType(Order.TYPE_LIMIT);
+		order.setType(OrderType.LMT);
 		order.setLimitPrice(limitPrice.getValue(trade, marketData));
 		order.setAllowOutsideRth(allowOutsideRth);
 	}

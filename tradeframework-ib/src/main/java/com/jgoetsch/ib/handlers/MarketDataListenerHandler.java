@@ -15,8 +15,8 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.ib.client.TickAttrib;
 import com.jgoetsch.tradeframework.Contract;
@@ -25,7 +25,7 @@ import com.jgoetsch.tradeframework.marketdata.MarketDataListener;
 public class MarketDataListenerHandler extends MarketDataHandler {
 
 	private Contract contract;
-	private Set<MarketDataListener> listeners = new HashSet<MarketDataListener>();
+	private Set<MarketDataListener> listeners = new CopyOnWriteArraySet<MarketDataListener>();
 	
 	public MarketDataListenerHandler(int tickerId, Contract contract) {
 		super(tickerId);
@@ -45,28 +45,21 @@ public class MarketDataListenerHandler extends MarketDataHandler {
 	}
 
 	@Override
-	protected synchronized void onTickPrice(int field, double price, TickAttrib attrib) {
+	protected void onTickPrice(int field, double price, TickAttrib attrib) {
 		super.onTickPrice(field, price, attrib);
-		if (getStatus() == STATUS_SUCCESS) {
-			for (MarketDataListener listener : listeners)
-				listener.tick(contract, this);
-		}
+		listeners.forEach(listener -> listener.tick(contract, getMarketData()));
 	}
 
 	@Override
-	protected synchronized void onTickSize(int field, int size) {
+	protected void onTickSize(int field, int size) {
 		super.onTickSize(field, size);
-		if (getStatus() == STATUS_SUCCESS)
-			for (MarketDataListener listener : listeners)
-				listener.tick(contract, this);
+		listeners.forEach(listener -> listener.tick(contract, getMarketData()));
 	}
 
 	@Override
-	protected synchronized void onTickString(int tickType, String value) {
+	protected void onTickString(int tickType, String value) {
 		super.onTickString(tickType, value);
-		if (getStatus() == STATUS_SUCCESS)
-			for (MarketDataListener listener : listeners)
-				listener.tick(contract, this);
+		listeners.forEach(listener -> listener.tick(contract, getMarketData()));
 	}
 
 }

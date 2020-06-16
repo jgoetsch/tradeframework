@@ -16,9 +16,8 @@
 package com.jgoetsch.tradeframework.order;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
-import com.jgoetsch.tradeframework.Contract;
-import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.Order;
 
@@ -60,11 +59,17 @@ public final class ReadOnlyTradeWrapper implements TradingService {
 		this.bPlaceUntransmittedOrder = bPlaceUntransmittedOrder;
 	}
 
-	public void placeOrder(Contract contract, Order order) throws InvalidContractException, OrderException, IOException {
-		if (order instanceof StandardOrder && bPlaceUntransmittedOrder) {
-			((StandardOrder)order).setTransmit(false);
-			tradingService.placeOrder(contract, order);
+	@Override
+	public CompletableFuture<Order> previewOrder(Order order) throws InvalidContractException, OrderException, IOException {
+		return tradingService.previewOrder(order);
+	}
+
+	public CompletableFuture<Order> placeOrder(Order order) throws InvalidContractException, OrderException, IOException {
+		if (bPlaceUntransmittedOrder) {
+			return tradingService.previewOrder(order);
 		}
+		else
+			return CompletableFuture.completedFuture(null);
 	}
 
 	public void subscribeExecutions(ExecutionListener listener) {

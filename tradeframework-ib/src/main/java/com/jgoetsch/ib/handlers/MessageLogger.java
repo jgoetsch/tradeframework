@@ -27,13 +27,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
 import com.ib.client.EWrapper;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
 import com.ib.client.TickType;
-import com.jgoetsch.ib.TWSUtils;
+import com.jgoetsch.ib.TWSMapper;
 
 /**
  * Logs responses received from TWS to various loggers at the DEBUG level.
@@ -46,7 +47,8 @@ import com.jgoetsch.ib.TWSUtils;
  */
 public class MessageLogger {
 
-	private static Logger log = LoggerFactory.getLogger(MessageLogger.class);
+	private static final Logger log = LoggerFactory.getLogger(MessageLogger.class);
+	private static final TWSMapper mapper = TWSMapper.INSTANCE;
 
 	private static final Class<EWrapper> wrapperInterface = EWrapper.class;
 
@@ -81,13 +83,16 @@ public class MessageLogger {
 								if (args[i] != null && !SUPPRESSED_VALUES.contains(args[i])) {
 									String argVal;
 									if (args[i] instanceof Contract)
-										argVal = TWSUtils.fromTWSContract((Contract)args[i]).toString();
+										argVal = mapper.fromTWSContract((Contract)args[i]).toString();
 									else if (args[i] instanceof Order)
-										argVal = TWSUtils.fromTWSOrder((Order)args[i]).toString();
+										argVal = mapper.fromTWSOrder((Order)args[i]).toString();
 									else if (args[i] instanceof Execution)
-										argVal = TWSUtils.fromTWSExecution((Execution)args[i]).toString();
+										argVal = mapper.fromTWSExecution((Execution)args[i]).toString();
 									else if (args[i] instanceof OrderState)
 										argVal = ((OrderState)args[i]).getStatus();
+									else if (args[i] instanceof CommissionReport) {
+										argVal = mapper.fromTWSCommissionReport((CommissionReport)args[i]).toString();
+									}
 									else if (args[i] instanceof Integer && argNames[i].equals("field"))
 										argVal = TickType.getField((Integer)args[i]);
 									else

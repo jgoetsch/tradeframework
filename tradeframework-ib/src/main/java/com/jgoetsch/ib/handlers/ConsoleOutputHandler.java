@@ -20,12 +20,7 @@ import com.ib.client.Execution;
 import com.jgoetsch.ib.TWSUtils;
 
 
-public class ConsoleOutputHandler extends BaseHandler {
-
-	@Override
-	public int getStatus() {
-		return STATUS_WORKING;
-	}
+public class ConsoleOutputHandler extends BaseHandler<Void> {
 
 	@Override
 	public void nextValidId(int orderId) {

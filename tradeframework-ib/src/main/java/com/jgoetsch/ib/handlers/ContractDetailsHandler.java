@@ -15,24 +15,20 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.jgoetsch.ib.TWSException;
 import com.jgoetsch.ib.TWSUtils;
 import com.jgoetsch.tradeframework.ContractDetails;
 
-public class ContractDetailsHandler extends BaseIdHandler {
+public class ContractDetailsHandler extends BaseIdHandler<ContractDetails> {
 
 	private ContractDetails contractDetails;
-
-	private final CompletableFuture<ContractDetails> future = new CompletableFuture<ContractDetails>();
 
 	public ContractDetailsHandler(int tickerId) {
 		super(tickerId);
 	}
 
-	public CompletableFuture<ContractDetails> getCompletableFuture() {
-		return future;
+	public ContractDetailsHandler(int tickerId, HandlerManager manager) {
+		super(tickerId, manager);
 	}
 
 	@Override
@@ -43,12 +39,12 @@ public class ContractDetailsHandler extends BaseIdHandler {
 
 	@Override
 	protected void onContractDetailsEnd() {
-		future.complete(contractDetails);
+		getCompletableFuture().complete(contractDetails);
 	}
 
 	@Override
 	protected void onError(int errorCode, String errorMsg) {
-		future.completeExceptionally(new TWSException(errorCode, errorMsg));
+		getCompletableFuture().completeExceptionally(new TWSException(errorCode, errorMsg));
 	}
 
 	@Override

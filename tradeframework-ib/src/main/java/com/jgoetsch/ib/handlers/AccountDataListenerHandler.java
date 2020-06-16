@@ -15,8 +15,8 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.ib.client.Contract;
 import com.jgoetsch.tradeframework.account.AccountDataListener;
@@ -30,11 +30,7 @@ import com.jgoetsch.tradeframework.account.AccountDataListener;
  */
 public class AccountDataListenerHandler extends AccountDataHandler {
 
-	private Set<AccountDataListener> listeners = new HashSet<AccountDataListener>();
-	
-	public AccountDataListenerHandler() {
-		super();
-	}
+	private Set<AccountDataListener> listeners = new CopyOnWriteArraySet<AccountDataListener>();
 
 	public AccountDataListenerHandler(String accountCode) {
 		super(accountCode);
@@ -53,30 +49,24 @@ public class AccountDataListenerHandler extends AccountDataHandler {
 	}
 
 	@Override
-	public synchronized void updateAccountValue(String key, String value, String currency, String accountName) {
+	public void updateAccountValue(String key, String value, String currency, String accountName) {
 		super.updateAccountValue(key, value, currency, accountName);
-		if (getStatus() == STATUS_SUCCESS)
-			for (AccountDataListener listener : listeners)
-				listener.updateAccountData(this);
+		listeners.forEach(listener -> listener.updateAccountData(this));
 	}
 
 	@Override
-	public synchronized void updatePortfolio(Contract contract, double position,
+	public void updatePortfolio(Contract contract, double position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
 		super.updatePortfolio(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName);
-		if (getStatus() == STATUS_SUCCESS)
-			for (AccountDataListener listener : listeners)
-				listener.updateAccountData(this);
+		listeners.forEach(listener -> listener.updateAccountData(this));
 	}
 
 	@Override
-	public synchronized void updateAccountTime(String timeStamp) {
+	public void updateAccountTime(String timeStamp) {
 		super.updateAccountTime(timeStamp);
-		if (getStatus() == STATUS_SUCCESS)
-			for (AccountDataListener listener : listeners)
-				listener.updateAccountData(this);
+		listeners.forEach(listener -> listener.updateAccountData(this));
 	}
 
 }

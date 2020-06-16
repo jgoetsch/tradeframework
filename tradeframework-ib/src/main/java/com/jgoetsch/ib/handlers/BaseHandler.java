@@ -15,12 +15,12 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.ib.client.Bar;
 import com.ib.client.CommissionReport;
@@ -53,85 +53,46 @@ import com.ib.client.TickAttribLast;
  * @author jgoetsch
  *
  */
-public class BaseHandler implements EWrapper {
-
-	private boolean closedConnection;
-	private int errorCode;
-	private String errorMsg;
-	
-	public static final int STATUS_WORKING = 0;
-	public static final int STATUS_SUCCESS = 1;
-	public static final int STATUS_FAILED = 2;
+public class BaseHandler<T> implements EWrapper {
 
 	public final static int WAIT_TIME = 2500;
 
-	public synchronized int getErrorCode() {
-		return errorCode;
-	}
-	
-	public String getErrorMsg() {
-		return errorMsg;
-	}
-	
-	public boolean isClosedConnection() {
-		return closedConnection;
+	private final CompletableFuture<T> future;
+
+	public BaseHandler() {
+		future = new CompletableFuture<T>();
 	}
 
-	/**
-	 * Should be overridden to return success when the conditions that the handler must
-	 * wait for to be considered complete are satisfied. The default implementation returns
-	 * failed status on closed connection or error or working otherwise.
-	 * 
-	 * @return STATUS_WORKING, STATUS_SUCCESS, or STATUS_FAILED
-	 */
-	public int getStatus() {
-		if (isClosedConnection())
-			return STATUS_FAILED;
-		else
-			return STATUS_WORKING;
+	public BaseHandler(HandlerManager manager) {
+		manager.addHandler(this);
+		future = new CompletableFuture<T>()
+				.whenComplete((m, e) -> {
+					manager.removeHandler(this);
+				});
 	}
 
-	/**
-	 * Puts the current thread into a wait state until the handler reports
-	 * either success or failure or a timeout is reached.
-	 * 
-	 * @return true if handler reported success, false if failed or timed out
-	 */
-	public final boolean block() {
-		long timeout;
-		Instant until = Instant.now().plusMillis(WAIT_TIME);
-		while (getStatus() == BaseHandler.STATUS_WORKING && (timeout = Duration.between(Instant.now(), until).toMillis()) > 0) {
-			try {
-				this.wait(timeout);
-			} catch (InterruptedException e) {
-				return false;
-			}
-		}
-		return (getStatus() == STATUS_SUCCESS);
+	public CompletableFuture<T> getCompletableFuture() {
+		return future;
 	}
-
 
 	/**
 	 * Handle connection closed event. Mark closed and wake up threads waiting on this handler.
 	 */
 	@Override
 	public synchronized void connectionClosed() {
-		this.closedConnection = true;
-		this.notifyAll();
+		getCompletableFuture().completeExceptionally(new IOException("Connection closed"));
 	}
 
 	/**
 	 * Handle error event. Record error and wake up threads waiting on this handler.
 	 */
 	@Override
-	public synchronized void error(int id, int code, String msg) {
-		this.errorCode = code;
-		this.errorMsg = msg;
-		this.notifyAll();
+	public void error(int id, int code, String msg) {
 	}
 
 	@Override
-	public void error(Exception e) {
+	public void error(Exception exception) {
+		getCompletableFuture().completeExceptionally(exception);
 	}
 
 	@Override

@@ -21,23 +21,24 @@ import java.util.Set;
 
 public class StandardOrder implements Order {
 
-	private String type;
+	private Contract contract;
+	private OrderType type;
 	private BigDecimal quantity;
-	private String timeInForce;
+	private TimeInForce timeInForce;
 	private boolean allowOutsideRth;
+	private boolean shortFlag;
 	private BigDecimal limitPrice;
 	private BigDecimal auxPrice;
 	private BigDecimal trailStopPrice;
 
 	private String account;
-	private boolean bTransmit;
+	private String previewId;
 
 	private final Set<String> tags = new HashSet<String>();
 
 	public StandardOrder() {
-		this.setTimeInForce(TIF_DAY);
+		this.setTimeInForce(TimeInForce.DAY);
 		this.setQuantity(BigDecimal.ZERO);
-		this.setTransmit(true);
 	}
 
 	public StandardOrder(Order other) {
@@ -49,29 +50,40 @@ public class StandardOrder implements Order {
 		this.auxPrice = other.getAuxPrice();
 		this.trailStopPrice = other.getTrailStopPrice();
 		this.setAccount(other.getAccount());
-		this.bTransmit = other.isTransmit();
+		this.previewId = other.getPreviewId();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getQuantity().signum() > 0 ? "BUY " : "SELL ").append(getQuantity().abs()).append(" ");
+		if (getContract() != null)
+			sb.append(getContract()).append(" ");
 		sb.append(getType());
 		if (getLimitPrice() != null)
 			sb.append(" @ ").append(getLimitPrice());
-		if (!TIF_DAY.equals(getTimeInForce()))
+		if (!TimeInForce.DAY.equals(getTimeInForce()))
 			sb.append(" ").append(getTimeInForce());
-		if (!isTransmit())
-			sb.append(" NO TRANSMIT");
+		if (getPreviewId() != null) {
+			sb.append(" (previewId=").append(getPreviewId()).append(")");
+		}
 		return sb.toString();
 	}
 
-	public void setType(String type) {
+	public Contract getContract() {
+		return contract;
+	}
+
+	public void setContract(Contract contract) {
+		this.contract = contract;
+	}
+
+	public void setType(OrderType type) {
 		this.type = type;
 	}
 
 	@Override
-	public String getType() {
+	public OrderType getType() {
 		return type;
 	}
 
@@ -111,12 +123,12 @@ public class StandardOrder implements Order {
 		return trailStopPrice;
 	}
 
-	public void setTimeInForce(String timeInForce) {
+	public void setTimeInForce(TimeInForce timeInForce) {
 		this.timeInForce = timeInForce;
 	}
 
 	@Override
-	public String getTimeInForce() {
+	public TimeInForce getTimeInForce() {
 		return timeInForce;
 	}
 
@@ -129,13 +141,13 @@ public class StandardOrder implements Order {
 		return allowOutsideRth;
 	}
 
-	public void setTransmit(boolean bTransmit) {
-		this.bTransmit = bTransmit;
+	public void setPreviewId(String previewId) {
+		this.previewId = previewId;
 	}
 
 	@Override
-	public boolean isTransmit() {
-		return bTransmit;
+	public String getPreviewId() {
+		return previewId;
 	}
 
 	@Override
@@ -150,5 +162,18 @@ public class StandardOrder implements Order {
 	@Override
 	public String getAccount() {
 		return account;
+	}
+
+	@Override
+	public boolean isShort() {
+		return shortFlag;
+	}
+
+	/**
+	 * Set to true if the order is to sell short or buy to cover. Necessary for brokers that require specification
+	 * between short/cover orders and long buy/sell orders, ignored otherwise.
+	 */
+	public void setShort(boolean shortFlag) {
+		this.shortFlag = shortFlag;
 	}
 }

@@ -29,7 +29,7 @@ import com.jgoetsch.eventtrader.processor.Processor;
 import com.jgoetsch.eventtrader.processor.ProcessorContext;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
-import com.jgoetsch.tradeframework.Order;
+import com.jgoetsch.tradeframework.Order.OrderType;
 import com.jgoetsch.tradeframework.StandardOrder;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
@@ -49,6 +49,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	public final void process(TradeSignal trade, ProcessorContext context) throws OrderException, IOException
 	{
 		StandardOrder order = new StandardOrder();
+		order.setContract(getContract() == null ? trade.getContract() : getContract());
 		order.setAccount(account);
 		try {
 			Supplier<MarketData> marketData = () -> context.getMarketData(marketDataSource, trade.getContract());
@@ -64,10 +65,9 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 		}
 
 		if (getTradingService() != null) {
-			Contract contract = getContract() == null ? trade.getContract() : getContract();
-			log.info("Placing order to " + order + " " + contract);
+			log.info("Placing order to " + order);
 			try {
-				getTradingService().placeOrder(contract, order);
+				getTradingService().placeOrder(order);
 			}
 			catch (InvalidContractException e) {
 				log.warn(e.getMessage());
@@ -78,7 +78,7 @@ public abstract class MarketOrderExecutor implements Processor<TradeSignal> {
 	}
 
 	protected void prepareOrder(StandardOrder order, TradeSignal trade, Supplier<MarketData> marketData) throws OrderException, DataUnavailableException {
-		order.setType(Order.TYPE_MARKET);
+		order.setType(OrderType.MKT);
 	}
 
 	/**

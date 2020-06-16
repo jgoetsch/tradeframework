@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.InvalidContractException;
 import com.jgoetsch.tradeframework.OHLC;
+import com.jgoetsch.tradeframework.Contract.SecurityType;
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 import com.jgoetsch.tradeframework.data.HistoricalDataUtils;
@@ -127,7 +128,7 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 	 * @return millisecond timestamp adjusted up to a regular trading session.
 	 */
 	protected long adjustTimestampToRTH(long timestamp, Contract contract) {
-		if ("STK".equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
+		if (SecurityType.STOCK.equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
 			ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("America/New_York"));
 			LocalTime time = dt.toLocalTime();
 			if (time.isBefore(LocalTime.of(9, 30)))
@@ -141,7 +142,7 @@ public class HistoricalMarketDataFeed extends SimulatedMarketDataFeed {
 				dt = dt.plusDays(1);
 			return dt.toInstant().toEpochMilli();
 		}
-		else if ("FUT".equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
+		else if (SecurityType.FUTURES.equals(contract.getType()) && "USD".equals(contract.getCurrency())) {
 			ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("America/Chicago"));
 			if (dt.getDayOfWeek() == DayOfWeek.SATURDAY)
 				dt = dt.plusDays(2).withHour(9).withMinute(0);

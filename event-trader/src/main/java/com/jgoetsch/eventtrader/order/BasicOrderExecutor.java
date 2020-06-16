@@ -49,7 +49,7 @@ public class BasicOrderExecutor implements Processor<TradeSignal> {
 				throw new IllegalArgumentException("Number of shares not known");
 			log.info("Placing order to " + order);
 			try {
-				getTradingService().placeOrder(trade.getContract(), order);
+				getTradingService().placeOrder(order);
 			}
 			catch (InvalidContractException e) {
 				log.warn(e.getMessage());
@@ -60,7 +60,7 @@ public class BasicOrderExecutor implements Processor<TradeSignal> {
 	}
 
 	protected StandardOrder createOrder(TradeSignal trade) {
-		return Order.marketOrder(BigDecimal.valueOf(trade.getType().isBuy() ? trade.getNumShares() : -trade.getNumShares()));
+		return Order.marketOrder(trade.getContract(), BigDecimal.valueOf(trade.getType().isBuy() ? trade.getNumShares() : -trade.getNumShares()));
 	}
 
 	public TradingService getTradingService() {

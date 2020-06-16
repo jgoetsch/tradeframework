@@ -1,0 +1,3 @@
+dependencies {
+	implementation "org.mapstruct:mapstruct-processor:1.4.0.Beta1"
+}

@@ -48,7 +48,7 @@ public class DefaultCalculatedPosition implements MutablePosition, ClosedPositio
 
 	public DefaultCalculatedPosition(Contract contract) {
 		this.contract = contract;
-		this.multiplier = BigDecimal.valueOf(contract.getMultiplier());
+		this.multiplier = BigDecimal.valueOf(contract.getMultiplier() != null ? contract.getMultiplier() : 1);
 	}
 
 	public Contract getContract() {

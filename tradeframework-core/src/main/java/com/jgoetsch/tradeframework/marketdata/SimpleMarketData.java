@@ -17,7 +17,6 @@ package com.jgoetsch.tradeframework.marketdata;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,12 +25,38 @@ public class SimpleMarketData implements MarketData, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private BigDecimal bid;
-	private Integer bidSize;
-	private BigDecimal ask;
-	private Integer askSize;
-	private BigDecimal last;
-	private Integer lastSize;
+	private static class PriceWithSize {
+		private BigDecimal price;
+		private Integer size;
+
+		public BigDecimal getPrice() {
+			return price;
+		}
+		public void setPrice(BigDecimal price) {
+			this.price = price;
+		}
+		public Integer getSize() {
+			return size;
+		}
+		public void setSize(Integer size) {
+			this.size = size;
+		}
+
+		@Override
+		public String toString() {
+			if (size == null)
+				return String.valueOf(price);
+			else {
+				StringBuilder sb = new StringBuilder(String.valueOf(price));
+				sb.append(" (").append(String.valueOf(size)).append(")");
+				return sb.toString();
+			}
+		}
+	}
+
+	private final PriceWithSize bid;
+	private final PriceWithSize ask;
+	private final PriceWithSize last;
 	private BigDecimal high;
 	private BigDecimal low;
 	private BigDecimal close;
@@ -40,19 +65,33 @@ public class SimpleMarketData implements MarketData, Serializable {
 	private Instant timestamp;
 
 	public SimpleMarketData() {
+		bid = new PriceWithSize();
+		ask = new PriceWithSize();
+		last = new PriceWithSize();
 	}
 
 	public SimpleMarketData(BigDecimal bid, BigDecimal ask, BigDecimal last) {
-		this(bid, 0, ask, 0, last, 0);
+		this();
+		setBid(bid);
+		setAsk(ask);
+		setLast(last);
 	}
 
 	public SimpleMarketData(BigDecimal bid, Integer bidSize, BigDecimal ask, int askSize, BigDecimal last, Integer lastSize) {
-		this.bid = bid;
-		this.bidSize = bidSize;
-		this.ask = ask;
-		this.askSize = askSize;
-		this.last = last;
-		this.lastSize = lastSize;
+		this(bid, ask, last);
+		setBidSize(bidSize);
+		setAskSize(askSize);
+		setLastSize(lastSize);
+	}
+
+	public SimpleMarketData(MarketData source) {
+		this(source.getBid(), source.getBidSize(), source.getAsk(), source.getAskSize(), source.getLast(), source.getLastSize());
+		setHigh(source.getHigh());
+		setLow(source.getLow());
+		setClose(source.getClose());
+		setVolume(source.getVolume());
+		setLastTimestamp(source.getLastTimestamp());
+		setTimestamp(source.getTimestamp());
 	}
 
 	private static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss z").withZone(ZoneId.of("America/New_York"));
@@ -60,60 +99,59 @@ public class SimpleMarketData implements MarketData, Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(dateFormat.format(getTimestamp()));
-		DecimalFormat df = new DecimalFormat("0.#####");
-		sb.append(": Last=").append(df.format(getLast()));
-		sb.append(", Bid=").append(df.format(getBid()));
-		sb.append(", Ask=").append(df.format(getAsk()));
+		sb.append(dateFormat.format(getTimestamp())).append(": ");
+		sb.append("Bid=").append(getBid());
+		sb.append(", Ask=").append(getAsk());
+		sb.append(", Last=").append(getLast());
 		return sb.toString();
 	}
 
 	public void setBid(BigDecimal bid) {
-		this.bid = bid;
+		this.bid.setPrice(bid);
 	}
 
 	public BigDecimal getBid() {
-		return bid;
+		return bid.getPrice();
 	}
 
 	public void setBidSize(Integer bidSize) {
-		this.bidSize = bidSize;
+		this.bid.setSize(bidSize);
 	}
 
 	public Integer getBidSize() {
-		return bidSize;
+		return bid.getSize();
 	}
 
 	public void setAsk(BigDecimal ask) {
-		this.ask = ask;
+		this.ask.setPrice(ask);
 	}
 
 	public BigDecimal getAsk() {
-		return ask;
+		return ask.getPrice();
 	}
 
 	public void setAskSize(Integer askSize) {
-		this.askSize = askSize;
+		this.ask.setSize(askSize);
 	}
 
 	public Integer getAskSize() {
-		return askSize;
+		return ask.getSize();
 	}
 
 	public void setLast(BigDecimal last) {
-		this.last = last;
+		this.last.setPrice(last);
 	}
 
 	public BigDecimal getLast() {
-		return last;
+		return last.getPrice();
 	}
 
 	public void setLastSize(Integer lastSize) {
-		this.lastSize = lastSize;
+		this.last.setSize(lastSize);
 	}
 
 	public Integer getLastSize() {
-		return lastSize;
+		return last.getSize();
 	}
 
 	public void setHigh(BigDecimal high) {

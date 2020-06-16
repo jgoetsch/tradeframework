@@ -24,29 +24,15 @@ package com.jgoetsch.ib.handlers;
  * @author jgoetsch
  *
  */
-public class NextValidIdHandler extends BaseHandler {
-	
-	private int id = -1;
-	
-	public int getId() {
-		return id;
-	}
+public class NextValidIdHandler extends BaseHandler<Integer> {
 
-	/**
-	 * Returns success when the order id has been received.
-	 */
-	@Override
-	public int getStatus() {
-		if (id != -1)
-			return STATUS_SUCCESS;
-		else
-			return super.getStatus();
+	public NextValidIdHandler(HandlerManager manager) {
+		super(manager);
 	}
 
 	@Override
-	public synchronized void nextValidId(int orderId) {
-		this.id = orderId;
-		this.notifyAll();
+	public void nextValidId(int orderId) {
+		getCompletableFuture().complete(orderId);
 	}
 
 }

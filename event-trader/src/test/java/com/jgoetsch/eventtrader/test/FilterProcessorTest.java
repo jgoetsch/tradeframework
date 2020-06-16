@@ -22,6 +22,7 @@ import com.jgoetsch.eventtrader.filter.SymbolBlacklistFilter;
 import com.jgoetsch.eventtrader.filter.TimeOfDayFilter;
 import com.jgoetsch.eventtrader.filter.UsernameFilter;
 import com.jgoetsch.tradeframework.Contract;
+import com.jgoetsch.tradeframework.Contract.SecurityType;
 
 public class FilterProcessorTest {
 
@@ -30,7 +31,7 @@ public class FilterProcessorTest {
 		List<FilterProcessor<TradeSignal>> filters = new ArrayList<FilterProcessor<TradeSignal>>();
 		
 		ContractTypeFilter contractTypeFilter = new ContractTypeFilter();
-		contractTypeFilter.setContractTypes(Collections.singleton("STK"));
+		contractTypeFilter.setContractTypes(Collections.singleton(SecurityType.STOCK));
 		filters.add(contractTypeFilter);
 		filters.add(new PartialTradeFilter());
 

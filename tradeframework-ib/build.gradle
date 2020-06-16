@@ -1,3 +1,7 @@
+plugins {
+  id 'net.ltgt.apt' version '0.21'
+}
+
 repositories {
 	mavenLocal {
 		content {
@@ -11,6 +15,9 @@ dependencies {
 	api 'com.interactivebrokers:tws-api:9.73.01-SNAPSHOT'
 	implementation 'net.sourceforge.collections:collections-generic:4.01'
     implementation 'org.slf4j:slf4j-api:1.7.30'
+	implementation "org.mapstruct:mapstruct:1.4.0.Beta1"
+	annotationProcessor "org.mapstruct:mapstruct-processor:1.4.0.Beta1"
+	annotationProcessor project('tradeframework-ib-spi')
 	testImplementation "org.spockframework:spock-core:2.0-M2-groovy-3.0"
 	testRuntimeOnly 'cglib:cglib-nodep:3.3.0'
 	testRuntimeOnly 'org.objenesis:objenesis:3.1'

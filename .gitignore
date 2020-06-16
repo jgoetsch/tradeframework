@@ -6,3 +6,6 @@ target/
 bin/
 build/
 /.gradle/
+.apt_generated/
+.apt_generated_tests/
+.factorypath
