@@ -1,0 +1,83 @@
+{  
+   "PreviewOrderResponse":{  
+      "orderType":"EQ",
+      "totalOrderValue":175.95,
+      "previewTime":1549318085462,
+      "dstFlag":false,
+      "accountId":"83879627",
+      "optionLevelCd":4,
+      "marginLevelCd":"MARGIN_TRADING_ALLOWED",
+      "Order":[  
+         {  
+            "orderTerm":"GOOD_FOR_DAY",
+            "priceType":"LIMIT",
+            "limitPrice":169,
+            "stopPrice":0,
+            "marketSession":"REGULAR",
+            "allOrNone":false,
+            "messages":{  
+               "Message":[  
+                  {  
+                     "description":"DTBP is negative but RegTBP is positive",
+                     "code":3041,
+                     "type":"WARNING"
+                  },
+                  {  
+                     "description":"200|This stock participates in the Tick Size Pilot Program. For additional details, please see our brief overview on etrade.com.",
+                     "code":1085,
+                     "type":"WARNING"
+                  }
+               ]
+            },
+            "egQual":"EG_QUAL_NOT_A_MARKET_ORDER",
+            "estimatedCommission":6.95,
+            "estimatedTotalAmount":175.95,
+            "netPrice":0,
+            "netBid":0,
+            "netAsk":0,
+            "gcd":0,
+            "ratio":"",
+            "Instrument":[  
+               {  
+                  "symbolDescription":"FACEBOOK INC CL A",
+                  "orderAction":"BUY",
+                  "quantityType":"QUANTITY",
+                  "quantity":1,
+                  "cancelQuantity":0,
+                  "reserveOrder":true,
+                  "reserveQuantity":0,
+                  "Product":{  
+                     "symbol":"FB",
+                     "securityType":"EQ"
+                  }
+               }
+            ]
+         }
+      ],
+      "PreviewIds":[  
+         {  
+            "previewId":3429395279
+         }
+      ],
+      "Disclosure":{  
+         "ehDisclosureFlag":true,
+         "ahDisclosureFlag":true,
+         "conditionalDisclosureFlag":true,
+         "aoDisclosureFlag":false
+      },
+      "settled": {
+         "currentBp": "200501006.95",
+         "currentNetBp": "200501006.95",
+         "currentOor": "0.00",
+         "currentOrderImpact": "1135.95",
+         "netBp": "200499871.00"
+      },
+      "settledUnsettled": {
+         "currentBp": "200501006.95",
+         "currentNetBp": "200501006.95",
+         "currentOor": "0.00",
+         "currentOrderImpact": "1135.95",
+         "netBp": "200499871.00"
+      }
+   }
+}

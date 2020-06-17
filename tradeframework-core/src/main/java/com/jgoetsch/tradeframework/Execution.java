@@ -49,7 +49,14 @@ public class Execution {
 
 	@Override
 	public String toString() {
-		return (getQuantity().signum() > 0 ? "BOT " : "SLD ") + getQuantity().abs() + " @" + NumberFormat.getNumberInstance().format(getPrice());
+		StringBuilder sb = new StringBuilder();
+		if (getQuantity() != null)
+			sb.append(getQuantity().signum() > 0 ? "BOT " : "SLD ").append(getQuantity().abs());
+		if (getPrice() != null)
+			sb.append(" @").append(getPrice());
+		if (getCommission() != null)
+			sb.append(" commissions=").append(getCommission());
+		return sb.length() > 0 ? sb.toString().trim() : "<empty Execution>";
 	}
 
 	public BigDecimal getQuantity() {

@@ -15,9 +15,9 @@
  */
 package com.jgoetsch.ib.handlers;
 
-import com.jgoetsch.ib.TWSException;
 import com.jgoetsch.ib.TWSUtils;
 import com.jgoetsch.tradeframework.ContractDetails;
+import com.jgoetsch.tradeframework.BrokerResponseException;
 
 public class ContractDetailsHandler extends BaseIdHandler<ContractDetails> {
 
@@ -44,7 +44,7 @@ public class ContractDetailsHandler extends BaseIdHandler<ContractDetails> {
 
 	@Override
 	protected void onError(int errorCode, String errorMsg) {
-		getCompletableFuture().completeExceptionally(new TWSException(errorCode, errorMsg));
+		getCompletableFuture().completeExceptionally(new BrokerResponseException(errorCode, errorMsg));
 	}
 
 	@Override

@@ -15,15 +15,28 @@
  */
 package com.jgoetsch.tradeframework;
 
-import java.io.IOException;
-
-public class NotConnectedException extends IOException {
+/**
+ * Exception indicating failure to send a request or receive the expected response from the
+ * broker service, for instance from an underlying IOException.
+ * @author jgoetsch
+ *
+ */
+public class BrokerCommunicationException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public NotConnectedException() {
+	public BrokerCommunicationException() {
 	}
 	
-	public NotConnectedException(String detail) {
+	public BrokerCommunicationException(String detail) {
 		super(detail);
 	}
+
+	public BrokerCommunicationException(Throwable cause) {
+		super(cause);
+	}
+
+	public BrokerCommunicationException(String detail, Throwable cause) {
+		super(detail, cause);
+	}
+
 }

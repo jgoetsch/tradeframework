@@ -23,9 +23,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.ib.client.Bar;
-import com.jgoetsch.ib.TWSException;
 import com.jgoetsch.tradeframework.OHLC;
 import com.jgoetsch.tradeframework.SimpleOHLC;
+import com.jgoetsch.tradeframework.BrokerResponseException;
 import com.jgoetsch.tradeframework.data.HistoricalDataSource;
 
 public class HistoricalDataHandler extends BaseIdHandler<OHLC[]> {
@@ -44,7 +44,7 @@ public class HistoricalDataHandler extends BaseIdHandler<OHLC[]> {
 	protected void onError(int errorCode, String errorMsg) {
 		super.onError(errorCode, errorMsg);
 		if (errorCode == 162 || errorCode == 200)
-			getCompletableFuture().completeExceptionally(new TWSException(errorCode, errorMsg));
+			getCompletableFuture().completeExceptionally(new BrokerResponseException(errorCode, errorMsg));
 	}
 
 	@Override

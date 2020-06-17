@@ -1,0 +1,57 @@
+{  
+   "PlaceOrderResponse":{  
+      "orderType":"EQ",
+      "dstFlag":false,
+      "optionLevelCd":4,
+      "marginLevelCd":"MARGIN_TRADING_ALLOWED",
+      "placedTime":1549318099447,
+      "accountId":"83879627",
+      "Order":[  
+         {  
+            "orderTerm":"GOOD_FOR_DAY",
+            "priceType":"LIMIT",
+            "limitPrice":169,
+            "stopPrice":0,
+            "marketSession":"REGULAR",
+            "allOrNone":false,
+            "messages":{  
+               "Message":[  
+                  {  
+                     "description":"200|The market was closed when we received your order. It has been entered into our system and will be reviewed prior to market open on the next regular trading day. After market open, please check to make sure your order was accepted.",
+                     "code":1027,
+                     "type":"WARNING"
+                  }
+               ]
+            },
+            "egQual":"EG_QUAL_NOT_A_MARKET_ORDER",
+            "estimatedCommission":6.95,
+            "estimatedTotalAmount":175.95,
+            "netPrice":0,
+            "netBid":0,
+            "netAsk":0,
+            "gcd":0,
+            "ratio":"",
+            "Instrument":[  
+               {  
+                  "symbolDescription":"FACEBOOK INC CL A",
+                  "orderAction":"BUY",
+                  "quantityType":"QUANTITY",
+                  "quantity":1,
+                  "cancelQuantity":0,
+                  "reserveOrder":true,
+                  "reserveQuantity":0,
+                  "Product":{  
+                     "symbol":"FB",
+                     "securityType":"EQ"
+                  }
+               }
+            ]
+         }
+      ],
+      "OrderIds":[  
+         {  
+            "orderId":485
+         }
+      ]
+   }
+}

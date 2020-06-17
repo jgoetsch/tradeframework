@@ -20,7 +20,7 @@ import java.time.Instant;
 
 import com.ib.client.TickAttrib;
 import com.ib.client.TickType;
-import com.jgoetsch.ib.TWSException;
+import com.jgoetsch.tradeframework.BrokerResponseException;
 import com.jgoetsch.tradeframework.marketdata.MarketData;
 import com.jgoetsch.tradeframework.marketdata.SimpleMarketData;
 
@@ -89,7 +89,7 @@ public class MarketDataHandler extends BaseIdHandler<MarketData> {
 	}
 	@Override
 	protected void onError(int errorCode, String errorMsg) {
-		getCompletableFuture().completeExceptionally(new TWSException(errorCode, errorMsg));
+		getCompletableFuture().completeExceptionally(new BrokerResponseException(errorCode, errorMsg));
 	}
 
 	protected final MarketData getMarketData() {

@@ -32,7 +32,7 @@ public class StandardOrder implements Order {
 	private BigDecimal trailStopPrice;
 
 	private String account;
-	private String previewId;
+	private String externalId;
 
 	private final Set<String> tags = new HashSet<String>();
 
@@ -42,15 +42,17 @@ public class StandardOrder implements Order {
 	}
 
 	public StandardOrder(Order other) {
+		this.contract = other.getContract();
 		this.type = other.getType();
 		this.quantity = other.getQuantity();
 		this.timeInForce = other.getTimeInForce();
 		this.allowOutsideRth = other.getAllowOutsideRth();
+		this.shortFlag = other.isShort();
 		this.limitPrice = other.getLimitPrice();
 		this.auxPrice = other.getAuxPrice();
 		this.trailStopPrice = other.getTrailStopPrice();
-		this.setAccount(other.getAccount());
-		this.previewId = other.getPreviewId();
+		this.account = other.getAccount();
+		this.externalId = other.getExternalId();
 	}
 
 	@Override
@@ -64,8 +66,8 @@ public class StandardOrder implements Order {
 			sb.append(" @ ").append(getLimitPrice());
 		if (!TimeInForce.DAY.equals(getTimeInForce()))
 			sb.append(" ").append(getTimeInForce());
-		if (getPreviewId() != null) {
-			sb.append(" (previewId=").append(getPreviewId()).append(")");
+		if (getExternalId() != null) {
+			sb.append(" (previewId=").append(getExternalId()).append(")");
 		}
 		return sb.toString();
 	}
@@ -141,13 +143,13 @@ public class StandardOrder implements Order {
 		return allowOutsideRth;
 	}
 
-	public void setPreviewId(String previewId) {
-		this.previewId = previewId;
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 
 	@Override
-	public String getPreviewId() {
-		return previewId;
+	public String getExternalId() {
+		return externalId;
 	}
 
 	@Override

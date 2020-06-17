@@ -17,14 +17,10 @@ package com.jgoetsch.tradeframework;
 
 import com.jgoetsch.tradeframework.data.DataUnavailableException;
 
-public class InvalidContractException extends DataUnavailableException {
+public class InvalidContractException extends BrokerResponseException {
 
 	private static final long serialVersionUID = 1L;
 	private final Contract contract;
-
-	public InvalidContractException(Contract contract) {
-		this.contract = contract;
-	}
 
 	public InvalidContractException(Contract contract, String message) {
 		super(message);
@@ -47,8 +43,8 @@ public class InvalidContractException extends DataUnavailableException {
 		this.contract = contract;
 	}
 
-	public InvalidContractException(Contract contract, String message, Throwable cause) {
-		super(message, cause);
+	public InvalidContractException(int code, Contract contract, String message, Throwable cause) {
+		super(code, message, cause);
 		this.contract = contract;
 	}
 

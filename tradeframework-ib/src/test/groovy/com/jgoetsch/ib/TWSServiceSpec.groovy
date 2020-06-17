@@ -73,7 +73,7 @@ class TWSServiceSpec extends Specification {
 
 	def "Places order"() {
 		when:
-		twsService.placeOrder(Order.limitOrder(Contract.stock("ABCD"), 2000, 1.55))
+		twsService.placeOrder(Order.limitOrder(Contract.stock("ABCD"), 2000, 1.55)).get()
 
 		then:
 		1 * clientSocket.placeOrder(_,
@@ -91,7 +91,7 @@ class TWSServiceSpec extends Specification {
 			comm.m_commission = 36.68564
 			comm.m_realizedPNL = Integer.MAX_VALUE
 			wrapper.commissionReport(comm);
-		}, 250, TimeUnit.MILLISECONDS)
+		}, 10, TimeUnit.MILLISECONDS)
 			
 		}
 	}

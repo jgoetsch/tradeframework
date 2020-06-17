@@ -43,11 +43,11 @@ public interface Order {
 	 */
 	boolean isShort();
 
-	String getPreviewId();
-
 	Set<String> getTags();
 
 	String getAccount();
+
+	String getExternalId();
 
 	static StandardOrder trailingStopOrder(Contract contract, BigDecimal quantity, BigDecimal stopPrice, BigDecimal trailAmount) {
 		StandardOrder order = marketOrder(contract, quantity);

@@ -49,7 +49,7 @@ import com.jgoetsch.ib.handlers.SimpleHandlerDelegatingWrapper;
 import com.jgoetsch.tradeframework.Contract;
 import com.jgoetsch.tradeframework.ContractDetails;
 import com.jgoetsch.tradeframework.InvalidContractException;
-import com.jgoetsch.tradeframework.NotConnectedException;
+import com.jgoetsch.tradeframework.BrokerCommunicationException;
 import com.jgoetsch.tradeframework.OHLC;
 import com.jgoetsch.tradeframework.Order;
 import com.jgoetsch.tradeframework.account.AccountData;
@@ -102,10 +102,10 @@ public class TWSService implements TradingService, AccountDataSource, MultiAccou
 	/**
 	 * Construct and connect to specified host/port/clientid
 	 */
-	public TWSService(String host, int port, int clientid) throws NotConnectedException {
+	public TWSService(String host, int port, int clientid) throws BrokerCommunicationException {
 		this();
 		if (!connect(host, port, clientid))
-			throw new NotConnectedException();
+			throw new BrokerCommunicationException("Not connected");
 	}
 
 	public boolean connect() {

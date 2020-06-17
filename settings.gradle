@@ -2,6 +2,8 @@
 rootProject.name = 'tradeframework'
 include ':tradeframework-core'
 include ':tradeframework-ib'
+include ':tradeframework-ib:tradeframework-ib-spi'
+include ':tradeframework-etrade'
 include ':tradeframework-yahoo'
 include ':event-trader'
 include ':event-trader-spring'
