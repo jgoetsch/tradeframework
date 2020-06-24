@@ -25,7 +25,6 @@ import com.jgoetsch.tradeframework.etrade.dto.OrderDetail.MarketSession;
 import com.jgoetsch.tradeframework.etrade.dto.OrderDetail.OrderTerm;
 import com.jgoetsch.tradeframework.etrade.dto.OrderDetail.PriceType;
 import com.jgoetsch.tradeframework.etrade.dto.PlaceOrderRequest;
-import com.jgoetsch.tradeframework.etrade.dto.PlaceOrderResponse;
 import com.jgoetsch.tradeframework.etrade.dto.PreviewOrderRequest;
 import com.jgoetsch.tradeframework.etrade.dto.PreviewOrderResponse;
 

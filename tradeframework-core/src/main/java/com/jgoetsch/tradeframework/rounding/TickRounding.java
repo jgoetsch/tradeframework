@@ -7,16 +7,15 @@ import java.util.TreeMap;
 import java.util.function.UnaryOperator;
 
 public abstract class TickRounding implements UnaryOperator<BigDecimal> {
-
-	public static UnaryOperator<BigDecimal> DEFAULT_STOCK_BUY = defaultStockTickSize(RoundingMode.HALF_DOWN);
-	public static UnaryOperator<BigDecimal> DEFAULT_STOCK_SELL = defaultStockTickSize(RoundingMode.HALF_UP);
-	public static UnaryOperator<BigDecimal> ROUND_TO_ONE = new PriceMappedTickRounding(BigDecimal.ONE, RoundingMode.HALF_DOWN);
+	public static final RoundingMode ROUNDING_MODE_DEFAULT = RoundingMode.HALF_EVEN;
+	public static final UnaryOperator<BigDecimal> DEFAULT_STOCK = defaultStockTickSize(ROUNDING_MODE_DEFAULT);
+	public static final UnaryOperator<BigDecimal> ROUND_TO_ONE = new RangeBoundedTickRounding(BigDecimal.ONE, ROUNDING_MODE_DEFAULT);
 
 	private static UnaryOperator<BigDecimal> defaultStockTickSize(RoundingMode roundingMode) {
 		Map<BigDecimal, BigDecimal> priceFloors = new TreeMap<BigDecimal, BigDecimal>();
 		priceFloors.put(BigDecimal.ZERO, BigDecimal.valueOf(1, 4));
 		priceFloors.put(BigDecimal.ONE, BigDecimal.valueOf(1, 2));
-		return new PriceMappedTickRounding(priceFloors, roundingMode);
+		return new RangeBoundedTickRounding(priceFloors, roundingMode);
 	}
 
 	private final RoundingMode roundingMode;

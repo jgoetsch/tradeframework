@@ -58,7 +58,8 @@ public class StandardOrder implements Order {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getQuantity().signum() > 0 ? "BUY " : "SELL ").append(getQuantity().abs()).append(" ");
+		if (getQuantity() != null)
+			sb.append(getQuantity().signum() > 0 ? "BUY " : "SELL ").append(getQuantity().abs()).append(" ");
 		if (getContract() != null)
 			sb.append(getContract()).append(" ");
 		sb.append(getType());
@@ -66,9 +67,10 @@ public class StandardOrder implements Order {
 			sb.append(" @ ").append(getLimitPrice());
 		if (!TimeInForce.DAY.equals(getTimeInForce()))
 			sb.append(" ").append(getTimeInForce());
-		if (getExternalId() != null) {
+		if (getExternalId() != null)
 			sb.append(" (previewId=").append(getExternalId()).append(")");
-		}
+		if (getQuantity() != null && getLimitPrice() != null)
+			sb.append(" (est value=$").append(getQuantity().multiply(getLimitPrice())).append(")");
 		return sb.toString();
 	}
 

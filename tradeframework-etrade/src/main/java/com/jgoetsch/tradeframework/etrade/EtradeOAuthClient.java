@@ -21,7 +21,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
@@ -76,7 +75,7 @@ public class EtradeOAuthClient implements AuthenticatedClient {
 			String response = getRequestFactory()
 					.buildGetRequest(new GenericUrl(getBaseUrl() + "oauth/renew_access_token"))
 					.execute().parseAsString();
-			log.debug("Renew token: {}", response);
+			log.info("Renew token: {}", response);
 		}
 		catch (HttpResponseException e) {
 			log.debug("Renew token failed", e);
@@ -130,8 +129,6 @@ public class EtradeOAuthClient implements AuthenticatedClient {
 	protected void setAccessTokens(String token, String tokenSecret) {
 		this.accessToken = token;
 		this.tokenSecret = tokenSecret;
-		if (log.isDebugEnabled())
-			log.debug("Using access token {}, secret: {}", scrubToken(this.accessToken), scrubToken(this.tokenSecret));
 	}
 
 	protected HttpRequestFactory getRequestFactory() {
@@ -169,13 +166,8 @@ public class EtradeOAuthClient implements AuthenticatedClient {
 		tempTokenRequest.callback = "oob";
 		OAuthCredentialsResponse requestCredential = tempTokenRequest.execute();
 		if (log.isDebugEnabled())
-			log.debug("Got temp request token {}, secret: {}", scrubToken(requestCredential.token), scrubToken(requestCredential.tokenSecret));
+			log.debug("Got temp request token");
 		return requestCredential;
-	}
-	
-	protected String scrubToken(String token) {
-		int len = Math.min(4, token.length());
-		return token.substring(0, len) + "*".repeat(token.length() - len);
 	}
 
 	private OAuthCredentialsResponse getAccessToken(String requestToken, String tokenSecret, String verificationCode) throws IOException {

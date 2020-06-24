@@ -1,7 +1,6 @@
 package com.jgoetsch.tradeframework.etrade;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +80,7 @@ public class EtradeService implements MarketDataSource, TradingService {
 		return client.doPost(orderMapper.createPreviewOrderRequest(order), PreviewOrderResponse.class,
 				String.format("v1/accounts/%s/orders/preview.json", order.getAccount()), null)
 				.whenComplete((o, ex) -> handleResponseMessages(o != null ? o.getOrder().messages : null))
-				.thenApply(o -> orderMapper.fromResponse(o));
+				.thenApply(orderMapper::fromResponse);
 	}
 
 	@Override
@@ -94,7 +93,7 @@ public class EtradeService implements MarketDataSource, TradingService {
 			return client.doPost(orderMapper.createPlaceOrderRequest(order), PlaceOrderResponse.class,
 					String.format("v1/accounts/%s/orders/place.json", order.getAccount()), null)
 					.whenComplete((o, ex) -> handleResponseMessages(o != null ? o.getOrder().messages : null))
-					.thenApply(o -> orderMapper.fromResponse(o));
+					.thenApply(orderMapper::fromResponse);
 	}
 
 	/**

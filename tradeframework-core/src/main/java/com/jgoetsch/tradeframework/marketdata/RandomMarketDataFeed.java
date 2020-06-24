@@ -31,7 +31,7 @@ public class RandomMarketDataFeed extends SimulatedMarketDataFeed {
 
 	private double volatility = 0.05;
 	private double trend = 0;
-	private UnaryOperator<BigDecimal> rounding = TickRounding.DEFAULT_STOCK_BUY;
+	private UnaryOperator<BigDecimal> rounding = TickRounding.DEFAULT_STOCK;
 	private long interval = 1000;
 
 	public RandomMarketDataFeed() {

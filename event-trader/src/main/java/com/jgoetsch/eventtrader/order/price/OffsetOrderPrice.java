@@ -36,16 +36,13 @@ import com.jgoetsch.tradeframework.rounding.TickRounding;
 public abstract class OffsetOrderPrice implements OrderPrice {
 	private BigDecimal offset = BigDecimal.ZERO;
 	private boolean isPercentage = false;
-	private UnaryOperator<BigDecimal> buyTickRounding = TickRounding.DEFAULT_STOCK_BUY;
-	private UnaryOperator<BigDecimal> sellTickRounding = TickRounding.DEFAULT_STOCK_SELL;
+	private UnaryOperator<BigDecimal> tickRounding = TickRounding.DEFAULT_STOCK;
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public final BigDecimal getValue(TradeSignal trade, Supplier<MarketData> marketData) throws DataUnavailableException {
 		BigDecimal base = getBaseValue(trade, marketData);
 		if (base != null) {
-			BigDecimal calculated =
-					(trade.isSell() ? sellTickRounding : buyTickRounding)
-					.apply(base.add(getActualOffset(trade.isSell(), base)));
+			BigDecimal calculated = tickRounding.apply(base.add(getActualOffset(trade.isSell(), base)));
 			log.trace("[{}] calculated price {} from base {}", toString(), calculated, base);
 			return calculated;
 		}
@@ -73,8 +70,8 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 	 * if selling. Can be overridden in order to dynamically modify the offset
 	 * based on trade or market data.
 	 * 
-	 * @param trade
-	 * @param marketData
+	 * @param isSell
+	 * @param basePrice
 	 * @return offset to add to base price
 	 */
 	protected BigDecimal getActualOffset(boolean isSell, BigDecimal basePrice) {
@@ -113,20 +110,12 @@ public abstract class OffsetOrderPrice implements OrderPrice {
 		return isPercentage;
 	}
 
-	public UnaryOperator<BigDecimal> getBuyTickRounding() {
-		return buyTickRounding;
+	public UnaryOperator<BigDecimal> getTickRounding() {
+		return tickRounding;
 	}
 
-	public void setBuyTickRounding(UnaryOperator<BigDecimal> tickRounding) {
-		this.buyTickRounding = tickRounding;
-	}
-
-	public UnaryOperator<BigDecimal> getSellTickRounding() {
-		return sellTickRounding;
-	}
-
-	public void setSellTickRounding(UnaryOperator<BigDecimal> tickRounding) {
-		this.sellTickRounding = tickRounding;
+	public void setTickRounding(UnaryOperator<BigDecimal> tickRounding) {
+		this.tickRounding = tickRounding;
 	}
 
 }

@@ -1,7 +1,6 @@
 package com.jgoetsch.eventtrader
 
-import com.jgoetsch.eventtrader.Msg
-import com.jgoetsch.eventtrader.TradeSignal
+
 import com.jgoetsch.eventtrader.order.price.AskPrice
 import com.jgoetsch.eventtrader.order.price.BidPrice
 import com.jgoetsch.eventtrader.order.price.ClosePrice
@@ -12,8 +11,7 @@ import com.jgoetsch.eventtrader.order.price.OffsetOrderPrice
 import com.jgoetsch.tradeframework.Contract
 import com.jgoetsch.tradeframework.marketdata.MarketData
 import com.jgoetsch.tradeframework.marketdata.SimpleMarketData
-import com.jgoetsch.tradeframework.rounding.PriceMappedTickRounding
-import com.jgoetsch.tradeframework.rounding.TickRounding
+import com.jgoetsch.tradeframework.rounding.RangeBoundedTickRounding
 
 import java.math.RoundingMode
 import spock.lang.Specification
@@ -39,15 +37,14 @@ class OrderPriceSpec extends Specification {
 	}
 
 	@Unroll
-	def "MidpointPrice with tick size #tickSize and offsets"() {
+	def "MidpointPrice with tick size #tickSize at #bid/#ask"() {
 		given:
 		def orderPrice = new MidpointPrice();
 
 		when:
 		def marketData = new SimpleMarketData(bid, ask, ask)
-		orderPrice.setBuyTickRounding(new PriceMappedTickRounding(tickSize, RoundingMode.HALF_DOWN))
-		orderPrice.setSellTickRounding(new PriceMappedTickRounding(tickSize, RoundingMode.HALF_UP))
-		
+		orderPrice.setTickRounding(new RangeBoundedTickRounding(tickSize, RoundingMode.HALF_DOWN))
+
 		then:
 		testOffsetPrice(orderPrice, marketData, expectForBuy, expectForSell, tickSize)
 
@@ -56,9 +53,9 @@ class OrderPriceSpec extends Specification {
 		40.0   | 41.0   | 0.01     | 40.50        | 40.50
 		40.0   | 40.175 | 0.01     | 40.09        | 40.09
 		0.10   | 0.175  | 0.0025   | 0.1375       | 0.1375
-		0.10   | 0.175  | 0.025    | 0.125        | 0.150
+		0.10   | 0.175  | 0.025    | 0.125        | 0.125
 		0.10   | 0.1751 | 0.025    | 0.150        | 0.150
-		40.0   | 40.175 | 0.025    | 40.075       | 40.100
+		40.0   | 40.175 | 0.025    | 40.075       | 40.075
 		40.0   | 40.175 | 0.5      | 40.0         | 40.0
 	}
 
